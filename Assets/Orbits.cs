@@ -65,12 +65,21 @@ namespace Assets
             }
         }
 
-        public static float getOrbitPos(System.DateTime passDate, float passPeriod, float passOffset)
+        public static float GetOrbitPos(
+            System.DateTime passDate, 
+            float passPeriodInDays, 
+            float passOffset = 0)
         {
-            //Debug.Log(-((System.Convert.ToSingle(passDate.Ticks - System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / 24f / passPeriod) * 360f);
-            return -(System.Convert.ToSingle(passDate.Ticks -
-                                              System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks) /
-                     10000f / 1000f / 60f / 60f / 24f / passPeriod) * 360f + passOffset;
+            long ticksIntoCurrentYear = passDate.Ticks -
+                                        System.DateTime.MinValue.AddYears(
+                                            System.DateTime.Now.Year - 1).Ticks;
+
+            float daysIntoCurrentYear = System.Convert.ToSingle(ticksIntoCurrentYear) /
+                                        10000000 /
+                                        SolarClock.SiderealDayInSeconds;
+
+            // convert to degrees
+            return -(daysIntoCurrentYear / passPeriodInDays) * 360 + passOffset;
         }
     }
 }

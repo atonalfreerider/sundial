@@ -12,6 +12,7 @@ namespace Assets
         const float sysDia = 150;
         float earthScale = .001f;
         const float earthLineL = 400;
+        public const float SiderealDayInSeconds = 86164.0905f;
 
         // text vars
         public Font mainFont;
@@ -447,7 +448,7 @@ namespace Assets
         {
             // Earth System Orbit;
             earth.transform.rotation = Quaternion.Euler(new Vector3(0,
-                Orbits.getOrbitPos(newDateUTC, YEAR, -180 - (10 / YEAR) * 360), 0));
+                Orbits.GetOrbitPos(newDateUTC, YEAR, -180 - (10 / YEAR) * 360), 0));
             // Earth Sphere;
             earth.earthSph.transform.rotation = Quaternion.Euler(Vector3.zero);
             earth.earthSph.transform.Rotate(Vector3.right, -23.4f);
@@ -458,7 +459,7 @@ namespace Assets
                 Quaternion.Euler(new Vector3(180f, -earth.getLocalClockAlpha(newDateLocal) + 180, 0));
             // Moon Orbit;
             earth.moonDial.moonSys.transform.rotation = Quaternion.Euler(0,
-                Orbits.getOrbitPos(newDateUTC, Moon.lunarSidereal, -45), 0);
+                Orbits.GetOrbitPos(newDateUTC, Moon.lunarSidereal, -155), 0);
             //  earth.moonDial.moonSprockCont.transform.rotation = Quaternion.Euler(Vector3.zero);
             if (currentDay != newDateLocal.Day)
             {
@@ -532,16 +533,16 @@ namespace Assets
 
             // Mercury Orbit: 88 days;
             orbits.planets[0].transform.localRotation =
-                Quaternion.Euler(new Vector3(0, Orbits.getOrbitPos(newDateUTC, 88, -90), 0));
+                Quaternion.Euler(new Vector3(0, Orbits.GetOrbitPos(newDateUTC, 88, 90), 0));
             // Venus Orbit: 224.698 days;
             orbits.planets[1].transform.localRotation =
-                Quaternion.Euler(new Vector3(0, Orbits.getOrbitPos(newDateUTC, 224.698f, -70), 0));
+                Quaternion.Euler(new Vector3(0, Orbits.GetOrbitPos(newDateUTC, 224.698f, -15), 0));
             // little Earth Orbit:365.256363004 days;
             orbits.planets[2].transform.localRotation =
                 Quaternion.Euler(new Vector3(0, earth.transform.localRotation.eulerAngles.y, 0));
             // Mars Orbit:  686.971;
             orbits.planets[3].transform.localRotation =
-                Quaternion.Euler(new Vector3(0, Orbits.getOrbitPos(newDateUTC, 686.971f, -90), 0));
+                Quaternion.Euler(new Vector3(0, Orbits.GetOrbitPos(newDateUTC, 686.971f, 45), 0));
 
             if (viewState == 2)
             {
@@ -552,7 +553,10 @@ namespace Assets
             }
 
             sunLine.transform.position = new Vector3(0,
-                earthLineL * (.5f - (newDateLocal.Ticks - jan1ofthisYear.Ticks) / 10000000f / 60f / 60f / 24f / YEAR),
+                earthLineL * (.5f - (newDateLocal.Ticks - jan1ofthisYear.Ticks) /
+                              10000000f /
+                              SiderealDayInSeconds /
+                              YEAR),
                 0);
         }
 

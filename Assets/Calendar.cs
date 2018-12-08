@@ -171,7 +171,7 @@ namespace Assets
             {
                 R = calR - 1f;
                 one = 1;
-                prct = (Orbits.getOrbitPos(passEv.start, YEAR, 0f) - Orbits.getOrbitPos(passEv.end, YEAR, 0f)) / YEAR;
+                prct = (Orbits.GetOrbitPos(passEv.start, YEAR) - Orbits.GetOrbitPos(passEv.end, YEAR)) / YEAR;
                 prct += 1f / YEAR;
             }
             else
@@ -200,7 +200,7 @@ namespace Assets
             titleT.gameObject.SetActive(false);
 
             newRing.transform.rotation = Quaternion.Euler(type == "year"
-                ? new Vector3(0f, Orbits.getOrbitPos(passEv.end, YEAR, sunSprockOffset), 0f) 
+                ? new Vector3(0f, Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset), 0f) 
                 : new Vector3(0f, -360f * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f, 0f));
 
             return newRing;
