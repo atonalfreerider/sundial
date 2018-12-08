@@ -211,17 +211,16 @@ namespace Assets
             sunLine = new GameObject("SunLine");
 
             GameObject yearLine = Items.YearLine((passDate.Year - 1).ToString(), earthLineL);
-            yearLine.transform.SetParent(sunLine.transform);
+            yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, -earthLineL, 0);
             yearQueue[0] = yearLine.transform.GetChild(1).GetComponent<Text>();
 
             yearLine = Items.YearLine(passDate.Year.ToString(), earthLineL);
-            yearLine.transform.SetParent(sunLine.transform);
-            yearLine.transform.localPosition = Vector3.zero;
+            yearLine.transform.SetParent(sunLine.transform, false);
             yearQueue[1] = yearLine.transform.GetChild(1).GetComponent<Text>();
 
             yearLine = Items.YearLine((passDate.Year + 1).ToString(), earthLineL);
-            yearLine.transform.SetParent(sunLine.transform);
+            yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
             yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<Text>();
 

@@ -103,7 +103,7 @@ namespace Assets
             tick.transform.localScale = new Vector3(tickR, 20f, tickR);
             tick.transform.SetParent(yearLine.transform, false);
             tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f, 0f);
-            tick.transform.Rotate(Vector3.right, 90f);
+            tick.transform.Rotate(Vector3.forward, 90f);
 
             for (int ii = 1; ii < 11; ii++)
             {
@@ -113,7 +113,7 @@ namespace Assets
                 tick.transform.localScale = new Vector3(tickR, 5f, tickR);
                 tick.transform.SetParent(yearLine.transform, false);
                 tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f + (ii * earthLineL) / 11f, 0f);
-                tick.transform.Rotate(Vector3.right, 90f);
+                tick.transform.Rotate(Vector3.forward, 90f);
             }
 
             return yearLine;
