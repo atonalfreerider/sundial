@@ -166,20 +166,21 @@ namespace Assets
             sunStar.GetComponent<SphereCollider>().enabled = false;
 
             // .......(0) SEASONS;
-            GameObject seasonCross = new GameObject();
+            GameObject seasonCross = new GameObject("SeasonCross");
             Items.AddCanvas(seasonCross);
-            seasonCross.name = "SeasonCross";
             Color axisColor = new Color(1, 1, 1, .5f);
             GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
+            solsticeLine.transform.Rotate(Vector3.right, -90);
 
             GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
             equinoxLine.name = "EquinoxLine";
-            equinoxLine.transform.Rotate(Vector3.up, 90);
             equinoxLine.transform.SetParent(seasonCross.transform, false);
+            equinoxLine.transform.Rotate(Vector3.up, 90);
+            equinoxLine.transform.Rotate(Vector3.forward, -90);
 
             // Season labels;
             string[] seasonList = {"SUMMER", "SPRING", "WINTER", "FALL"};
@@ -201,8 +202,7 @@ namespace Assets
                 count++;
             }
 
-            seasonCross.transform.SetParent(sunDial.transform);
-
+            seasonCross.transform.SetParent(sunDial.transform, false);
             sunSprockCont = DrawSunSprockCont(sundialR, passDate);
             sunSprockCont.name = "SunSprockCont";
             sunSprockCont.transform.SetParent(sunDial.transform, false);
@@ -300,14 +300,14 @@ namespace Assets
 
                 // add first-of-month tick;
                 retArr = Shapes.SprockTick(
-                    sundialR, 
-                    bigH, 
-                    alpha, 
-                    -(counter + 1) * step, 
+                    sundialR,
+                    bigH,
+                    alpha,
+                    -(counter + 1) * step,
                     sprockTh,
-                    baseAl, 
+                    baseAl,
                     pointAl,
-                    pointCounter, 
+                    pointCounter,
                     0);
                 pointList.AddRange((List<Vector3>) retArr[0]);
                 indList.AddRange((List<int>) retArr[1]);
@@ -559,8 +559,14 @@ namespace Assets
 
         void GetEarthCam()
         {
-            targetPos = new Vector3(earth.earthSys.transform.position.x, earthCamY, earth.earthSys.transform.position.z);
-            targetRot = Quaternion.Euler(new Vector3(90, earth.transform.rotation.eulerAngles.y - 180, 0));
+            targetPos = new Vector3(
+                earth.earthSys.transform.position.x, 
+                earthCamY,
+                earth.earthSys.transform.position.z);
+            targetRot = Quaternion.Euler(new Vector3(
+                90, 
+                earth.transform.rotation.eulerAngles.y - 180, 
+                0));
         }
 
         static float SunSprockOffset()
