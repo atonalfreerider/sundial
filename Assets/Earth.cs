@@ -34,10 +34,10 @@ namespace Assets
             earthLineCont.name = "EarthLine";
             float earthH = earthR * .99f;
             GameObject earthLine = Shapes.DrawTri(earthH, earthR * .05f, new Color(1f, 1f, 1f, .3f));
-            earthLine.transform.parent = earthLineCont.transform;
+            earthLine.transform.SetParent(earthLineCont.transform, false);
             //GameObject earthLine2 = Shapes.DrawTri(earthH * .7f, earthR * .02f, Color.white);
-            //earthLine2.transform.parent = earthLineCont.transform;
-            earthLineCont.transform.parent = this.transform;
+            //earthLine2.transform.SetParent(earthLineCont.transform;
+            earthLineCont.transform.SetParent(transform, false);
 
             // ...(1) Earth System;
             earthSys = new GameObject();
@@ -151,7 +151,7 @@ namespace Assets
             intDatelineSplit.transform.SetParent(earthSprockCont.transform);
 
             strip = new GameObject();
-            strip.transform.parent = earthSprock.transform;
+            strip.transform.SetParent(earthSprock.transform, false);
 
             earthSprockCont.transform.SetParent(earthSys.transform);
 
@@ -188,23 +188,23 @@ namespace Assets
 
             GameObject hSprock = Shapes.CreatePoly(pointList2, indList2, Color.white);
             hSprock.name = "HourSprocket";
-            hSprock.transform.parent = localWheelCont.transform;
+            hSprock.transform.SetParent(localWheelCont.transform, false);
 
             GameObject whiteTri = Shapes.DrawTri(bigH, 7f, Color.white);
             whiteTri.name = "WhiteTriangle";
             whiteTri.transform.Translate(Vector3.forward * (localR));
             whiteTri.transform.Rotate(Vector3.forward, 180f);
             //whiteTri.transform.Translate(Vector3.up * .2f);
-            whiteTri.transform.parent = localWheelCont.transform;
+            whiteTri.transform.SetParent(localWheelCont.transform, false);
 
             GameObject redTri = Shapes.DrawTri(bigH * .7f, 3f, Color.red);
             redTri.name = "RedTriangle";
             redTri.transform.Translate(Vector3.forward * (localR));
             redTri.transform.Rotate(Vector3.forward, 180f);
             redTri.transform.Translate(Vector3.up * .2f);
-            redTri.transform.parent = localWheelCont.transform;
+            redTri.transform.SetParent(localWheelCont.transform, false);
 
-            localWheelCont.transform.parent = earthSys.transform;
+            localWheelCont.transform.SetParent(earthSys.transform, false);
 
             // ........(3) Earth Sphere;
             earthSph = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -212,7 +212,7 @@ namespace Assets
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
             earthSph.name = "Earth";
             earthSph.transform.localScale = new Vector3(75f, 75f, 75f);
-            earthSph.transform.parent = earthSys.transform;
+            earthSph.transform.SetParent(earthSys.transform, false);
 
             //.........(4) Day Calendar;
             //earth.addChild(Calendar.NewDayCalendar(earthR*.4));
@@ -230,12 +230,12 @@ namespace Assets
             ////........(6) Moon;     
             GameObject moonDialGO = new GameObject();
             moonDialGO.name = "MoonDial";
-            moonDialGO.transform.parent = earthSys.transform;
+            moonDialGO.transform.SetParent(earthSys.transform, false);
             moonDial = (Moon) moonDialGO.AddComponent<Moon>();
             moonDial.NewMoon(earthR * .45f, passDate);
 
             earthSys.transform.Translate(Vector3.forward * earthR * .5f);
-            earthSys.transform.parent = this.transform;
+            earthSys.transform.SetParent(transform, false);
         }
 
         public void RedrawStrip(System.DateTime passDate)
@@ -243,7 +243,7 @@ namespace Assets
             float prct = (360f - getLocalClockAlpha(passDate)) / 360f;
             Destroy(strip);
             strip = Shapes.DrawRing(localR - 1f, localR - 3.5f, prct, new Color(1f, 1f, 1f, .3f), 0f, false);
-            strip.transform.parent = earthSprock.transform;
+            strip.transform.SetParent(earthSprock.transform, false);
             strip.transform.localPosition = Vector3.zero;
             strip.transform.localRotation = Quaternion.Euler(Vector3.zero);
             strip.transform.localScale = new Vector3(1f, 1f, 1f);

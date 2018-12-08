@@ -92,7 +92,7 @@ namespace Assets
             axisLine.name = "axisLine";
             axisLine.GetComponent<CapsuleCollider>().enabled = false;
             axisLine.transform.localScale = new Vector3(2f, earthLineL * .5f, 2f);
-            axisLine.transform.parent = yearLine.transform;
+            axisLine.transform.SetParent(yearLine.transform, false);
 
             Text yearText = NewText2(year, Color.white, 200, TextAnchor.MiddleRight, false);
             yearText.transform.SetParent(yearLine.transform);
@@ -105,7 +105,7 @@ namespace Assets
             tick.name = "BigTick";
             tick.GetComponent<CapsuleCollider>().enabled = false;
             tick.transform.localScale = new Vector3(tickR, 20f, tickR);
-            tick.transform.parent = yearLine.transform;
+            tick.transform.SetParent(yearLine.transform, false);
             tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f, 0f);
             tick.transform.Rotate(Vector3.right, 90f);
 
@@ -115,7 +115,7 @@ namespace Assets
                 tick.name = "MedTick";
                 tick.GetComponent<CapsuleCollider>().enabled = false;
                 tick.transform.localScale = new Vector3(tickR, 5f, tickR);
-                tick.transform.parent = yearLine.transform;
+                tick.transform.SetParent(yearLine.transform, false);
                 tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f + (ii * earthLineL) / 11f, 0f);
                 tick.transform.Rotate(Vector3.right, 90f);
             }

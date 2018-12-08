@@ -153,20 +153,20 @@ namespace Assets
             // (0) SUNDIAL;
             GameObject sunDial = NewSunDial(clockR, passDate);
             sunDial.name = "SunDial";
-            sunDial.transform.parent = this.transform;
+            sunDial.transform.SetParent(transform, false);
 
             // (1) EARTHDIAL;
             GameObject earthGO = new GameObject("EarthDial");
             earth = earthGO.AddComponent<Earth>();
             earth.NewEarthSystem(clockR, passDate);
-            earthGO.transform.parent = this.transform;
+            earthGO.transform.SetParent(transform, false);
 
             // (2) SUN and Planets;
             //.........(0) Planets;
             GameObject orbitsGO = new GameObject("PlanetOrbits");
             orbits = orbitsGO.AddComponent<Orbits>();
             orbits.NewOrbits(clockR * .5f);
-            orbitsGO.transform.parent = this.transform;
+            orbitsGO.transform.SetParent(transform, false);
         }
 
         // CREATION Functions;
@@ -178,7 +178,7 @@ namespace Assets
             float sunR = 12f;
             sunStar.transform.localScale = new Vector3(sunR, sunR, sunR);
             sunStar.name = "Sun";
-            sunStar.transform.parent = sunDial.transform;
+            sunStar.transform.SetParent(sunDial.transform, false);
             sunStar.GetComponent<SphereCollider>().enabled = false;
 
             // .......(0) SEASONS;
@@ -189,13 +189,13 @@ namespace Assets
             GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0f, 0f, sundialR),
                 new Vector3(0f, 0f, -sundialR), axisColor, .5f, .5f);
             solsticeLine.name = "SolsticeLine";
-            solsticeLine.transform.parent = seasonCross.transform;
+            solsticeLine.transform.SetParent(seasonCross.transform, false);
 
             GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0f, 0f, sundialR),
                 new Vector3(0f, 0f, -sundialR), axisColor, .5f, .5f);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.Rotate(Vector3.up, 90f);
-            equinoxLine.transform.parent = seasonCross.transform;
+            equinoxLine.transform.SetParent(seasonCross.transform, false);
 
             // Season labels;
             string[] seasonList = new string[4] {"SUMMER", "SPRING", "WINTER", "FALL"};
@@ -221,7 +221,7 @@ namespace Assets
 
             sunSprockCont = DrawSunSprockCont(sundialR, passDate);
             sunSprockCont.name = "SunSprockCont";
-            sunSprockCont.transform.parent = sunDial.transform;
+            sunSprockCont.transform.SetParent(sunDial.transform, false);
 
             //SUN LINE;
             sunLine = new GameObject("SunLine");
@@ -241,7 +241,7 @@ namespace Assets
             yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
             yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<Text>();
 
-            sunLine.transform.parent = sunDial.transform;
+            sunLine.transform.SetParent(sunDial.transform, false);
             sunLine.SetActive(false);
 
             return sunDial;
@@ -253,7 +253,7 @@ namespace Assets
 
             sunSprock = DrawSunSprock(sundialR, passDate);
             sunSprock.name = "SunSprock";
-            sunSprock.transform.parent = newSunSprockCont.transform;
+            sunSprock.transform.SetParent(newSunSprockCont.transform, false);
 
             // ........(3) MONTH LABEL;
             string[] monthArray = Calendar.monthofYrAbr;
@@ -506,7 +506,7 @@ namespace Assets
                 Destroy(sunSprock);
                 sunSprock = DrawSunSprock(sysDia, newDateLocal);
                 sunSprock.name = "SunSprock";
-                sunSprock.transform.parent = sunSprockCont.transform;
+                sunSprock.transform.SetParent(sunSprockCont.transform, false);
                 sunSprock.transform.localRotation = Quaternion.Euler(Vector3.zero);
 
                 // update yearcal;

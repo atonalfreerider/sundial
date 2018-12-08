@@ -45,22 +45,22 @@ namespace Assets
                 {
                     path = Shapes.DrawRing(plR, plR - minorThick, 1f / 3f, minorColor,
                         planetORs[count] * DoverR * velComp, true);
-                    Shapes.DrawTri(plR, 2f, planetHandColors[count]).transform.parent = pl.transform;
+                    Shapes.DrawTri(plR, 2f, planetHandColors[count]).transform.SetParent(pl.transform, false);
                 }
                 else
                 {
                     path = Shapes.DrawRing(plR, plR - .5f, 5f / 6f, new Color(1f, 1f, 1f, 1f),
                         earthOR * DoverR * velComp, true);
-                    Shapes.DrawTri(plR, 5f, planetHandColors[count]).transform.parent = pl.transform;
+                    Shapes.DrawTri(plR, 5f, planetHandColors[count]).transform.SetParent(pl.transform, false);
                 }
 
-                path.transform.parent = pl.transform;
+                path.transform.SetParent(pl.transform, false);
                 path.transform.localScale = new Vector3(1f, flatScale, 1f);
                 paths[count] = path;
                 planet.transform.Translate(Vector3.forward * plR);
-                planet.transform.parent = pl.transform;
+                planet.transform.SetParent(pl.transform, false);
                 planets[count] = pl;
-                pl.transform.parent = this.transform;
+                pl.transform.SetParent(transform, false);
                 count++;
             }
         }
@@ -68,8 +68,8 @@ namespace Assets
         public static float getOrbitPos(System.DateTime passDate, float passPeriod, float passOffset)
         {
             //Debug.Log(-((System.Convert.ToSingle(passDate.Ticks - System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / 24f / passPeriod) * 360f);
-            return -((System.Convert.ToSingle(passDate.Ticks -
-                                              System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) /
+            return -(System.Convert.ToSingle(passDate.Ticks -
+                                              System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks) /
                      10000f / 1000f / 60f / 60f / 24f / passPeriod) * 360f + passOffset;
         }
     }

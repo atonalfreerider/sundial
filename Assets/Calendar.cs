@@ -130,9 +130,9 @@ namespace Assets
             yearCal = new GameObject("YearCal");
             foreach (MyEvent ev in yearQueue)
                 if (ev.start.Year == passDate.Year)
-                    DrawEvent(ev, "year").transform.parent = yearCal.transform;
+                    DrawEvent(ev, "year").transform.SetParent(yearCal.transform, false);
 
-            yearCal.transform.parent = solarClock;
+            yearCal.transform.SetParent(solarClock, false);
         }
 
         public void DrawDayCalendar(System.DateTime passDate, Transform solarClock)
@@ -142,9 +142,9 @@ namespace Assets
             dayCal = new GameObject("DayCal");
             foreach (MyEvent ev in dayQueue)
                 if (ev.start.Year == passDate.Year && ev.start.Month == passDate.Month && ev.start.Day == passDate.Day)
-                    DrawEvent(ev, "day").transform.parent = dayCal.transform;
+                    DrawEvent(ev, "day").transform.SetParent(dayCal.transform, false);
 
-            dayCal.transform.parent = solarClock;
+            dayCal.transform.SetParent(solarClock, false);
             dayCal.transform.localPosition = Vector3.zero;
             dayCal.transform.localRotation = Quaternion.Euler(Vector3.zero);
             dayCal.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -184,11 +184,11 @@ namespace Assets
 
             /*
             GameObject startingLine = Shapes.DrawLine("flat", Vector3.zero, new Vector3(0f, 0f, evH), evColor, 1f, 1f);
-            startingLine.transform.parent = newRing.transform;
+            startingLine.transform.SetParent(newRing.transform;
             startingLine.transform.Translate(Vector3.right * (R-evH));
     
             GameObject endLine = Shapes.DrawLine("flat", Vector3.zero, new Vector3(0f, 0f, evH), evColor, 1f, 1f);
-            endLine.transform.parent = newRing.transform;
+            endLine.transform.SetParent(newRing.transform;
             endLine.transform.Rotate(Vector3.forward, prct * 360f);
             endLine.transform.Translate(Vector3.right * (R-evH));
             */

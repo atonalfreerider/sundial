@@ -31,7 +31,7 @@ namespace Assets
             //...............(5) MOON;
             //................... (0) moon dial;
             moonSprockCont = NewMoonSprockCont(moonR, passDate);
-            moonSprockCont.transform.parent = this.transform;
+            moonSprockCont.transform.SetParent(transform, false);
             moonSprockCont.name = "MoonSprockCont";
 
             //....................(1) Moon Sys;
@@ -61,7 +61,7 @@ namespace Assets
             moon.transform.Translate(Vector3.forward * moonR);
             moon.transform.parent = moonSys.transform;
 
-            moonSys.transform.parent = this.transform;
+            moonSys.transform.SetParent(transform, false);
         }
 
         GameObject NewMoonSprockCont(float passMoonR, System.DateTime passDate)

@@ -105,7 +105,7 @@ namespace Assets
                 for (int ii = 0; ii < totalDot; ii++)
                 {
                     dot = DrawCirc(passLW, 1f, passColor);
-                    dot.transform.parent = line.transform;
+                    dot.transform.SetParent(line.transform, false);
                     float mag = -ii * length / totalDot;
                     if (pt1.x > 0f)
                         dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0f, 0f);
