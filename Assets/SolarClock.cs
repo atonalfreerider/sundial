@@ -7,6 +7,13 @@ namespace Assets
 {
     public class SolarClock : MonoBehaviour
     {
+        enum ViewState
+        {
+            Galactic,
+            HelioCentric,
+            GeoCentric,
+        }
+        
         // calibration vars
         const float YEAR = 365.256363004f;
         const float sysDia = 150;
@@ -35,7 +42,7 @@ namespace Assets
         System.DateTime travelDateLocal = System.DateTime.Now;
 
         // camera vars
-        int viewState = 1;
+        ViewState viewState = ViewState.HelioCentric;
         const float solCamY = 270;
         const float earthCamY = 135;
         Vector3 targetPos = new Vector3(0, solCamY, 0);
@@ -119,7 +126,7 @@ namespace Assets
 
             SetOrbit(date1, date2);
             earth.moonDial.MoveMoonSprockCont(date2, false, true, forward);
-            // move 11 days past winter EQNOX + local hour difference;
+            // move 11 days past winter EQUINOX + local hour difference;
             sunSprockCont.transform.localRotation = Quaternion.Euler(0, SunSprockOffset(), 0);
         }
 
@@ -255,7 +262,7 @@ namespace Assets
                 monthText.transform.SetParent(mLabelWheel.transform);
             }
 
-            FlipMonthLabels(sundialR, true);
+            FlipMonthLabels(true);
             mLabelWheel.transform.Rotate(Vector3.forward, -360f * 15f / YEAR - 180);
 
             mLabelWheel.transform.SetParent(newSunSprockCont.transform);
@@ -320,15 +327,31 @@ namespace Assets
                     if (dayCounter == 7)
                     {
                         // add Sunday tick;
-                        retArr = Shapes.SprockTick(sundialR, medH, alpha, -(counter + 1) * step, sprockTh, baseAl,
-                            pointAl, pointCounter, 0f);
+                        retArr = Shapes.SprockTick(
+                            sundialR,
+                            medH, 
+                            alpha, 
+                            -(counter + 1) * step,
+                            sprockTh, 
+                            baseAl,
+                            pointAl,
+                            pointCounter,
+                            0);
                         dayCounter = 0;
                     }
                     else
                     {
                         // add day tick;
-                        retArr = Shapes.SprockTick(sundialR, smallH, alpha, -(counter + 1) * step, sprockTh, baseAl,
-                            pointAl, pointCounter, 0f);
+                        retArr = Shapes.SprockTick(
+                            sundialR, 
+                            smallH,
+                            alpha,
+                            -(counter + 1) * step,
+                            sprockTh, 
+                            baseAl,
+                            pointAl, 
+                            pointCounter,
+                            0);
                     }
 
                     pointList.AddRange((List<Vector3>) retArr[0]);
@@ -354,10 +377,10 @@ namespace Assets
 
             sunLine.SetActive(false);
 
-            if (viewState == 1)
+            if (viewState == ViewState.HelioCentric)
             {
                 // zoom to Earth;
-                viewState = 2;
+                viewState = ViewState.GeoCentric;
                 GetEarthCam();
                 orbits.gameObject.SetActive(false);
                 earth.earthSys.gameObject.SetActive(true);
@@ -365,14 +388,14 @@ namespace Assets
                 ptInt = 1;
                 dirLight.enabled = true;
                 orthoSize = earthOrthoSize;
-                FlipMonthLabels(sysDia, false);
+                FlipMonthLabels(false);
                 if (calCreated)
                     calendar.dayCal.SetActive(calendar.vis);
             }
             else
             {
                 // zoom to Solar;
-                viewState = 1;
+                viewState = ViewState.HelioCentric;
                 //420f;
                 // 270;
                 targetPos = new Vector3(0, solCamY, 0);
@@ -382,7 +405,7 @@ namespace Assets
                 orthoSize = solOrthoSize;
 
                 ptInt = .5f;
-                FlipMonthLabels(sysDia, true);
+                FlipMonthLabels(true);
             }
 
             if (zooming != null)
@@ -391,7 +414,7 @@ namespace Assets
             zooming = StartCoroutine(Zoom(50));
         }
 
-        void FlipMonthLabels(float sundialR, bool passLabelUp)
+        void FlipMonthLabels(bool passLabelUp)
         {
             if (passLabelUp != labelUp)
             {
@@ -414,7 +437,7 @@ namespace Assets
             for (int ii = passCD; ii > 0; ii--)
             {
                 Zoomer(1f / ii);
-                yield return new WaitForFixedUpdate();
+                yield return null;
             }
 
             zooming = null;
@@ -423,24 +446,38 @@ namespace Assets
 
         void Zoomer(float lerp)
         {
-            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPos, lerp);
-            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, targetRot, lerp);
-            Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, orthoSize, lerp);
-            earth.earthSys.transform.localScale = Vector3.Lerp(earth.earthSys.transform.localScale,
-                new Vector3(earthScale, earthScale, earthScale), lerp);
+            Camera.main.transform.position = Vector3.Lerp(
+                Camera.main.transform.position, 
+                targetPos, 
+                lerp);
+            Camera.main.transform.rotation = Quaternion.Lerp(
+                Camera.main.transform.rotation, 
+                targetRot, 
+                lerp);
+            Camera.main.orthographicSize = Mathf.Lerp(
+                Camera.main.orthographicSize,
+                orthoSize, 
+                lerp);
+            earth.earthSys.transform.localScale = Vector3.Lerp(
+                earth.earthSys.transform.localScale,
+                new Vector3(earthScale, earthScale, earthScale), 
+                lerp);
 
             ptLight.intensity = Mathf.Lerp(ptLight.intensity, ptInt, lerp);
 
-            if (viewState == 1 && lerp >= 1 - float.Epsilon)
+            if (viewState == ViewState.HelioCentric && lerp >= 1 - float.Epsilon)
             {
                 earth.earthSys.gameObject.SetActive(false);
                 dirLight.enabled = false;
             }
 
-            //  sunSprock.transform.localScale = Vector3.Lerp(sunSprock.transform.localScale, orbitScale, lerp);
-
             foreach (GameObject path in orbits.paths)
-                path.transform.localScale = Vector3.Lerp(path.transform.localScale, orbitScale, lerp);
+            {
+                path.transform.localScale = Vector3.Lerp(
+                    path.transform.localScale,
+                    orbitScale, 
+                    lerp);
+            }
         }
 
         // TIME Functions
@@ -456,11 +493,13 @@ namespace Assets
 
             // Clock Sprocket;
             earth.localWheelCont.transform.localRotation =
-                Quaternion.Euler(new Vector3(180f, -earth.getLocalClockAlpha(newDateLocal) + 180, 0));
+                Quaternion.Euler(new Vector3(
+                    180,
+                    -earth.getLocalClockAlpha(newDateLocal) + 180,
+                    0));
             // Moon Orbit;
             earth.moonDial.moonSys.transform.rotation = Quaternion.Euler(0,
                 Orbits.GetOrbitPos(newDateUTC, Moon.lunarSidereal, -155), 0);
-            //  earth.moonDial.moonSprockCont.transform.rotation = Quaternion.Euler(Vector3.zero);
             if (currentDay != newDateLocal.Day)
             {
                 // day has switched over -> move month tri;
@@ -488,8 +527,7 @@ namespace Assets
                 yearQueue[0].text = (currentYear - 1).ToString();
                 yearQueue[1].text = (currentYear).ToString();
                 yearQueue[2].text = (currentYear + 1).ToString();
-
-                //sunLine.transform.position = Vector3.zero;
+                
                 jan1ofthisYear = new System.DateTime();
                 jan1ofthisYear = jan1ofthisYear.AddYears(newDateLocal.Year - 1);
 
@@ -544,7 +582,7 @@ namespace Assets
             orbits.planets[3].transform.localRotation =
                 Quaternion.Euler(new Vector3(0, Orbits.GetOrbitPos(newDateUTC, 686.971f, 45), 0));
 
-            if (viewState == 2)
+            if (viewState == ViewState.GeoCentric)
             {
                 // move main camera and light to keep up with Earth;
                 GetEarthCam();
@@ -581,7 +619,10 @@ namespace Assets
         IEnumerator MinuteUpdate()
         {
             if (showNow)
-                SetOrbit(System.DateTime.UtcNow, System.DateTime.Now); //set orbit exactly every minute;
+            {
+                //set orbit exactly every minute
+                SetOrbit(System.DateTime.UtcNow, System.DateTime.Now); 
+            }
 
             yield return new WaitForSeconds(60);
             StartCoroutine(MinuteUpdate());
@@ -614,7 +655,7 @@ namespace Assets
 
             if (Input.GetKeyDown(KeyCode.I))
             {
-                viewState = 0;
+                viewState = ViewState.Galactic;
                 sunSprockCont.SetActive(false);
                 earth.gameObject.SetActive(false);
                 targetPos = new Vector3(375, 330, 150);
