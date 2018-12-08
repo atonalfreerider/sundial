@@ -4,63 +4,100 @@ namespace Assets
 {
     public class Orbits : MonoBehaviour
     {
-        // container for 4 inner planets;
+        // container for 4 inner planets
         public GameObject[] planets = new GameObject[4];
         public GameObject[] paths = new GameObject[4];
 
-        // calibration vars;
+        // calibration vars
         const float earthR = 5f;
         const float DoverR = 47.33f;
         const float velComp = .1f;
         public float flatScale = .01f;
-        readonly string[] planetLabels = new string[4] {"MercuryOrbit", "VenusOrbit", "EarthOrbit", "MarsOrbit"};
-        readonly Color[] planetColors = new Color[4]
+        readonly PlanetData[] planetDatas =
         {
-            new Color(.4f, .5f, .6f), new Color(.97f, .97f, .85f), new Color(.8f, .92f, .97f), new Color(.9f, .2f, .3f)
-        };
-        readonly Color[] planetHandColors = new Color[4]
-        {
-            new Color(.4f, .5f, .6f, .3f), new Color(.97f, .97f, .85f, .3f), new Color(.3f, .3f, 1f, 1f),
-            new Color(.9f, .2f, .3f, .3f)
+            new PlanetData(
+                "Mercury",
+                new Color(.4f, .5f, .6f),
+                new Color(.4f, .5f, .6f, .3f),
+                .387f,
+                .238f * earthR
+            ),
+            new PlanetData(
+                "Venus",
+                new Color(.97f, .97f, .85f),
+                new Color(.97f, .97f, .85f, .3f),
+                .723f,
+                .95f * earthR
+            ),
+            new PlanetData(
+                "Earth",
+                new Color(.8f, .92f, .97f),
+                new Color(.3f, .3f, 1f, 1f),
+                1,
+                earthR
+            ),
+            new PlanetData(
+                "Mars",
+                new Color(.9f, .2f, .3f),
+                new Color(.9f, .2f, .3f, .3f),
+                1.523f,
+                .532f * earthR
+            )
         };
 
         public void NewOrbits(float earthOR)
         {
-            float[] planetORs = new float[4] {earthOR * .387f, earthOR * .723f, earthOR, earthOR * 1.523f};
-            float[] planetRs = new float[4] {earthR * .238f, earthR * .95f, earthR, earthR * .532f};
-            GameObject pl;
+            GameObject planetOrbit;
             int count = 0;
             GameObject planet;
             GameObject path;
-            Color minorColor = new Color(1f, 1f, 1f, .5f);
+            Color minorColor = new Color(1, 1, 1, .5f);
             float minorThick = .3f;
-            foreach (float plR in planetORs)
+            foreach (PlanetData planetData in planetDatas)
             {
-                pl = new GameObject(planetLabels[count]);
+                planetOrbit = new GameObject(planetDatas[count].planetName);
+                planetOrbit.transform.SetParent(transform, false);
+                planets[count] = planetOrbit;
+                
                 planet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                planet.transform.localScale = new Vector3(planetRs[count], planetRs[count], planetRs[count]);
-                planet.GetComponent<Renderer>().material.color = planetColors[count];
+                planet.GetComponent<Renderer>().material.color = planetData.planetColor;
+                planet.transform.SetParent(planetOrbit.transform, false);
+                planet.transform.Translate(Vector3.forward * planetData.orbitMultiplier * earthOR);
+                planet.transform.localScale = Vector3.one * planetData.radius;
 
-                if (count == 0 || count == 1 || count == 3)
+                if (count != 2)
                 {
-                    path = Shapes.DrawRing(plR, plR - minorThick, 1f / 3f, minorColor,
-                        planetORs[count] * DoverR * velComp, true);
-                    Shapes.DrawTri(plR, 2f, planetHandColors[count]).transform.SetParent(pl.transform, false);
+                    path = Shapes.DrawRing(
+                        planetData.orbitMultiplier * earthOR,
+                        planetData.orbitMultiplier * earthOR - minorThick, 
+                        .33f, 
+                        minorColor,
+                        planetData.orbitMultiplier * earthOR * DoverR * velComp,
+                        true);
+                    Shapes.DrawTri(
+                        planetData.orbitMultiplier * earthOR,
+                        2,
+                        planetData.planetHandColor).transform.SetParent(planetOrbit.transform, false);
                 }
                 else
                 {
-                    path = Shapes.DrawRing(plR, plR - .5f, 5f / 6f, new Color(1f, 1f, 1f, 1f),
-                        earthOR * DoverR * velComp, true);
-                    Shapes.DrawTri(plR, 5f, planetHandColors[count]).transform.SetParent(pl.transform, false);
+                    // earth
+                    path = Shapes.DrawRing(
+                        earthOR,
+                        earthOR - .5f,
+                        .833f,
+                        new Color(1, 1, 1, 1),
+                        earthOR * DoverR * velComp,
+                        true);
+                    Shapes.DrawTri(
+                        planetData.radius,
+                        5,
+                        planetData.planetHandColor).transform.SetParent(planetOrbit.transform, false);
                 }
 
-                path.transform.SetParent(pl.transform, false);
-                path.transform.localScale = new Vector3(1f, flatScale, 1f);
+                path.transform.SetParent(planetOrbit.transform, false);
+                path.transform.localScale = new Vector3(1, flatScale, 1);
                 paths[count] = path;
-                planet.transform.Translate(Vector3.forward * plR);
-                planet.transform.SetParent(pl.transform, false);
-                planets[count] = pl;
-                pl.transform.SetParent(transform, false);
                 count++;
             }
         }
@@ -80,6 +117,29 @@ namespace Assets
 
             // convert to degrees
             return -(daysIntoCurrentYear / passPeriodInDays) * 360 + passOffset;
+        }
+
+        struct PlanetData
+        {
+            public readonly string planetName;
+            public readonly Color planetColor;
+            public readonly Color planetHandColor;
+            public readonly float orbitMultiplier;
+            public readonly float radius;
+
+            public PlanetData(
+                string planetName, 
+                Color planetColor,
+                Color planetHandColor,
+                float orbitMultiplier,
+                float radius)
+            {
+                this.planetName = planetName;
+                this.planetColor = planetColor;
+                this.planetHandColor = planetHandColor;
+                this.orbitMultiplier = orbitMultiplier;
+                this.radius = radius;
+            }
         }
     }
 }
