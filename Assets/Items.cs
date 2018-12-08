@@ -6,14 +6,10 @@ namespace Assets
     public static class Items
     {
         static Font mainFont;
-        static Material mainFontMat;
-        static Material mainFontMatO;
 
-        public static void Init(Font passFont, Shader passMat, Shader passMatO)
+        public static void Init(Font passFont)
         {
             mainFont = passFont;
-            mainFontMat = new Material(passMat);
-            mainFontMatO = new Material(passMatO);
         }
 
         public static void AddCanvas(GameObject passGO)

@@ -7,41 +7,33 @@ namespace Assets
 {
     public class SolarClock : MonoBehaviour
     {
-        // calibration vars;
+        // calibration vars
         const float YEAR = 365.256363004f;
-        public int daysInYr;
         const float sysDia = 150;
         float earthScale = .001f;
         const float earthLineL = 400;
 
-        // text vars;
+        // text vars
         public Font mainFont;
-        public Shader mainFontMat;
-        public Shader mainFontMatO;
-        public Material EarthMM;
-        public Material MoonMat;
+        public Shader mainShader;
+        public Material EarthMM, MoonMat;
 
-        // persistent objects;
+        // persistent objects
         Earth earth;
         Orbits orbits;
-        GameObject sunSprockCont;
-        GameObject sunSprock;
-        GameObject mLabelWheel;
-        Text summerText;
-        Text springText;
+        GameObject sunSprockCont, sunSprock, mLabelWheel, sunLine;
+        Text summerText, springText;
         Calendar calendar;
 
         public DigitalClock digiClock;
         readonly GameObject[] seasonLabels = new GameObject[4];
-        GameObject sunLine;
         readonly Text[] yearQueue = new Text[3];
 
-        // time initialization;
+        // time initialization
         System.DateTime travelDateUTC = System.DateTime.UtcNow;
         System.DateTime travelDateLocal = System.DateTime.Now;
 
-        // camera vars;
-        public Camera cam;
+        // camera vars
         int viewState = 1;
         const float solCamY = 270;
         const float earthCamY = 135;
@@ -59,37 +51,29 @@ namespace Assets
 #endif
         Coroutine zooming;
 
-        // light vars;
-        public Light ptLight;
-        public Light dirLight;
+        // light vars
+        public Light ptLight, dirLight;
         float ptInt = .5f;
 
-        // calibration vars;
+        // calibration vars
         bool minuteFound = false;
         bool secondFound = false;
         bool calCreated = false;
         //bool newDayFound = false;
-        int currentDay;
-        int currentMonth;
-        int currentYear;
-        int currentTimeZone;
-        int currentINDL;
-        int dst;
+        int currentDay, currentMonth, currentYear, currentTimeZone, currentINDL, dst;
         int spinInc = 0;
         bool showNow = true;
         System.DateTime jan1ofthisYear;
-
-        public GameObject LowPolySphere;
-        public Shader mainShader;
+        
         bool forward = true;
         bool labelUp = false;
 
-        // INIT Functions;
+        // INIT Functions
         void Awake()
         {
             QualitySettings.antiAliasing = 4;
             Shapes.Init(mainShader);
-            Items.Init(mainFont, mainFontMat, mainFontMatO);
+            Items.Init(mainFont);
             orthoSize = solOrthoSize;
 
             /*
@@ -126,22 +110,22 @@ namespace Assets
                 dst = 1;
 
             EarthMM.SetTextureOffset("_DetailAlbedoMap",
-                new Vector2(((float) (12 - currentTimeZone - dst) + .5f) / 24f, 0f));
+                new Vector2(((float) (12 - currentTimeZone - dst) + .5f) / 24f, 0));
 
             // create new SolarClock and set celestial positions;
-            this.gameObject.name = "SolarClock";
+            gameObject.name = "SolarClock";
             NewSolarClock(sysDia, date2);
 
             SetOrbit(date1, date2);
             earth.moonDial.MoveMoonSprockCont(date2, false, true, forward);
             // move 11 days past winter EQNOX + local hour difference;
-            sunSprockCont.transform.localRotation = Quaternion.Euler(0f, SunSprockOffset(), 0f);
+            sunSprockCont.transform.localRotation = Quaternion.Euler(0, SunSprockOffset(), 0);
         }
 
         void Start()
         {
             // move camera to Solar View - initialize lights;
-            Zoomer(1f);
+            Zoomer(1);
             dirLight.transform.LookAt(earth.earthSys.transform);
             earth.earthSys.gameObject.SetActive(false);
             dirLight.enabled = false;
@@ -169,7 +153,7 @@ namespace Assets
             orbitsGO.transform.SetParent(transform, false);
         }
 
-        // CREATION Functions;
+        // CREATION Functions
         GameObject NewSunDial(float sundialR, System.DateTime passDate)
         {
             GameObject sunDial = new GameObject();
@@ -185,35 +169,35 @@ namespace Assets
             GameObject seasonCross = new GameObject();
             Items.AddCanvas(seasonCross);
             seasonCross.name = "SeasonCross";
-            Color axisColor = new Color(1f, 1f, 1f, .5f);
-            GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0f, 0f, sundialR),
-                new Vector3(0f, 0f, -sundialR), axisColor, .5f, .5f);
+            Color axisColor = new Color(1, 1, 1, .5f);
+            GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
+                new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
 
-            GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0f, 0f, sundialR),
-                new Vector3(0f, 0f, -sundialR), axisColor, .5f, .5f);
+            GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
+                new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
             equinoxLine.name = "EquinoxLine";
-            equinoxLine.transform.Rotate(Vector3.up, 90f);
+            equinoxLine.transform.Rotate(Vector3.up, 90);
             equinoxLine.transform.SetParent(seasonCross.transform, false);
 
             // Season labels;
-            string[] seasonList = new string[4] {"SUMMER", "SPRING", "WINTER", "FALL"};
+            string[] seasonList = {"SUMMER", "SPRING", "WINTER", "FALL"};
 
             int count = 0;
-            Text seaText;
-            Color seaTextColor = new Color(1f, 1f, 1f, .5f);
-            foreach (string sea in seasonList)
+            Text seasonText;
+            Color seaTextColor = new Color(1, 1, 1, .5f);
+            foreach (string season in seasonList)
             {
-                seaText = Items.NewText(sea, seaTextColor, 60, TextAnchor.MiddleCenter, false);
-                seaText.transform.Rotate(Vector3.forward, -count * 90f - 45f - 90f);
-                seaText.transform.Translate(Vector3.up * -sundialR * .82f);
-                seaText.transform.SetParent(seasonCross.transform);
+                seasonText = Items.NewText(season, seaTextColor, 60, TextAnchor.MiddleCenter, false);
+                seasonText.transform.Rotate(Vector3.forward, -count * 90 - 45 - 90);
+                seasonText.transform.Translate(Vector3.up * -sundialR * .82f);
+                seasonText.transform.SetParent(seasonCross.transform);
                 if (count == 0)
-                    summerText = seaText;
+                    summerText = seasonText;
                 else if (count == 1)
-                    springText = seaText;
-                seasonLabels[count] = seaText.gameObject;
+                    springText = seasonText;
+                seasonLabels[count] = seasonText.gameObject;
                 count++;
             }
 
@@ -249,7 +233,7 @@ namespace Assets
 
         GameObject DrawSunSprockCont(float sundialR, System.DateTime passDate)
         {
-            GameObject newSunSprockCont = new GameObject();
+            GameObject newSunSprockCont = new GameObject("SunSprocketContainer");
 
             sunSprock = DrawSunSprock(sundialR, passDate);
             sunSprock.name = "SunSprock";
@@ -265,14 +249,14 @@ namespace Assets
             for (int mt = 1; mt <= 12; mt++)
             {
                 monthText = Items.NewText(monthArray[mt - 1], Color.white, 60, TextAnchor.MiddleCenter, false);
-                monthText.transform.Rotate(Vector3.forward, 30f * (float) (mt));
-                monthText.transform.Translate(Vector3.up * (-sundialR + 6f));
+                monthText.transform.Rotate(Vector3.forward, 30 * mt);
+                monthText.transform.Translate(Vector3.up * (-sundialR + 6));
 
                 monthText.transform.SetParent(mLabelWheel.transform);
             }
 
             FlipMonthLabels(sundialR, true);
-            mLabelWheel.transform.Rotate(Vector3.forward, -360f * 15f / YEAR - 180f);
+            mLabelWheel.transform.Rotate(Vector3.forward, -360f * 15f / YEAR - 180);
 
             mLabelWheel.transform.SetParent(newSunSprockCont.transform);
 
@@ -282,11 +266,9 @@ namespace Assets
         GameObject DrawSunSprock(float sundialR, System.DateTime passDate)
         {
             // ........(2) DAYS;
-            daysInYr = 365;
-            int[] daysinMonth = new int[12] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+            int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
             if (System.DateTime.IsLeapYear(passDate.Year))
             {
-                daysInYr++;
                 daysinMonth[1]++;
             }
 
@@ -299,12 +281,12 @@ namespace Assets
             int counter = 0;
             int pointCounter = 0;
             float alpha;
-            float sprockTh = 1f;
+            float sprockTh = 1;
             float baseAl = .002f;
             float pointAl = .001f;
-            float bigH = 10f;
-            float medH = 5f;
-            float smallH = 3f;
+            float bigH = 10;
+            float medH = 5;
+            float smallH = 3;
             int dayCounter = firstSunday;
             float step = 360f / YEAR * Mathf.PI / 180f;
 
@@ -317,8 +299,16 @@ namespace Assets
                 }
 
                 // add first-of-month tick;
-                retArr = Shapes.SprockTick(sundialR, bigH, alpha, -(counter + 1) * step, sprockTh, baseAl, pointAl,
-                    pointCounter, 0f);
+                retArr = Shapes.SprockTick(
+                    sundialR, 
+                    bigH, 
+                    alpha, 
+                    -(counter + 1) * step, 
+                    sprockTh,
+                    baseAl, 
+                    pointAl,
+                    pointCounter, 
+                    0);
                 pointList.AddRange((List<Vector3>) retArr[0]);
                 indList.AddRange((List<int>) retArr[1]);
                 pointCounter = (int) retArr[2];
@@ -433,9 +423,9 @@ namespace Assets
 
         void Zoomer(float lerp)
         {
-            cam.transform.position = Vector3.Lerp(cam.transform.position, targetPos, lerp);
-            cam.transform.rotation = Quaternion.Lerp(cam.transform.rotation, targetRot, lerp);
-            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, orthoSize, lerp);
+            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPos, lerp);
+            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, targetRot, lerp);
+            Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, orthoSize, lerp);
             earth.earthSys.transform.localScale = Vector3.Lerp(earth.earthSys.transform.localScale,
                 new Vector3(earthScale, earthScale, earthScale), lerp);
 
@@ -453,7 +443,7 @@ namespace Assets
                 path.transform.localScale = Vector3.Lerp(path.transform.localScale, orbitScale, lerp);
         }
 
-        // TIME Functions;
+        // TIME Functions
         void SetOrbit(System.DateTime newDateUTC, System.DateTime newDateLocal)
         {
             // Earth System Orbit;
@@ -469,7 +459,7 @@ namespace Assets
                 Quaternion.Euler(new Vector3(180f, -earth.getLocalClockAlpha(newDateLocal) + 180, 0));
             // Moon Orbit;
             earth.moonDial.moonSys.transform.rotation = Quaternion.Euler(0,
-                Orbits.getOrbitPos(newDateUTC, earth.moonDial.lunarSidereal, -45), 0);
+                Orbits.getOrbitPos(newDateUTC, Moon.lunarSidereal, -45), 0);
             //  earth.moonDial.moonSprockCont.transform.rotation = Quaternion.Euler(Vector3.zero);
             if (currentDay != newDateLocal.Day)
             {
@@ -578,7 +568,7 @@ namespace Assets
             return -10 * 360 / YEAR - 180 + Earth.GetTimeZone() * 360 / (YEAR * 24);
         }
 
-        // UPDATE Functions;
+        // UPDATE Functions
         IEnumerator MinuteUpdate()
         {
             if (showNow)

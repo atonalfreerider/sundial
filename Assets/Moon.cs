@@ -9,7 +9,7 @@ namespace Assets
         // calibration vars;
         public System.DateTime offsetDate;
         const float lunarSynodic = 29.531f;
-        public float lunarSidereal = 27.321582f;
+        public const float lunarSidereal = 27.321582f;
         float moonR;
 
         // persistent objects;
