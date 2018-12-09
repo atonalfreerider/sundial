@@ -63,7 +63,7 @@ namespace Assets
         public Light ptLight, dirLight;
         float ptInt = .5f;
 
-        // calibration vars
+        // state vars
         bool minuteFound = false;
         bool secondFound = false;
         bool calCreated = false;
@@ -75,6 +75,9 @@ namespace Assets
         
         bool forward = true;
         bool labelUp = false;
+
+        Coroutine minuteUpdate;
+        Coroutine secondUpdate;
 
         // INIT Functions
         void Awake()
@@ -115,7 +118,9 @@ namespace Assets
             currentINDL = Earth.GetDatelineDay(date1);
             dst = 0;
             if (date2.IsDaylightSavingTime())
+            {
                 dst = 1;
+            }
 
             EarthMM.SetTextureOffset("_DetailAlbedoMap",
                 new Vector2(((float) (12 - currentTimeZone - dst) + .5f) / 24f, 0));
@@ -625,7 +630,7 @@ namespace Assets
             }
 
             yield return new WaitForSeconds(60);
-            StartCoroutine(MinuteUpdate());
+            minuteUpdate = StartCoroutine(MinuteUpdate());
         }
 
         IEnumerator SecondUpdate()
@@ -633,7 +638,7 @@ namespace Assets
             digiClock.SetTime(System.DateTime.Now);
 
             yield return new WaitForSeconds(1);
-            StartCoroutine(SecondUpdate());
+            secondUpdate = StartCoroutine(SecondUpdate());
         }
 
         void FixedUpdate()
@@ -651,7 +656,9 @@ namespace Assets
         void Update()
         {
             if (Input.GetMouseButtonDown(0))
+            {
                 Toggle();
+            }
 
             if (Input.GetKeyDown(KeyCode.I))
             {
@@ -678,7 +685,9 @@ namespace Assets
             }
 
             if (Input.GetKeyDown(KeyCode.T))
+            {
                 digiClock.gameObject.SetActive(!digiClock.gameObject.activeInHierarchy);
+            }
 
 
             // switch between realtime and speed time;
@@ -730,7 +739,7 @@ namespace Assets
                 {
                     //    Debug.Log("FOUND");
                     minuteFound = true;
-                    StartCoroutine(MinuteUpdate());
+                    minuteUpdate = StartCoroutine(MinuteUpdate());
                 }
             }
 
@@ -741,8 +750,40 @@ namespace Assets
                 {
                     //    Debug.Log("FOUND");
                     secondFound = true;
-                    StartCoroutine(SecondUpdate());
+                    secondUpdate = StartCoroutine(SecondUpdate());
                 }
+            }
+        }
+
+        void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                minuteFound = false;
+                secondFound = false;
+                if (minuteUpdate != null)
+                {
+                    StopCoroutine(minuteUpdate);
+                    minuteUpdate = null;
+                }
+
+                if (secondUpdate != null)
+                {
+                    StopCoroutine(secondUpdate);
+                    secondUpdate = null;
+                }
+            }
+            else
+            {
+                SetOrbit(System.DateTime.UtcNow, System.DateTime.Now); 
+            }
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
             }
         }
     }
