@@ -12,7 +12,11 @@ namespace Assets
         public System.DateTime end;
         public Color color;
 
-        public MyEvent(string passTitle, System.DateTime passStart, System.DateTime passEnd, Color passColor)
+        public MyEvent(
+            string passTitle,
+            System.DateTime passStart, 
+            System.DateTime passEnd, 
+            Color passColor)
         {
             title = passTitle;
             start = passStart;
@@ -33,13 +37,20 @@ namespace Assets
 
         List<MyEvent> yearQueue;
         List<MyEvent> dayQueue;
-        public static string[] daysofweek = new string[7]
-            {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-        public static readonly string[] daysofweekAbr = new string[7] {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
-        public static readonly string[] monthofYrAbr = new string[12]
-            {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+        public static string[] daysofweek =
+        {
+            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+        };
+        public static readonly string[] daysofweekAbr =
+        {
+            "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
+        };
+        public static readonly string[] monthofYrAbr =
+        {
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+        };
 
-        string loadFile = "johnbvoorhees_calendar.txt";
+        const string loadFile = "johnbvoorhees_calendar.txt";
 
         float sunSprockOffset;
 
@@ -51,8 +62,8 @@ namespace Assets
             earthR = passER;
             sunSprockOffset = passSunSprockOffset;
 
-            var or = File.OpenText(loadFile);
-            string calText = or.ReadToEnd().ToString();
+            StreamReader or = File.OpenText(loadFile);
+            string calText = or.ReadToEnd();
 
             calText = StringParse.ChopBlock(calText, "END:VTIMEZONE\r\n");
 
@@ -86,10 +97,10 @@ namespace Assets
                     case "LA":
                         evColor = new Color(1f, 0f, 0f, .5f);
                         break;
-                    case "LONDON":
+                    case "BOULDER":
                         evColor = new Color(0f, 1f, 0f, .5f);
                         break;
-                    case "London":
+                    case "Boulder":
                         evColor = new Color(0f, 1f, 0f, .5f);
                         break;
                     default:
@@ -104,17 +115,42 @@ namespace Assets
                     // daylong event;
                     startDate = StringParse.ShortDateFromString(StringParse.TextAfterChar(dtStart, ":"));
                     endDate = StringParse.ShortDateFromString(StringParse.TextAfterChar(dtEnd, ":"));
-                    yearQueue.Add(new MyEvent(evName, CreateDate(startDate[0], startDate[1], startDate[2], 0, 0),
-                        CreateDate(endDate[0], endDate[1], endDate[2], 0, 0), evColor));
+                    yearQueue.Add(new MyEvent(
+                        evName, 
+                        CreateDate(
+                            startDate[0], 
+                            startDate[1], 
+                            startDate[2], 
+                            0, 
+                            0),
+                        CreateDate(
+                            endDate[0], 
+                            endDate[1], 
+                            endDate[2], 
+                            0, 
+                            0),
+                        evColor));
                 }
                 else
                 {
                     // hourly event;
                     startDate = StringParse.DateFromString(StringParse.TextAfterChar(dtStart, ":"));
                     endDate = StringParse.DateFromString(StringParse.TextAfterChar(dtEnd, ":"));
-                    dayQueue.Add(new MyEvent(evName,
-                        CreateDate(startDate[0], startDate[1], startDate[2], startDate[3] + TimeZone, startDate[4]),
-                        CreateDate(endDate[0], endDate[1], endDate[2], endDate[3] + TimeZone, endDate[4]), evColor));
+                    dayQueue.Add(new MyEvent(
+                        evName,
+                        CreateDate(
+                            startDate[0],
+                            startDate[1], 
+                            startDate[2], 
+                            startDate[3] + TimeZone,
+                            startDate[4]),
+                        CreateDate(
+                            endDate[0], 
+                            endDate[1],
+                            endDate[2],
+                            endDate[3] + TimeZone,
+                            endDate[4]), 
+                        evColor));
                 }
 
                 calText = StringParse.ChopBlock(calText, "END:VEVENT\r\n");
@@ -125,12 +161,18 @@ namespace Assets
         public void DrawYearCalendar(System.DateTime passDate, Transform solarClock)
         {
             if (yearCal)
+            {
                 GameObject.Destroy(yearCal);
+            }
 
             yearCal = new GameObject("YearCal");
             foreach (MyEvent ev in yearQueue)
+            {
                 if (ev.start.Year == passDate.Year)
+                {
                     DrawEvent(ev, "year").transform.SetParent(yearCal.transform, false);
+                }
+            }
 
             yearCal.transform.SetParent(solarClock, false);
         }
@@ -138,19 +180,25 @@ namespace Assets
         public void DrawDayCalendar(System.DateTime passDate, Transform solarClock)
         {
             if (dayCal)
+            {
                 GameObject.Destroy(dayCal);
+            }
+
             dayCal = new GameObject("DayCal");
             foreach (MyEvent ev in dayQueue)
-                if (ev.start.Year == passDate.Year && ev.start.Month == passDate.Month && ev.start.Day == passDate.Day)
+            {
+                if (ev.start.Year == passDate.Year &&
+                    ev.start.Month == passDate.Month &&
+                    ev.start.Day == passDate.Day)
+                {
                     DrawEvent(ev, "day").transform.SetParent(dayCal.transform, false);
+                }
+            }
 
             dayCal.transform.SetParent(solarClock, false);
-            dayCal.transform.localPosition = Vector3.zero;
-            dayCal.transform.localRotation = Quaternion.Euler(Vector3.zero);
-            dayCal.transform.localScale = new Vector3(1f, 1f, 1f);
         }
 
-        System.DateTime CreateDate(int yr, int month, int day, int hour, int min)
+        static System.DateTime CreateDate(int yr, int month, int day, int hour, int min)
         {
             System.DateTime newDate = new System.DateTime();
             newDate = newDate.AddYears(yr - 1);
@@ -163,45 +211,37 @@ namespace Assets
 
         GameObject DrawEvent(MyEvent passEv, string type)
         {
-            float evH = 7f;
-            float R = 0f;
-            float prct = 0f;
+            const float evH = 7;
+            float R = 0;
+            float prct = 0;
             int one = -1;
             if (type == "year")
             {
-                R = calR - 1f;
+                R = calR - 1;
                 one = 1;
-                prct = (Orbits.GetOrbitPos(passEv.start, YEAR) - Orbits.GetOrbitPos(passEv.end, YEAR)) / YEAR;
+                prct = (Orbits.GetOrbitPos(passEv.start, YEAR) - 
+                        Orbits.GetOrbitPos(passEv.end, YEAR)) / 
+                       YEAR;
                 prct += 1f / YEAR;
             }
             else
             {
-                R = earthR - 1f;
-                prct = ((passEv.start.Hour - passEv.end.Hour) + (passEv.start.Minute - passEv.end.Minute) / 60f) / 24f;
+                R = earthR - 1;
+                prct = ((passEv.start.Hour - passEv.end.Hour) +
+                        (passEv.start.Minute - passEv.end.Minute) / 60f) / 24f;
             }
 
-            GameObject newRing = Shapes.DrawRing(R, R - evH, one * prct, passEv.color, 0f, false);
-
-            /*
-            GameObject startingLine = Shapes.DrawLine("flat", Vector3.zero, new Vector3(0f, 0f, evH), evColor, 1f, 1f);
-            startingLine.transform.SetParent(newRing.transform;
-            startingLine.transform.Translate(Vector3.right * (R-evH));
-    
-            GameObject endLine = Shapes.DrawLine("flat", Vector3.zero, new Vector3(0f, 0f, evH), evColor, 1f, 1f);
-            endLine.transform.SetParent(newRing.transform;
-            endLine.transform.Rotate(Vector3.forward, prct * 360f);
-            endLine.transform.Translate(Vector3.right * (R-evH));
-            */
+            GameObject newRing = Shapes.DrawRing(R, R - evH, one * prct, passEv.color, 0, false);
 
             Text titleT = Items.NewText(passEv.title, passEv.color, 50, TextAnchor.MiddleCenter, false);
             titleT.transform.SetParent(newRing.transform);
-            titleT.transform.Translate(Vector3.down * (R - 6f));
-            titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360f + 180f);
+            titleT.transform.Translate(Vector3.down * (R - 6));
+            titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360 + 180);
             titleT.gameObject.SetActive(false);
 
             newRing.transform.rotation = Quaternion.Euler(type == "year"
-                ? new Vector3(0f, Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset), 0f) 
-                : new Vector3(0f, -360f * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f, 0f));
+                ? new Vector3(0, Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset), 0) 
+                : new Vector3(0, -360f * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f, 0));
 
             return newRing;
         }
