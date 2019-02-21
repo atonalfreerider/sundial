@@ -130,7 +130,7 @@ namespace Assets
             NewSolarClock(sysDia, date2);
 
             SetOrbit(date1, date2);
-            earth.moonDial.MoveMoonSprockCont(date2, false, true, forward);
+            earth.moonDial.MoveMoonSprockCont(date2, false, false, forward);
             // move 11 days past winter EQUINOX + local hour difference
             sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
         }
