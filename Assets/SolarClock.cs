@@ -19,7 +19,7 @@ namespace Assets
         const float sysDia = 150;
         float earthScale = .001f;
         const float earthLineL = 400;
-        public const float SiderealDayInSeconds = 86164.0905f;
+        const float SiderealDayInSeconds = 86164.0905f;
 
         // text vars
         public Font mainFont;
@@ -492,7 +492,7 @@ namespace Assets
             // January 1st is 10 days past the solstice which is 180 deg from where the top of the circle is 
             const float yearStartOffset = -180 - (10 / YEAR) * 360;
             earth.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetOrbitPos(newDateUTC, YEAR, yearStartOffset),
+                Orbits.GetEarthOrbitAngle(newDateUTC, YEAR, yearStartOffset),
                 Vector3.up);
 
             // reset Earth Sphere
@@ -511,7 +511,7 @@ namespace Assets
 
             // Moon Orbit
             earth.moonDial.moonSys.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetOrbitPos(newDateUTC, Moon.lunarSidereal, -155),
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, Moon.lunarSidereal, 60),
                 Vector3.up);
 
             if (currentDay != newDateLocal.Day)
@@ -587,12 +587,12 @@ namespace Assets
 
             // Mercury Orbit: 88 days
             orbits.planets[0].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetOrbitPos(newDateUTC, 88, 90),
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, 88, 120),
                 Vector3.up);
 
             // Venus Orbit: 224.698 days
             orbits.planets[1].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetOrbitPos(newDateUTC, 224.698f, -15),
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, 224.698f, 120),
                 Vector3.up);
 
             // little Earth Orbit:365.256363004 days
@@ -602,7 +602,7 @@ namespace Assets
 
             // Mars Orbit:  686.971
             orbits.planets[3].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetOrbitPos(newDateUTC, 686.971f, 45),
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, 686.971f, -130),
                 Vector3.up);
 
             if (viewState == ViewState.GeoCentric)

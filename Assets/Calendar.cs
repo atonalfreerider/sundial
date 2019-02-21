@@ -219,8 +219,8 @@ namespace Assets
             {
                 R = calR - 1;
                 one = 1;
-                prct = (Orbits.GetOrbitPos(passEv.start, YEAR) - 
-                        Orbits.GetOrbitPos(passEv.end, YEAR)) / 
+                prct = (Orbits.GetEarthOrbitAngle(passEv.start, YEAR) - 
+                        Orbits.GetEarthOrbitAngle(passEv.end, YEAR)) / 
                        YEAR;
                 prct += 1 / YEAR;
             }
@@ -241,7 +241,7 @@ namespace Assets
 
             newRing.transform.rotation = Quaternion.AngleAxis(
                 type == "year"
-                    ? Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset)
+                    ? Orbits.GetEarthOrbitAngle(passEv.end, YEAR, sunSprockOffset)
                     : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
 

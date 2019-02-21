@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets
 {
@@ -102,21 +103,37 @@ namespace Assets
             }
         }
 
-        public static float GetOrbitPos(
-            System.DateTime passDate, 
+        public static float GetEarthOrbitAngle(
+            DateTime passDate, 
             float passPeriodInDays, 
             float passOffset = 0)
         {
+            // Earth's orbit is always fixed to the amount of days into the year divided by a year
             long ticksIntoCurrentYear = passDate.Ticks -
-                                        System.DateTime.MinValue.AddYears(
-                                            System.DateTime.Now.Year - 1).Ticks;
-
-            float daysIntoCurrentYear = System.Convert.ToSingle(ticksIntoCurrentYear) /
-                                        10000000 /
-                                        SolarClock.SiderealDayInSeconds;
+                                        DateTime.MinValue.AddYears(
+                                            DateTime.Now.Year - 1).Ticks;
+            
+            TimeSpan timeSpan = new TimeSpan(ticksIntoCurrentYear);
 
             // convert to degrees
-            return -(daysIntoCurrentYear / passPeriodInDays) * 360 + passOffset;
+            return -((float)timeSpan.TotalDays / passPeriodInDays) * 360 + passOffset;
+        }
+
+        public static float GetNonEarthOrbitAngle(
+            DateTime passDate, 
+            float passPeriodInDays, 
+            float passOffset = 0)
+        {
+            // anything that is not the earth follows an orbit defined by a period
+            // since the planets and the moon don't have a naturally occuring ordinal position, define an arbitrary
+            // one and offset the orbits by an arbitrary amount
+            DateTime Date_2019_01_01 = new DateTime(2019,1,1);
+            long ticksFrom_2019_01_01 = passDate.Ticks - Date_2019_01_01.Ticks;
+            
+            TimeSpan timeSpan = new TimeSpan(ticksFrom_2019_01_01);
+            float periodInSeconds = passPeriodInDays * 24 * 60 * 60;
+            // convert to degrees
+            return -((float) timeSpan.TotalSeconds / periodInSeconds) * 360 + passOffset;
         }
 
         struct PlanetData
