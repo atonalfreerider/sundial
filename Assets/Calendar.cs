@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace Assets
 {
@@ -50,111 +51,123 @@ namespace Assets
             "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
         };
 
-        const string loadFile = "johnbvoorhees_calendar.txt";
-
         float sunSprockOffset;
 
-        // INIT Functions;
+        // INIT Functions
+        
+        static MyEvent[] RetrieveCalendarEvents()
+        {
+            DateTime currentYearJan1 = new DateTime(System.DateTime.Now.Year, 1, 1);
+            
+            MyEvent[] calendarEvents = {};
+            using (AndroidJavaClass javaClass = new AndroidJavaClass("com.example.calendar.calendarlibrary.main.EventsActivity"))
+            {
+                using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("ctx"))
+                {
+                    AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd");
+                    int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0 
+                        ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject()) 
+                        : new int[0];
+                    obj.Dispose();
+                    
+                    AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles");
+                    byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0 
+                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject()) 
+                        : new byte[0];
+                    obj2.Dispose();
+
+                    string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
+                    string[] split = rectify.Split('|');
+                    
+                    calendarEvents = new MyEvent[split.Length];
+                    for (int i = 0; i < calendarEvents.Length; i++)
+                    {
+                        string title = split[i];
+                        if (i * 2 > eventsStartEnd.Length - 2) break;
+
+                        int start = eventsStartEnd[i * 2];
+                        DateTime startDate = currentYearJan1.AddMilliseconds(start);
+                        int end = eventsStartEnd[i * 2 + 1];
+                        DateTime endDate = currentYearJan1.AddMilliseconds(end);
+
+                        //int TimeZone = Earth.GetTimeZone();
+
+                        calendarEvents[i] = new MyEvent(
+                            title,
+                            startDate,
+                            endDate,
+                            GetEventColor(title)
+                        );
+                    }
+                }
+            }
+
+            return calendarEvents;
+        }
+
+        static Color GetEventColor(string title)
+        {
+            switch (title)
+            {
+                case "ABQ":
+                    return new Color(1f, 1f, 0f, .5f);
+                case "LA":
+                case "NYC":
+                case "NC":
+                    return new Color(1f, 0f, 0f, .5f);
+                case "London":
+                case "LONDON":
+                case "Zurich":
+                    return new Color(.3f, 0, 1f, .5f);
+                case "India":
+                case "Singapore":
+                case "Taiwan":
+                    return new Color(0f, 1f, 0f, .5f);
+                default:
+                    return new Color(0f, 0f, 1f, .5f);
+            }
+        }
+        
         public void Init(float passYEAR, float passCR, float passER, float passSunSprockOffset)
         {
             YEAR = passYEAR;
             calR = passCR;
             earthR = passER;
             sunSprockOffset = passSunSprockOffset;
-
-            StreamReader or = File.OpenText(loadFile);
-            string calText = or.ReadToEnd();
-
-            calText = StringParse.ChopBlock(calText, "END:VTIMEZONE\r\n");
-
+            
             yearQueue = new List<MyEvent>();
             dayQueue = new List<MyEvent>();
 
-            string block1;
-            int[] startDate;
-            int[] endDate;
-            string evName;
-            string dtStart;
-            string dtEnd;
-            Color evColor;
-            int TimeZone = Earth.GetTimeZone();
-
-            while (calText.Contains("END:VEVENT"))
+            /*
+            yearQueue.Add(new MyEvent(
+                "TEST",
+                CreateDate(2019, 1, 1, 0, 0),
+                CreateDate(2019,2, 1, 0, 0), 
+                Color.red));
+            
+            dayQueue.Add(
+                new MyEvent(
+                    "TEST",
+                    CreateDate(2019, 2, 24, 1, 0),
+                    CreateDate(2019,2, 24, 5, 0), 
+                    Color.red));
+*/
+            
+            if(Application.platform != RuntimePlatform.Android) return;
+            
+            MyEvent[] calendarEvents = RetrieveCalendarEvents();
+            foreach (MyEvent calendarEvent in calendarEvents)
             {
-                block1 = StringParse.Block(calText, "BEGIN:VEVENT", "END:VEVENT");
-                evName = StringParse.TextAfterChar(StringParse.GetLine(block1, "SUMMARY:"), ":");
-                switch (evName)
-                {
-                    case "ABQ":
-                        evColor = new Color(1f, 1f, 0f, .5f);
-                        break;
-                    case "SF":
-                        evColor = new Color(1f, 0f, 0f, .5f);
-                        break;
-                    case "Bay Area":
-                        evColor = new Color(1f, 0f, 0f, .5f);
-                        break;
-                    case "LA":
-                        evColor = new Color(1f, 0f, 0f, .5f);
-                        break;
-                    case "BOULDER":
-                        evColor = new Color(0f, 1f, 0f, .5f);
-                        break;
-                    case "Boulder":
-                        evColor = new Color(0f, 1f, 0f, .5f);
-                        break;
-                    default:
-                        evColor = new Color(0f, 0f, 1f, .5f);
-                        break;
-                }
+                long ticks = calendarEvent.end.Ticks - calendarEvent.start.Ticks;
 
-                dtStart = StringParse.GetLine(block1, "DTSTART");
-                dtEnd = StringParse.GetLine(block1, "DTEND");
-                if (dtStart.Contains(";"))
+                if (ticks >= TimeSpan.TicksPerDay)
                 {
-                    // daylong event;
-                    startDate = StringParse.ShortDateFromString(StringParse.TextAfterChar(dtStart, ":"));
-                    endDate = StringParse.ShortDateFromString(StringParse.TextAfterChar(dtEnd, ":"));
-                    yearQueue.Add(new MyEvent(
-                        evName, 
-                        CreateDate(
-                            startDate[0], 
-                            startDate[1], 
-                            startDate[2], 
-                            0, 
-                            0),
-                        CreateDate(
-                            endDate[0], 
-                            endDate[1], 
-                            endDate[2], 
-                            0, 
-                            0),
-                        evColor));
+                    yearQueue.Add(calendarEvent);
                 }
                 else
                 {
-                    // hourly event;
-                    startDate = StringParse.DateFromString(StringParse.TextAfterChar(dtStart, ":"));
-                    endDate = StringParse.DateFromString(StringParse.TextAfterChar(dtEnd, ":"));
-                    dayQueue.Add(new MyEvent(
-                        evName,
-                        CreateDate(
-                            startDate[0],
-                            startDate[1], 
-                            startDate[2], 
-                            startDate[3] + TimeZone,
-                            startDate[4]),
-                        CreateDate(
-                            endDate[0], 
-                            endDate[1],
-                            endDate[2],
-                            endDate[3] + TimeZone,
-                            endDate[4]), 
-                        evColor));
+                    dayQueue.Add(calendarEvent);
                 }
-
-                calText = StringParse.ChopBlock(calText, "END:VEVENT\r\n");
-                // Debug.Log("Y:" + startDate[0].ToString() + ",M:" + startDate[1].ToString() + "D:" + startDate[2].ToString() + "H:" + startDate[3].ToString() + "M:" + startDate[4].ToString());
             }
         }
 
@@ -166,6 +179,8 @@ namespace Assets
             }
 
             yearCal = new GameObject("YearCal");
+            Items.AddCanvas(yearCal);
+            yearCal.transform.Rotate(Vector3.right * -90);
             foreach (MyEvent ev in yearQueue)
             {
                 if (ev.start.Year == passDate.Year)
@@ -185,6 +200,8 @@ namespace Assets
             }
 
             dayCal = new GameObject("DayCal");
+            Items.AddCanvas(dayCal);
+            dayCal.transform.Rotate((Vector3.right * -90));
             foreach (MyEvent ev in dayQueue)
             {
                 if (ev.start.Year == passDate.Year &&
@@ -233,11 +250,16 @@ namespace Assets
 
             GameObject newRing = Shapes.DrawRing(R, R - evH, one * prct, passEv.color, 0, false);
 
-            Text titleT = Items.NewText(passEv.title, passEv.color, 50, TextAnchor.MiddleCenter, false);
+            string displayTitle = passEv.title;
+            if (displayTitle.Length > 12)
+            {
+                displayTitle = displayTitle.Substring(0, 12);
+            }
+            Text titleT = Items.NewText(displayTitle, passEv.color, 50, TextAnchor.MiddleCenter, false);
             titleT.transform.SetParent(newRing.transform);
-            titleT.transform.Translate(Vector3.down * (R - 6));
+            titleT.transform.Translate(Vector3.up * (R - 10));
             titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360 + 180);
-            titleT.gameObject.SetActive(false);
+            //titleT.gameObject.SetActive(false);
 
             newRing.transform.rotation = Quaternion.AngleAxis(
                 type == "year"

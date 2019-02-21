@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -134,7 +135,7 @@ namespace Assets
             // move 11 days past winter EQUINOX + local hour difference
             sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
         }
-
+        
         void Start()
         {
             // move camera to Solar View - initialize lights
@@ -143,8 +144,10 @@ namespace Assets
             earth.earthSys.gameObject.SetActive(false);
             dirLight.enabled = false;
             ptLight.intensity = ptInt;
+            
+            CreateOrToggleCalendar();
         }
-
+        
         void NewSolarClock(float clockR, System.DateTime passDate)
         {
             // (0) SUNDIAL
@@ -369,6 +372,22 @@ namespace Assets
 
             indList.RemoveRange(indList.Count - 6, 6);
             return Shapes.CreatePoly(pointList, indList, Color.white);
+        }
+        
+        void CreateOrToggleCalendar()
+        {
+            if (!calCreated)
+            {
+                calendar = new Calendar();
+                calendar.Init(YEAR, sysDia, sysDia * .4f, SunSprockOffset() + 360 / YEAR);
+                System.DateTime date2 = System.DateTime.Now;
+                calendar.DrawYearCalendar(date2, transform);
+
+                calendar.DrawDayCalendar(date2, earth.earthSys.transform);
+                calCreated = true;
+            }
+
+            calendar.Toggle();
         }
 
         // TOGGLE Functions
@@ -737,18 +756,7 @@ namespace Assets
 
             if (Input.GetKeyDown(KeyCode.C))
             {
-                if (!calCreated)
-                {
-                    calendar = new Calendar();
-                    calendar.Init(YEAR, sysDia, sysDia * .4f, SunSprockOffset() + 360 / YEAR);
-                    System.DateTime date2 = System.DateTime.Now;
-                    calendar.DrawYearCalendar(date2, transform);
-
-                    calendar.DrawDayCalendar(date2, earth.earthSys.transform);
-                    calCreated = true;
-                }
-
-                calendar.Toggle();
+                CreateOrToggleCalendar();
             }
 
             if (!minuteFound)
