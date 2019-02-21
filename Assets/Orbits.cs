@@ -52,6 +52,7 @@ namespace Assets
             int count = 0;
             GameObject planet;
             GameObject path;
+            GameObject planetTri;
             Color minorColor = new Color(1, 1, 1, .5f);
             float minorThick = .3f;
             foreach (PlanetData planetData in planetDatas)
@@ -70,15 +71,15 @@ namespace Assets
                 {
                     path = Shapes.DrawRing(
                         planetData.orbitMultiplier * earthOR,
-                        planetData.orbitMultiplier * earthOR - minorThick, 
-                        .33f, 
+                        planetData.orbitMultiplier * earthOR - minorThick,
+                        .33f,
                         minorColor,
                         planetData.orbitMultiplier * earthOR * DoverR * velComp,
                         true);
-                    Shapes.DrawTri(
+                    planetTri = Shapes.DrawTri(
                         planetData.orbitMultiplier * earthOR,
                         2,
-                        planetData.planetHandColor).transform.SetParent(planetOrbit.transform, false);
+                        planetData.planetHandColor);
                 }
                 else
                 {
@@ -90,15 +91,20 @@ namespace Assets
                         new Color(1, 1, 1, 1),
                         earthOR * DoverR * velComp,
                         true);
-                    Shapes.DrawTri(
-                        planetData.radius,
+                    planetTri = Shapes.DrawTri(
+                        earthOR,
                         5,
-                        planetData.planetHandColor).transform.SetParent(planetOrbit.transform, false);
+                        planetData.planetHandColor);
                 }
 
+                path.name = "planet path";
                 path.transform.SetParent(planetOrbit.transform, false);
                 path.transform.localScale = new Vector3(1, flatScale, 1);
                 paths[count] = path;
+                
+                planetTri.transform.SetParent(planetOrbit.transform, false);
+                planetTri.name = "planet triangle";
+                
                 count++;
             }
         }

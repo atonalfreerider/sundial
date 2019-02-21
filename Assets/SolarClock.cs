@@ -147,19 +147,19 @@ namespace Assets
 
         void NewSolarClock(float clockR, System.DateTime passDate)
         {
-            // (0) SUNDIAL;
+            // (0) SUNDIAL
             GameObject sunDial = NewSunDial(clockR, passDate);
             sunDial.name = "SunDial";
             sunDial.transform.SetParent(transform, false);
 
-            // (1) EARTHDIAL;
+            // (1) EARTHDIAL
             GameObject earthGO = new GameObject("EarthDial");
             earth = earthGO.AddComponent<Earth>();
             earth.NewEarthSystem(clockR, passDate);
             earthGO.transform.SetParent(transform, false);
 
-            // (2) SUN and Planets;
-            //.........(0) Planets;
+            // (2) SUN and Planets
+            //.........(0) Planets
             GameObject orbitsGO = new GameObject("PlanetOrbits");
             orbits = orbitsGO.AddComponent<Orbits>();
             orbits.NewOrbits(clockR * .5f);
@@ -183,13 +183,13 @@ namespace Assets
             Items.AddCanvas(seasonCross);
             Color axisColor = new Color(1, 1, 1, .5f);
             GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
+                new Vector3(0, 0, -sundialR), axisColor, .5f);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
             solsticeLine.transform.Rotate(Vector3.right, -90);
 
             GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR), axisColor, .5f, .5f);
+                new Vector3(0, 0, -sundialR), axisColor, .5f);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.SetParent(seasonCross.transform, false);
             equinoxLine.transform.Rotate(Vector3.up, 90);
@@ -549,7 +549,6 @@ namespace Assets
                 sunSprock = DrawSunSprock(sysDia, newDateLocal);
                 sunSprock.name = "SunSprock";
                 sunSprock.transform.SetParent(sunSprockCont.transform, false);
-                sunSprock.transform.localRotation = Quaternion.identity;
 
                 // update yearcal
                 if (calCreated)

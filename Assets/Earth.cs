@@ -30,12 +30,13 @@ namespace Assets
         {
             earthR = passEarthR;
             //...(0) Earth Line
-            GameObject earthLineCont = new GameObject("EarthLine");
+            GameObject earthLineCont = new GameObject("EarthLineCont");
             float earthH = earthR * .99f;
             GameObject earthLine = Shapes.DrawTri(
                 earthH, 
                 earthR * .05f,
                 new Color(1, 1, 1, .3f));
+            earthLine.name = "EarthLine";
             earthLine.transform.SetParent(earthLineCont.transform, false);
             //GameObject earthLine2 = Shapes.DrawTri(earthH * .7f, earthR * .02f, Color.white)
             //earthLine2.transform.SetParent(earthLineCont.transform
@@ -149,9 +150,6 @@ namespace Assets
 
             intDatelineSplit.transform.SetParent(earthSprockCont.transform);
 
-            strip = new GameObject();
-            strip.transform.SetParent(earthSprock.transform, false);
-
             earthSprockCont.transform.SetParent(earthSys.transform);
 
             //........ (2) local wheel
@@ -237,8 +235,13 @@ namespace Assets
 
         public void RedrawStrip(System.DateTime passDate)
         {
+            // for some reason, 3 of these are getting created
             float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
-            Destroy(strip);
+            if (strip != null)
+            {
+                Destroy(strip);
+            }
+
             strip = Shapes.DrawRing(
                 localR - 1,
                 localR - 3.5f,
@@ -246,10 +249,8 @@ namespace Assets
                 new Color(1, 1, 1, .3f),
                 0,
                 false);
+            strip.name = "strip";
             strip.transform.SetParent(earthSprock.transform, false);
-            strip.transform.localPosition = Vector3.zero;
-            strip.transform.localRotation = Quaternion.identity;
-            strip.transform.localScale = Vector3.one;
         }
 
         // TIME Functions;

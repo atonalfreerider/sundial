@@ -52,8 +52,8 @@ namespace Assets
             float tempA = alpha - .03f;
             while (tempA > aDelt + .03f)
             {
-                pointList.Add(new Vector3(R * Mathf.Sin(tempA), 0f, R * Mathf.Cos(tempA)));
-                pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(tempA), 0f, (R - sprockTh) * Mathf.Cos(tempA)));
+                pointList.Add(new Vector3(R * Mathf.Sin(tempA), 0, R * Mathf.Cos(tempA)));
+                pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(tempA), 0, (R - sprockTh) * Mathf.Cos(tempA)));
                 indList.Add(counter - 2);
                 indList.Add(counter - 1);
                 indList.Add(counter + 0);
@@ -78,8 +78,7 @@ namespace Assets
             return retArr;
         }
 
-        public static GameObject DrawLine(string type, Vector3 pt0, Vector3 pt1, Color passColor, float passLW,
-            float passLD)
+        public static GameObject DrawLine(string type, Vector3 pt0, Vector3 pt1, Color passColor, float passLW)
         {
             GameObject line;
             float D = Vector3.Distance(pt0, pt1);
@@ -89,8 +88,8 @@ namespace Assets
                 line.transform.localPosition = Vector3.Lerp(pt0, pt1, .5f);
                 line.transform.LookAt(pt0);
                 line.transform.localScale = new Vector3(D, passLW, 1f);
-                line.transform.Rotate(Vector3.up, 90f);
-                line.transform.Rotate(Vector3.right, 90f);
+                line.transform.Rotate(Vector3.up, 90);
+                line.transform.Rotate(Vector3.right, 90);
 
                 Material Outline = mainMat;
                 line.transform.GetComponent<Renderer>().material = Outline;
@@ -107,10 +106,10 @@ namespace Assets
                     dot = DrawCirc(passLW, 1f, passColor);
                     dot.transform.SetParent(line.transform, false);
                     float mag = -ii * length / totalDot;
-                    if (pt1.x > 0f)
-                        dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0f, 0f);
+                    if (pt1.x > 0)
+                        dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0, 0);
                     else
-                        dot.transform.localPosition = pt0 + new Vector3(0f, 0f, mag - .5f);
+                        dot.transform.localPosition = pt0 + new Vector3(0, 0, mag - .5f);
                 }
             }
             else
@@ -122,8 +121,8 @@ namespace Assets
 
         static Vector3 VectArc(float R, float alpha, float prct, float offSet, float cX, float cY, float cZ)
         {
-            return new Vector3(R * Mathf.Sin(alpha * prct * Mathf.PI / 180f + offSet * Mathf.PI / 180f) + cX, cY,
-                R * Mathf.Cos(alpha * prct * Mathf.PI / 180f + offSet * Mathf.PI / 180f) + cZ);
+            return new Vector3(R * Mathf.Sin(alpha * prct * Mathf.PI / 180 + offSet * Mathf.PI / 180) + cX, cY,
+                R * Mathf.Cos(alpha * prct * Mathf.PI / 180 + offSet * Mathf.PI / 180) + cZ);
         }
 
         static GameObject DrawCirc(float R, float prct, Color passColor)
@@ -136,7 +135,7 @@ namespace Assets
             int count = 1;
             for (int ii = side - 1; ii >= 0; ii--)
             {
-                skinList.Add(VectArc(R, ii * 360f / side, prct, 0f, 0f, 0f, 0f));
+                skinList.Add(VectArc(R, ii * 360f / side, prct, 0, 0, 0, 0));
                 indList.Add(0);
                 indList.Add(count + 1);
                 indList.Add(count);
@@ -152,22 +151,22 @@ namespace Assets
         {
             List<Vector3> skinList = new List<Vector3>();
             List<int> indList = new List<int>();
-            int side = (int) (36 * prct * R1 / 10f);
+            int side = (int) (36 * prct * R1 / 10);
             int count = 0;
             float spirBit = 0;
 
-            float dimR = 0f;
+            float dimR = 0;
 
             for (int ii = side - 1; ii >= 0; ii--)
             {
                 spirBit = -(ii) * spiralH / side;
                 if (dim)
                 {
-                    dimR = Mathf.Lerp(0f, R1 - R2, (float) ii / side);
+                    dimR = Mathf.Lerp(0, R1 - R2, (float) ii / side);
                 }
 
-                skinList.Add(VectArc(R1 - dimR, ii * 360f / side, prct, 0f, 0f, spirBit, 0f));
-                skinList.Add(VectArc(R2, ii * 360f / side, prct, 0f, 0f, spirBit, 0f));
+                skinList.Add(VectArc(R1 - dimR, ii * 360f / side, prct, 0, 0, spirBit, 0));
+                skinList.Add(VectArc(R2, ii * 360f / side, prct, 0, 0, spirBit, 0));
                 indList.Add(count);
                 indList.Add(count + 1);
                 indList.Add(count + 2);
@@ -179,7 +178,7 @@ namespace Assets
                 count += 2;
             }
 
-            if (prct == 1f)
+            if (prct >= 1 - float.Epsilon)
             {
                 indList[indList.Count - 1] = 0;
                 indList[indList.Count - 2] = 1;
@@ -195,10 +194,12 @@ namespace Assets
 
         public static GameObject DrawTri(float h, float b, Color passColor)
         {
-            List<Vector3> skinList = new List<Vector3>();
-            skinList.Add(new Vector3(0f, 0f, h));
-            skinList.Add(new Vector3(b * .5f, 0f, 0f));
-            skinList.Add(new Vector3(-b * .5f, 0f, 0f));
+            List<Vector3> skinList = new List<Vector3>
+            {
+                new Vector3(0, 0, h), 
+                new Vector3(b * .5f, 0, 0),
+                new Vector3(-b * .5f, 0, 0)
+            };
 
             List<int> indList = new List<int>() {0, 1, 2};
 
