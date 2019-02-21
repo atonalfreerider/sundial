@@ -162,7 +162,7 @@ namespace Assets
         {
             if (yearCal)
             {
-                GameObject.Destroy(yearCal);
+                Object.Destroy(yearCal);
             }
 
             yearCal = new GameObject("YearCal");
@@ -181,7 +181,7 @@ namespace Assets
         {
             if (dayCal)
             {
-                GameObject.Destroy(dayCal);
+                Object.Destroy(dayCal);
             }
 
             dayCal = new GameObject("DayCal");
@@ -222,7 +222,7 @@ namespace Assets
                 prct = (Orbits.GetOrbitPos(passEv.start, YEAR) - 
                         Orbits.GetOrbitPos(passEv.end, YEAR)) / 
                        YEAR;
-                prct += 1f / YEAR;
+                prct += 1 / YEAR;
             }
             else
             {
@@ -239,9 +239,11 @@ namespace Assets
             titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360 + 180);
             titleT.gameObject.SetActive(false);
 
-            newRing.transform.rotation = Quaternion.Euler(type == "year"
-                ? new Vector3(0, Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset), 0) 
-                : new Vector3(0, -360f * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f, 0));
+            newRing.transform.rotation = Quaternion.AngleAxis(
+                type == "year"
+                    ? Orbits.GetOrbitPos(passEv.end, YEAR, sunSprockOffset)
+                    : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
+                Vector3.up);
 
             return newRing;
         }

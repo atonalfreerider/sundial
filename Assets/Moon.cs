@@ -112,8 +112,9 @@ namespace Assets
 
         public void MoveMoonSprockCont(System.DateTime passDate, bool dayChange, bool monthChange, bool forward)
         {
-            moonSprockCont.transform.rotation = Quaternion.Euler(0f,
-                moonSys.transform.rotation.eulerAngles.y + passDate.Hour * 360f / (24f * lunarSynodic), 0f);
+            moonSprockCont.transform.rotation = Quaternion.AngleAxis(
+                moonSys.transform.rotation.eulerAngles.y + passDate.Hour * 360f / (24 * lunarSynodic), 
+                Vector3.up);
 
             if (dayChange)
             {
@@ -128,16 +129,20 @@ namespace Assets
                         if (passDate.Month > 1)
                         {
                             // if not January;
-                            if ((monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month - 1)) ||
-                                (!monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month)))
-                                day = 1; // month has changed over and current day in queue has exceeded next months num days || month has not changed and current day in queue is greater than current month's num days -> reset to 1; 
+                            if (monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month - 1) ||
+                                !monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month))
+                            {
+                                day = 1; // month has changed over and current day in queue has exceeded next months num days || month has not changed and current day in queue is greater than current month's num days -> reset to 1;
+                            }
                         }
                         else
                         {
                             // January;
-                            if ((monthChange && day > System.DateTime.DaysInMonth(passDate.Year - 1, 12)) ||
-                                (!monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month)))
+                            if (monthChange && day > System.DateTime.DaysInMonth(passDate.Year - 1, 12) ||
+                                !monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month))
+                            {
                                 day = 1;
+                            }
                         }
                     }
                     else
@@ -145,7 +150,9 @@ namespace Assets
                         // time is moving backward;
                         day = System.Convert.ToInt32(dL.text) - 1;
                         if (day < 1)
+                        {
                             day = System.DateTime.DaysInMonth(passDate.Year, passDate.Month);
+                        }
                     }
 
                     dL.text = day.ToString();
@@ -156,9 +163,13 @@ namespace Assets
             if (monthChange)
             {
                 if (passDate.Month < 12)
+                {
                     daysUntilNextMonth = System.DateTime.DaysInMonth(passDate.Year, passDate.Month + 1) - passDate.Day;
+                }
                 else
+                {
                     daysUntilNextMonth = System.DateTime.DaysInMonth(passDate.Year + 1, 1) - passDate.Day;
+                }
 
                 // update text;
                 month1L.text = Calendar.monthofYrAbr[passDate.Month - 1];
@@ -170,17 +181,16 @@ namespace Assets
             // detect if 1st is not in 1st pos;
             for (int ii = 0; ii < 29; ii++)
             {
-                if (System.Convert.ToInt32(dayList[ii].text) == 1 && ii > 0)
-                {
-                    setOn = true;
-                    break;
-                }
+                if (System.Convert.ToInt32(dayList[ii].text) != 1 || ii <= 0) continue;
+                setOn = true;
+                break;
             }
 
             monthSplitCont.SetActive(setOn);
 
-            monthSplitCont.transform.rotation = Quaternion.Euler(0f,
-                moonSprock.transform.rotation.eulerAngles.y - daysUntilNextMonth * 360f / lunarSynodic, 0f);
+            monthSplitCont.transform.rotation = Quaternion.AngleAxis(
+                moonSprock.transform.rotation.eulerAngles.y - daysUntilNextMonth * 360f / lunarSynodic,
+                Vector3.up);
         }
 
         GameObject NewDayMonthLabels(System.DateTime passDate)

@@ -6,13 +6,13 @@ namespace Assets
 {
     public class Earth : MonoBehaviour
     {
-        // calibration vars;
+        // calibration vars
         const float earthSidereal = 23.9344696f;
-        const float earthSynodic = 24f;
+        const float earthSynodic = 24;
         public float earthR;
         float localR;
 
-        // persistent object;
+        // persistent object
         public GameObject earthSys;
         public GameObject earthSph;
         public GameObject localWheelCont;
@@ -25,29 +25,29 @@ namespace Assets
         GameObject strip;
         GameObject earthSprock;
 
-        // INIT Functions;
+        // INIT Functions
         public void NewEarthSystem(float passEarthR, System.DateTime passDate)
         {
             earthR = passEarthR;
-            //...(0) Earth Line;
-            GameObject earthLineCont = new GameObject();
-            earthLineCont.name = "EarthLine";
+            //...(0) Earth Line
+            GameObject earthLineCont = new GameObject("EarthLine");
             float earthH = earthR * .99f;
-            GameObject earthLine = Shapes.DrawTri(earthH, earthR * .05f, new Color(1f, 1f, 1f, .3f));
+            GameObject earthLine = Shapes.DrawTri(
+                earthH, 
+                earthR * .05f,
+                new Color(1, 1, 1, .3f));
             earthLine.transform.SetParent(earthLineCont.transform, false);
-            //GameObject earthLine2 = Shapes.DrawTri(earthH * .7f, earthR * .02f, Color.white);
-            //earthLine2.transform.SetParent(earthLineCont.transform;
+            //GameObject earthLine2 = Shapes.DrawTri(earthH * .7f, earthR * .02f, Color.white)
+            //earthLine2.transform.SetParent(earthLineCont.transform
             earthLineCont.transform.SetParent(transform, false);
 
-            // ...(1) Earth System;
-            earthSys = new GameObject();
-            earthSys.name = "EarthSys";
+            // ...(1) Earth System
+            earthSys = new GameObject("EarthSys");
             // .........(1) Earth Sprocket;
-            GameObject earthSprockCont = new GameObject();
+            GameObject earthSprockCont = new GameObject("EarthSprockCont");
             Items.AddCanvas(earthSprockCont);
-            earthSprockCont.name = "EarthSprockCont";
 
-            // create point cloud for earth sprocket mesh;
+            // create point cloud for earth sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
             object[] retArr = new object[3];
@@ -64,10 +64,10 @@ namespace Assets
             for (int tt = 0; tt < 24; tt++)
             {
                 alpha = -counter * stepD;
-                // create hour tick;
+                // create hour tick
 
                 retArr = Shapes.SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
-                    pointCounter, 0f);
+                    pointCounter, 0);
                 pointList.AddRange((List<Vector3>) retArr[0]);
                 indList.AddRange((List<int>) retArr[1]);
                 pointCounter = (int) retArr[2];
@@ -75,9 +75,9 @@ namespace Assets
                 for (int dd = 0; dd < 3; dd++)
                 {
                     alpha = -counter * stepD;
-                    // create 15min tick;
+                    // create 15min tick
                     retArr = Shapes.SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
-                        pointCounter, 0f);
+                        pointCounter, 0);
                     pointList.AddRange((List<Vector3>) retArr[0]);
                     indList.AddRange((List<int>) retArr[1]);
                     pointCounter = (int) retArr[2];
@@ -91,8 +91,8 @@ namespace Assets
             earthSprock.name = "EarthSprock";
             earthSprock.transform.SetParent(earthSprockCont.transform);
 
-            //...........................(1) hLabelWheel;
-            // create 24 hour marks;
+            //...........................(1) hLabelWheel
+            // create 24 hour marks
             GameObject hLabelWheel = new GameObject();
             Items.AddCanvas(hLabelWheel);
             hLabelWheel.name = "HourLabelWheel";
@@ -110,19 +110,19 @@ namespace Assets
 
             hLabelWheel.transform.SetParent(earthSprockCont.transform);
 
-            //...........................(3) dayDil;
+            //...........................(3) dayDil
             localR = earthR * .28f;
 
-            //System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> zones = System.TimeZoneInfo.GetSystemTimeZones();
-            //System.TimeZoneInfo dstZone = zones[0];
+            //System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> zones = System.TimeZoneInfo.GetSystemTimeZones()
+            //System.TimeZoneInfo dstZone = zones[0]
 
-            // System.DateTime dsTime = System.TimeZoneInfo.ConvertTimeFromUtc(System.DateTime.UtcNow, dstZone);
+            // System.DateTime dsTime = System.TimeZoneInfo.ConvertTimeFromUtc(System.DateTime.UtcNow, dstZone)
             int datelineDay = GetDatelineDay(System.DateTime.UtcNow);
             int yesterday = datelineDay - 1;
             if (yesterday < 0)
                 yesterday = 6;
 
-            float angOffset = 4.2f;
+            const float angOffset = 4.2f;
             day11 = Items.NewText(Calendar.daysofweekAbr[yesterday], Color.white, 30, TextAnchor.MiddleCenter, false);
             day11.transform.SetParent(earthSprockCont.transform);
             day11.transform.Rotate(Vector3.forward * (180f - angOffset));
@@ -133,10 +133,9 @@ namespace Assets
             day21.transform.Rotate(Vector3.forward * (180f + angOffset));
             day21.transform.Translate(Vector3.up * -(localR - 2.25f));
 
-            intDatelineSplit = new GameObject();
+            intDatelineSplit = new GameObject("IntDatelineSplit");
             Items.AddCanvas(intDatelineSplit);
-            intDatelineSplit.transform.rotation = Quaternion.Euler(Vector3.zero);
-            intDatelineSplit.name = "IntDatelineSplit";
+            intDatelineSplit.transform.rotation = Quaternion.identity;
 
             day12 = Items.NewText(Calendar.daysofweekAbr[yesterday], Color.white, 30, TextAnchor.MiddleCenter, false);
             day12.transform.SetParent(intDatelineSplit.transform);
@@ -155,7 +154,7 @@ namespace Assets
 
             earthSprockCont.transform.SetParent(earthSys.transform);
 
-            //........ (2) local wheel;
+            //........ (2) local wheel
             List<Vector3> pointList2 = new List<Vector3>();
             List<int> indList2 = new List<int>();
             pointCounter = 0;
@@ -168,7 +167,7 @@ namespace Assets
             for (int tt = 0; tt < 24; tt++)
             {
                 alpha = -tt * stepD;
-                if (tt == 0) // local tick;
+                if (tt == 0) // local tick
                     retArr = Shapes.SprockTick(localR, -bigH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl * 2, pointAl,
                         pointCounter, 0f);
                 else
@@ -183,8 +182,7 @@ namespace Assets
             indList2.RemoveRange(0, 24);
             indList2.RemoveRange(indList2.Count - 6, 6);
 
-            localWheelCont = new GameObject();
-            localWheelCont.name = "LocalWheelCont";
+            localWheelCont = new GameObject("LocalWheelCont");
 
             GameObject hSprock = Shapes.CreatePoly(pointList2, indList2, Color.white);
             hSprock.name = "HourSprocket";
@@ -194,7 +192,7 @@ namespace Assets
             whiteTri.name = "WhiteTriangle";
             whiteTri.transform.Translate(Vector3.forward * (localR));
             whiteTri.transform.Rotate(Vector3.forward, 180f);
-            //whiteTri.transform.Translate(Vector3.up * .2f);
+            //whiteTri.transform.Translate(Vector3.up * .2f)
             whiteTri.transform.SetParent(localWheelCont.transform, false);
 
             GameObject redTri = Shapes.DrawTri(bigH * .7f, 3f, Color.red);
@@ -206,30 +204,29 @@ namespace Assets
 
             localWheelCont.transform.SetParent(earthSys.transform, false);
 
-            // ........(3) Earth Sphere;
+            // ........(3) Earth Sphere
             earthSph = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             earthSph.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
             earthSph.name = "Earth";
-            earthSph.transform.localScale = new Vector3(75f, 75f, 75f);
+            earthSph.transform.localScale = Vector3.one * 75;
             earthSph.transform.SetParent(earthSys.transform, false);
 
-            //.........(4) Day Calendar;
-            //earth.addChild(Calendar.NewDayCalendar(earthR*.4));
+            //.........(4) Day Calendar
+            //earth.addChild(Calendar.NewDayCalendar(earthR*.4))
 
-            //.........(5) shade;
-            //var shade = new GameObject();
-            //shade.addChild(Shapes.NewTrapazoid(earthR*.822,earthR*.418,20,.5,0x000000));
-            //shade.addChild(Shapes.NewChord(earthR*.822,earthR*.185, .5, 0x000000));
-            //shade.getChildAt(1).y = earthR * .418;
-            //shade.getChildAt(1).x =  -  shade.getChildAt(1).width / 2;
-            //shade.filters = [blur];
-            //shade.alpha = .7;
-            //earth.addChild(shade);
+            //.........(5) shade
+            //var shade = new GameObject()
+            //shade.addChild(Shapes.NewTrapazoid(earthR*.822,earthR*.418,20,.5,0x000000))
+            //shade.addChild(Shapes.NewChord(earthR*.822,earthR*.185, .5, 0x000000))
+            //shade.getChildAt(1).y = earthR * .418
+            //shade.getChildAt(1).x =  -  shade.getChildAt(1).width / 2
+            //shade.filters = [blur]
+            //shade.alpha = .7
+            //earth.addChild(shade)
 
-            ////........(6) Moon;     
-            GameObject moonDialGO = new GameObject();
-            moonDialGO.name = "MoonDial";
+            ////........(6) Moon;    
+            GameObject moonDialGO = new GameObject("MoonDial");
             moonDialGO.transform.SetParent(earthSys.transform, false);
             moonDial = (Moon) moonDialGO.AddComponent<Moon>();
             moonDial.NewMoon(earthR * .45f, passDate);
@@ -240,13 +237,19 @@ namespace Assets
 
         public void RedrawStrip(System.DateTime passDate)
         {
-            float prct = (360f - getLocalClockAlpha(passDate)) / 360f;
+            float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
             Destroy(strip);
-            strip = Shapes.DrawRing(localR - 1f, localR - 3.5f, prct, new Color(1f, 1f, 1f, .3f), 0f, false);
+            strip = Shapes.DrawRing(
+                localR - 1,
+                localR - 3.5f,
+                prct,
+                new Color(1, 1, 1, .3f),
+                0,
+                false);
             strip.transform.SetParent(earthSprock.transform, false);
             strip.transform.localPosition = Vector3.zero;
-            strip.transform.localRotation = Quaternion.Euler(Vector3.zero);
-            strip.transform.localScale = new Vector3(1f, 1f, 1f);
+            strip.transform.localRotation = Quaternion.identity;
+            strip.transform.localScale = Vector3.one;
         }
 
         // TIME Functions;
@@ -265,26 +268,26 @@ namespace Assets
             return System.Convert.ToInt32(dateline.DayOfWeek);
         }
 
-        public float getDiurnalPos(System.DateTime passDate)
+        public static float getDiurnalPos(System.DateTime passDate)
         {
             //Debug.Log(-((System.Convert.ToSingle(passDate.Ticks - System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / earthSidereal) * 360f );
-            return -((System.Convert.ToSingle(passDate.Ticks -
-                                              System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) /
-                     10000f / 1000f / 60f / 60f / earthSidereal) * 360f + 75f;
+            return -(System.Convert.ToSingle(passDate.Ticks -
+                                             System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks) /
+                     10000f / 1000f / 60f / 60f / earthSidereal) * 360 + 75;
         }
 
-        public float getLocalClockAlpha(System.DateTime passDate)
+        public static float getLocalClockAlpha(System.DateTime passDate)
         {
-            return ((passDate.Hour) * 60f * 60f + passDate.Minute * 60f + passDate.Second) /
-                   (earthSynodic * 60f * 60f) * 360f;
+            return (passDate.Hour * 60 * 60 + passDate.Minute * 60 + passDate.Second) /
+                   (earthSynodic * 60 * 60) * 360;
         }
 
         public float getSynodicPos(System.DateTime passDate)
         {
             float time = (float) System.DateTime.Now.Subtract(System.DateTime.MinValue.AddYears(1969))
                 .TotalMilliseconds;
-            return -((((time / 1000f) / 60f) / 60f) / earthSynodic -
-                     Mathf.Floor((((time / 1000f) / 60f) / 60f) / earthSynodic)) * 360f - 180f - 26f;
+            return -(time / 1000f / 60f / 60f / earthSynodic -
+                     Mathf.Floor(time / 1000f / 60f / 60f / earthSynodic)) * 360 - 180 - 26;
         }
     }
 }
