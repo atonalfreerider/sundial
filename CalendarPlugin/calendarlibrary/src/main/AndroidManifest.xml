@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example.calendar.calendarlibrary">
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name">
+        <activity
+                android:name=".main.EventsActivity"
+                android:label="@string/app_name">
+        </activity>
+    </application>
+</manifest>
