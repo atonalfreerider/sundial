@@ -46,8 +46,12 @@ namespace Assets
 
             // ...(1) Earth System
             earthSys = new GameObject("EarthSys");
+            earthSys.transform.SetParent(transform, false);
+            earthSys.transform.Translate(Vector3.forward * earthR * .5f);
+            
             // .........(1) Earth Sprocket;
             GameObject earthSprockCont = new GameObject("EarthSprockCont");
+            earthSprockCont.transform.SetParent(earthSys.transform, false);
 
             // create point cloud for earth sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
@@ -91,25 +95,25 @@ namespace Assets
 
             earthSprock = Shapes.CreatePoly(pointList, indList, Color.white);
             earthSprock.name = "EarthSprock";
-            earthSprock.transform.SetParent(earthSprockCont.transform);
+            earthSprock.transform.SetParent(earthSprockCont.transform, false);
 
             //...........................(1) hLabelWheel
             // create 24 hour marks
-            GameObject hLabelWheel = new GameObject();
-            hLabelWheel.name = "HourLabelWheel";
+            GameObject hLabelWheel = new GameObject("HourLabelWheel");
+            hLabelWheel.transform.SetParent(earthSprockCont.transform, false);
             TextBox hLabel;
             for (int ht = 0; ht < 24; ht++)
             {
                 hLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 40, TextAlignmentOptions.Center);
+                hLabel.transform.SetParent(hLabelWheel.transform, false);
                 hLabel.transform.Rotate(Vector3.forward, ht * (360f / 24f));
-                hLabel.transform.Translate(Vector3.up * (earthR * .4f - 10f));
+                hLabel.transform.Translate(Vector3.up * (earthR * .4f - 10));
                 if ((ht >= 0 && ht < 6) || ht > 18)
-                    hLabel.transform.Rotate(Vector3.forward, 180f);
-
-                hLabel.transform.SetParent(hLabelWheel.transform);
+                {
+                    hLabel.transform.Rotate(Vector3.forward, 180);
+                }
             }
-
-            hLabelWheel.transform.SetParent(earthSprockCont.transform);
+            hLabelWheel.transform.Rotate(Vector3.right * 90);
 
             //...........................(3) dayDil
             localR = earthR * .28f;
@@ -125,31 +129,31 @@ namespace Assets
 
             const float angOffset = 4.2f;
             day11 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
-            day11.transform.SetParent(earthSprockCont.transform);
-            day11.transform.Rotate(Vector3.forward * (180f - angOffset));
-            day11.transform.Translate(Vector3.up * -(localR - 2.25f));
+            day11.transform.SetParent(earthSprockCont.transform, false);
+            day11.transform.Rotate(Vector3.up * (180f + angOffset));
+            day11.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day11.transform.Rotate(Vector3.right * 90);
 
             day21 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
-            day21.transform.SetParent(earthSprockCont.transform);
-            day21.transform.Rotate(Vector3.forward * (180f + angOffset));
-            day21.transform.Translate(Vector3.up * -(localR - 2.25f));
+            day21.transform.SetParent(earthSprockCont.transform, false);
+            day21.transform.Rotate(Vector3.up * (180f - angOffset));
+            day21.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day21.transform.Rotate(Vector3.right * 90);
 
             intDatelineSplit = new GameObject("IntDatelineSplit");
-            intDatelineSplit.transform.rotation = Quaternion.identity;
+            intDatelineSplit.transform.SetParent(earthSprockCont.transform, false);
 
             day12 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
-            day12.transform.SetParent(intDatelineSplit.transform);
-            day12.transform.Rotate(Vector3.forward * (180f + angOffset));
-            day12.transform.Translate(Vector3.up * -(localR - 2.25f));
+            day12.transform.SetParent(intDatelineSplit.transform, false);
+            day12.transform.Rotate(Vector3.up * (180 - angOffset));
+            day12.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day12.transform.Rotate(Vector3.right * 90);
 
             day22 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
-            day22.transform.SetParent(intDatelineSplit.transform);
-            day22.transform.Rotate(Vector3.forward * (180f - angOffset));
-            day22.transform.Translate(Vector3.up * -(localR - 2.25f));
-
-            intDatelineSplit.transform.SetParent(earthSprockCont.transform);
-
-            earthSprockCont.transform.SetParent(earthSys.transform);
+            day22.transform.SetParent(intDatelineSplit.transform, false);
+            day22.transform.Rotate(Vector3.up * (180 + angOffset));
+            day22.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day22.transform.Rotate(Vector3.right * 90);
 
             //........ (2) local wheel
             List<Vector3> pointList2 = new List<Vector3>();
@@ -227,9 +231,6 @@ namespace Assets
             moonDialGO.transform.SetParent(earthSys.transform, false);
             moonDial = (Moon) moonDialGO.AddComponent<Moon>();
             moonDial.NewMoon(earthR * .45f, passDate);
-
-            earthSys.transform.Translate(Vector3.forward * earthR * .5f);
-            earthSys.transform.SetParent(transform, false);
         }
 
         public void RedrawStrip(System.DateTime passDate)

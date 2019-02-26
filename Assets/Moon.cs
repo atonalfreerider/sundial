@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Assets.UI.Text;
 using TMPro;
-using UnityEngine.UI;
 
 namespace Assets
 {
@@ -103,7 +102,8 @@ namespace Assets
             monthTick.transform.Translate(Vector3.forward * moonR);
 
             moonLabels = NewDayMonthLabels(passDate);
-            moonLabels.transform.SetParent(newMoonSprockCont.transform);
+            moonLabels.transform.SetParent(newMoonSprockCont.transform, false);
+            moonLabels.transform.Rotate(Vector3.right * 90);
 
             return newMoonSprockCont;
         }
@@ -201,14 +201,15 @@ namespace Assets
             int count = 0;
             int count2 = 0;
             int htr = 0;
+            const float dayLabelPad = 2;
             for (int ht = passDate.Day; ht <= System.DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
             {
                 dLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
+                dLabel.transform.SetParent(newDLabelWheel.transform, false);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (ht - passDate.Day) * (360 / lunarSynodic) + 2);
-                dLabel.transform.Translate(Vector3.up * (moonR - 6.5f));
+                dLabel.transform.Translate(Vector3.up * (moonR - dayLabelPad));
                 dLabel.transform.Rotate(Vector3.forward, 90);
-                dLabel.transform.SetParent(newDLabelWheel.transform);
                 count++;
                 count2++;
                 htr = ht;
@@ -221,11 +222,11 @@ namespace Assets
             while (count < 29)
             {
                 dLabel = TextBox.Create(nextD.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
+                dLabel.transform.SetParent(newDLabelWheel.transform, false);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (htr - passDate.Day) * (360 / lunarSynodic) + 2);
-                dLabel.transform.Translate(Vector3.up * (moonR - 6.5f));
+                dLabel.transform.Translate(Vector3.up * (moonR - dayLabelPad));
                 dLabel.transform.Rotate(Vector3.forward, 90);
-                dLabel.transform.SetParent(newDLabelWheel.transform);
                 nextD++;
                 count++;
                 count2++;
@@ -233,33 +234,34 @@ namespace Assets
             }
 
             month1L = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
-            month1L.transform.Translate(Vector3.up * (moonR + 6));
+            month1L.transform.SetParent(newDLabelWheel.transform, false);
+            month1L.transform.Translate(Vector3.up * (moonR + dayLabelPad));
             month1L.transform.Translate(Vector3.left * 2);
             month1L.transform.Rotate(Vector3.forward, 90);
             month1L.transform.Rotate(Vector3.up, -3.5f);
-            month1L.transform.SetParent(newDLabelWheel.transform);
 
-            monthSplitCont = new GameObject();
+            monthSplitCont = new GameObject("month split contain");
+            monthSplitCont.transform.SetParent(newDLabelWheel.transform, false);
 
             GameObject monthTick = Shapes.DrawTri(7, 1, Color.white);
-            monthTick.transform.parent = monthSplitCont.transform;
+            monthTick.transform.SetParent(monthSplitCont.transform, false);
             monthTick.transform.Translate(Vector3.forward * moonR);
 
             month1L2 = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont , 28, TextAlignmentOptions.Left);
-            month1L2.transform.Translate(Vector3.up * (moonR + 6));
+            month1L2.transform.SetParent(monthSplitCont.transform, false);
+            month1L2.transform.Rotate(Vector3.right * 90);
+            month1L2.transform.Translate(Vector3.up * (moonR + 1));
             month1L2.transform.Translate(Vector3.right * 2);
-            month1L2.transform.Rotate(Vector3.forward, 90);
-            month1L2.transform.Rotate(Vector3.up, 1);
-            month1L2.transform.SetParent(monthSplitCont.transform);
-
+            month1L2.transform.Rotate(Vector3.forward * 90);
+            month1L2.transform.Rotate(Vector3.up, -1);
+            
             month2L = TextBox.Create(Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
-            month2L.transform.Translate(Vector3.up * (moonR + 6));
+            month2L.transform.SetParent(monthSplitCont.transform, false);
+            month2L.transform.Rotate(Vector3.right * 90);
+            month2L.transform.Translate(Vector3.up * (moonR + 1));
             month2L.transform.Translate(Vector3.left * 2);
-            month2L.transform.Rotate(Vector3.forward, 90);
-            month2L.transform.Rotate(Vector3.up, -3.5f);
-            month2L.transform.SetParent(monthSplitCont.transform);
-
-            monthSplitCont.transform.parent = newDLabelWheel.transform;
+            month2L.transform.Rotate(Vector3.forward * 90);
+            month2L.transform.Rotate(Vector3.up, 5f);
 
             return newDLabelWheel;
         }

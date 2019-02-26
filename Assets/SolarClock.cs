@@ -191,27 +191,25 @@ namespace Assets
                 new Vector3(0, 0, -sundialR), axisColor, .5f);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
-            solsticeLine.transform.Rotate(Vector3.right, -90);
 
             GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR), axisColor, .5f);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.SetParent(seasonCross.transform, false);
             equinoxLine.transform.Rotate(Vector3.up, 90);
-            equinoxLine.transform.Rotate(Vector3.forward, -90);
 
             // Season labels;
             string[] seasonList = {"SUMMER", "SPRING", "WINTER", "FALL"};
 
             int count = 0;
-            TextBox seasonText;
-            Color seaTextColor = new Color(1, 1, 1, .5f);
             foreach (string season in seasonList)
             {
-                seasonText = TextBox.Create(season, TextBox.FontType.SecFont, 60, TextAlignmentOptions.Center);
-                seasonText.transform.Rotate(Vector3.forward, -count * 90 - 45 - 90);
-                seasonText.transform.Translate(Vector3.up * -sundialR * .82f);
-                seasonText.transform.SetParent(seasonCross.transform);
+                TextBox seasonText = TextBox.Create(season, TextBox.FontType.SecFont, 60, TextAlignmentOptions.Center);
+                seasonText.transform.SetParent(seasonCross.transform, false);
+                seasonText.transform.Rotate(Vector3.up, count * 90 - 45);
+                seasonText.transform.Translate(Vector3.forward * sundialR * .82f);
+                seasonText.transform.Rotate(Vector3.right * 90);
+                seasonText.transform.Rotate(Vector3.forward * 180);
                 if (count == 0)
                     summerText = seasonText;
                 else if (count == 1)
@@ -227,6 +225,8 @@ namespace Assets
 
             //SUN LINE;
             sunLine = new GameObject("SunLine");
+            sunLine.transform.SetParent(sunDial.transform, false);
+            sunLine.transform.Rotate(Vector3.up * -90);
 
             GameObject yearLine = Items.YearLine((passDate.Year - 1).ToString(), earthLineL);
             yearLine.transform.SetParent(sunLine.transform, false);
@@ -241,8 +241,7 @@ namespace Assets
             yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
             yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
-
-            sunLine.transform.SetParent(sunDial.transform, false);
+            
             sunLine.SetActive(false);
 
             return sunDial;
@@ -271,7 +270,8 @@ namespace Assets
             }
 
             FlipMonthLabels(true);
-            mLabelWheel.transform.Rotate(Vector3.forward, -360f * 15f / YEAR - 180);
+            mLabelWheel.transform.Rotate(Vector3.right * 90);
+            mLabelWheel.transform.Rotate(Vector3.forward, -360 * 15 / YEAR - 180);
 
             mLabelWheel.transform.SetParent(newSunSprockCont.transform);
 
