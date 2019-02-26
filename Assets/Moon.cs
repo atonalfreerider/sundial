@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Assets.UI.Text;
+using TMPro;
 using UnityEngine.UI;
 
 namespace Assets
@@ -18,11 +20,11 @@ namespace Assets
         public GameObject moonSprockCont;
         GameObject moonSprock;
         public GameObject moonLabels;
-        Text month1L;
+        TextBox month1L;
         GameObject monthSplitCont;
-        Text month1L2;
-        Text month2L;
-        Text[] dayList;
+        TextBox month1L2;
+        TextBox month2L;
+        TextBox[] dayList;
 
         // INIT Functions
         public void NewMoon(float passMoonR, System.DateTime passDate)
@@ -116,12 +118,12 @@ namespace Assets
             {
                 // increment or decrement each day by 1 
                 int day;
-                foreach (Text dL in dayList)
+                foreach (TextBox dL in dayList)
                 {
                     if (forward)
                     {
                         // time is moving forward
-                        day = System.Convert.ToInt32(dL.text) + 1;
+                        day = System.Convert.ToInt32(dL.Text) + 1;
                         if (passDate.Month > 1)
                         {
                             // if not January
@@ -144,14 +146,14 @@ namespace Assets
                     else
                     {
                         // time is moving backward
-                        day = System.Convert.ToInt32(dL.text) - 1;
+                        day = System.Convert.ToInt32(dL.Text) - 1;
                         if (day < 1)
                         {
                             day = System.DateTime.DaysInMonth(passDate.Year, passDate.Month);
                         }
                     }
 
-                    dL.text = day.ToString();
+                    dL.Text = day.ToString();
                 }
             }
 
@@ -168,16 +170,16 @@ namespace Assets
                 }
 
                 // update text
-                month1L.text = Calendar.monthofYrAbr[passDate.Month - 1];
-                month1L2.text = Calendar.monthofYrAbr[passDate.Month - 1];
-                month2L.text = Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)];
+                month1L.Text = Calendar.monthofYrAbr[passDate.Month - 1];
+                month1L2.Text = Calendar.monthofYrAbr[passDate.Month - 1];
+                month2L.Text = Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)];
             }
 
             bool setOn = false;
             // detect if 1st is not in 1st pos
             for (int ii = 0; ii < 29; ii++)
             {
-                if (System.Convert.ToInt32(dayList[ii].text) != 1 || ii <= 0) continue;
+                if (System.Convert.ToInt32(dayList[ii].Text) != 1 || ii <= 0) continue;
                 setOn = true;
                 break;
             }
@@ -193,16 +195,15 @@ namespace Assets
         {
             //...........................(1) hLabelWheel
             // create days in month;        
-            dayList = new Text[29];
+            dayList = new TextBox[29];
             GameObject newDLabelWheel = new GameObject("MoonLabels");
-            Items.AddCanvas(newDLabelWheel);
-            Text dLabel;
+            TextBox dLabel;
             int count = 0;
             int count2 = 0;
             int htr = 0;
             for (int ht = passDate.Day; ht <= System.DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
             {
-                dLabel = Items.NewText(ht.ToString(), Color.white, 28, TextAnchor.MiddleRight, false);
+                dLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (ht - passDate.Day) * (360 / lunarSynodic) + 2);
                 dLabel.transform.Translate(Vector3.up * (moonR - 6.5f));
@@ -219,7 +220,7 @@ namespace Assets
             htr++;
             while (count < 29)
             {
-                dLabel = Items.NewText(nextD.ToString(), Color.white, 28, TextAnchor.MiddleRight, false);
+                dLabel = TextBox.Create(nextD.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (htr - passDate.Day) * (360 / lunarSynodic) + 2);
                 dLabel.transform.Translate(Vector3.up * (moonR - 6.5f));
@@ -231,8 +232,7 @@ namespace Assets
                 htr++;
             }
 
-            month1L = Items.NewText(Calendar.monthofYrAbr[passDate.Month - 1], Color.white, 28, TextAnchor.MiddleLeft,
-                false);
+            month1L = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
             month1L.transform.Translate(Vector3.up * (moonR + 6));
             month1L.transform.Translate(Vector3.left * 2);
             month1L.transform.Rotate(Vector3.forward, 90);
@@ -245,16 +245,14 @@ namespace Assets
             monthTick.transform.parent = monthSplitCont.transform;
             monthTick.transform.Translate(Vector3.forward * moonR);
 
-            month1L2 = Items.NewText(Calendar.monthofYrAbr[passDate.Month - 1], Color.white, 28, TextAnchor.MiddleLeft,
-                false);
+            month1L2 = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont , 28, TextAlignmentOptions.Left);
             month1L2.transform.Translate(Vector3.up * (moonR + 6));
             month1L2.transform.Translate(Vector3.right * 2);
             month1L2.transform.Rotate(Vector3.forward, 90);
             month1L2.transform.Rotate(Vector3.up, 1);
             month1L2.transform.SetParent(monthSplitCont.transform);
 
-            month2L = Items.NewText(Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)], Color.white, 28,
-                TextAnchor.MiddleLeft, false);
+            month2L = TextBox.Create(Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
             month2L.transform.Translate(Vector3.up * (moonR + 6));
             month2L.transform.Translate(Vector3.left * 2);
             month2L.transform.Rotate(Vector3.forward, 90);

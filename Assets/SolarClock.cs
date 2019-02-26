@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
+using Assets.UI.Text;
+using TMPro;
 
 namespace Assets
 {
@@ -14,6 +15,8 @@ namespace Assets
             GeoCentric,
         }
 
+        public static SolarClock Instance;
+        
         // calibration vars
         const float YEAR = 365.256363004f;
         const float sysDia = 150;
@@ -22,7 +25,7 @@ namespace Assets
         const float SiderealDayInSeconds = 86164.0905f;
 
         // text vars
-        public Font mainFont;
+        public TMP_FontAsset mainFont;
         public Shader mainShader;
         public Material EarthMM, MoonMat;
 
@@ -30,12 +33,13 @@ namespace Assets
         Earth earth;
         Orbits orbits;
         GameObject sunSprockCont, sunSprock, mLabelWheel, sunLine;
-        Text summerText, springText;
+        TextBox summerText, springText;
         Calendar calendar;
 
         public DigitalClock digiClock;
+        public TextBox TextBoxPrefab;
         readonly GameObject[] seasonLabels = new GameObject[4];
-        readonly Text[] yearQueue = new Text[3];
+        readonly TextBox[] yearQueue = new TextBox[3];
 
         // time initialization
         System.DateTime travelDateUTC = System.DateTime.UtcNow;
@@ -82,9 +86,9 @@ namespace Assets
         // INIT Functions
         void Awake()
         {
+            Instance = this;
             QualitySettings.antiAliasing = 4;
             Shapes.Init(mainShader);
-            Items.Init(mainFont);
             orthoSize = solOrthoSize;
 
             /*
@@ -182,7 +186,6 @@ namespace Assets
 
             // .......(0) SEASONS;
             GameObject seasonCross = new GameObject("SeasonCross");
-            Items.AddCanvas(seasonCross);
             Color axisColor = new Color(1, 1, 1, .5f);
             GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR), axisColor, .5f);
@@ -201,11 +204,11 @@ namespace Assets
             string[] seasonList = {"SUMMER", "SPRING", "WINTER", "FALL"};
 
             int count = 0;
-            Text seasonText;
+            TextBox seasonText;
             Color seaTextColor = new Color(1, 1, 1, .5f);
             foreach (string season in seasonList)
             {
-                seasonText = Items.NewText(season, seaTextColor, 60, TextAnchor.MiddleCenter, false);
+                seasonText = TextBox.Create(season, TextBox.FontType.SecFont, 60, TextAlignmentOptions.Center);
                 seasonText.transform.Rotate(Vector3.forward, -count * 90 - 45 - 90);
                 seasonText.transform.Translate(Vector3.up * -sundialR * .82f);
                 seasonText.transform.SetParent(seasonCross.transform);
@@ -228,16 +231,16 @@ namespace Assets
             GameObject yearLine = Items.YearLine((passDate.Year - 1).ToString(), earthLineL);
             yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, -earthLineL, 0);
-            yearQueue[0] = yearLine.transform.GetChild(1).GetComponent<Text>();
+            yearQueue[0] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
             yearLine = Items.YearLine(passDate.Year.ToString(), earthLineL);
             yearLine.transform.SetParent(sunLine.transform, false);
-            yearQueue[1] = yearLine.transform.GetChild(1).GetComponent<Text>();
+            yearQueue[1] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
             yearLine = Items.YearLine((passDate.Year + 1).ToString(), earthLineL);
             yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
-            yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<Text>();
+            yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
             sunLine.transform.SetParent(sunDial.transform, false);
             sunLine.SetActive(false);
@@ -257,12 +260,10 @@ namespace Assets
             string[] monthArray = Calendar.monthofYrAbr;
             mLabelWheel = new GameObject("MonthLabelWheel");
 
-            Items.AddCanvas(mLabelWheel);
-
-            Text monthText;
+            TextBox monthText;
             for (int mt = 1; mt <= 12; mt++)
             {
-                monthText = Items.NewText(monthArray[mt - 1], Color.white, 60, TextAnchor.MiddleCenter, false);
+                monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60, TextAlignmentOptions.Center);
                 monthText.transform.Rotate(Vector3.forward, 30 * mt);
                 monthText.transform.Translate(Vector3.up * (-sundialR + 6));
 
@@ -556,9 +557,9 @@ namespace Assets
                 sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
                 currentYear = newDateLocal.Year;
 
-                yearQueue[0].text = (currentYear - 1).ToString();
-                yearQueue[1].text = (currentYear).ToString();
-                yearQueue[2].text = (currentYear + 1).ToString();
+                yearQueue[0].Text = (currentYear - 1).ToString();
+                yearQueue[1].Text = (currentYear).ToString();
+                yearQueue[2].Text = (currentYear + 1).ToString();
 
                 jan1ofthisYear = new System.DateTime();
                 jan1ofthisYear = jan1ofthisYear.AddYears(newDateLocal.Year - 1);
@@ -577,12 +578,12 @@ namespace Assets
                 Quaternion.AngleAxis(
                     earth.earthSph.transform.rotation.eulerAngles.y - 90,
                     Vector3.up);
-            string temp1 = earth.day21.text;
-            earth.day21.text = "";
-            earth.day21.text = temp1;
-            string temp2 = earth.day22.text;
-            earth.day22.text = "";
-            earth.day22.text = temp2;
+            string temp1 = earth.day21.Text;
+            earth.day21.Text = "";
+            earth.day21.Text = temp1;
+            string temp2 = earth.day22.Text;
+            earth.day22.Text = "";
+            earth.day22.Text = temp2;
 
             int datelineDay = Earth.GetDatelineDay(newDateUTC);
             if (datelineDay != currentINDL)
@@ -591,11 +592,11 @@ namespace Assets
                 if (yesterday < 0)
                     yesterday = 6;
 
-                earth.day11.text = Calendar.daysofweekAbr[yesterday];
-                earth.day12.text = Calendar.daysofweekAbr[yesterday];
+                earth.day11.Text = Calendar.daysofweekAbr[yesterday];
+                earth.day12.Text = Calendar.daysofweekAbr[yesterday];
 
-                earth.day21.text = Calendar.daysofweekAbr[datelineDay];
-                earth.day22.text = Calendar.daysofweekAbr[datelineDay];
+                earth.day21.Text = Calendar.daysofweekAbr[datelineDay];
+                earth.day22.Text = Calendar.daysofweekAbr[datelineDay];
 
                 currentINDL = datelineDay;
             }

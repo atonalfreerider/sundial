@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Assets.UI.Text;
+using TMPro;
 using UnityEngine.UI;
 
 namespace Assets
@@ -17,11 +19,11 @@ namespace Assets
         public GameObject earthSph;
         public GameObject localWheelCont;
         public Moon moonDial;
-        public Text day11;
-        public Text day12;
+        public TextBox day11;
+        public TextBox day12;
         public GameObject intDatelineSplit;
-        public Text day21;
-        public Text day22;
+        public TextBox day21;
+        public TextBox day22;
         GameObject strip;
         GameObject earthSprock;
 
@@ -46,7 +48,6 @@ namespace Assets
             earthSys = new GameObject("EarthSys");
             // .........(1) Earth Sprocket;
             GameObject earthSprockCont = new GameObject("EarthSprockCont");
-            Items.AddCanvas(earthSprockCont);
 
             // create point cloud for earth sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
@@ -95,12 +96,11 @@ namespace Assets
             //...........................(1) hLabelWheel
             // create 24 hour marks
             GameObject hLabelWheel = new GameObject();
-            Items.AddCanvas(hLabelWheel);
             hLabelWheel.name = "HourLabelWheel";
-            Text hLabel;
+            TextBox hLabel;
             for (int ht = 0; ht < 24; ht++)
             {
-                hLabel = Items.NewText(ht.ToString(), Color.white, 40, TextAnchor.MiddleCenter, false);
+                hLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 40, TextAlignmentOptions.Center);
                 hLabel.transform.Rotate(Vector3.forward, ht * (360f / 24f));
                 hLabel.transform.Translate(Vector3.up * (earthR * .4f - 10f));
                 if ((ht >= 0 && ht < 6) || ht > 18)
@@ -124,26 +124,25 @@ namespace Assets
                 yesterday = 6;
 
             const float angOffset = 4.2f;
-            day11 = Items.NewText(Calendar.daysofweekAbr[yesterday], Color.white, 30, TextAnchor.MiddleCenter, false);
+            day11 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day11.transform.SetParent(earthSprockCont.transform);
             day11.transform.Rotate(Vector3.forward * (180f - angOffset));
             day11.transform.Translate(Vector3.up * -(localR - 2.25f));
 
-            day21 = Items.NewText(Calendar.daysofweekAbr[datelineDay], Color.white, 30, TextAnchor.MiddleCenter, false);
+            day21 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day21.transform.SetParent(earthSprockCont.transform);
             day21.transform.Rotate(Vector3.forward * (180f + angOffset));
             day21.transform.Translate(Vector3.up * -(localR - 2.25f));
 
             intDatelineSplit = new GameObject("IntDatelineSplit");
-            Items.AddCanvas(intDatelineSplit);
             intDatelineSplit.transform.rotation = Quaternion.identity;
 
-            day12 = Items.NewText(Calendar.daysofweekAbr[yesterday], Color.white, 30, TextAnchor.MiddleCenter, false);
+            day12 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day12.transform.SetParent(intDatelineSplit.transform);
             day12.transform.Rotate(Vector3.forward * (180f + angOffset));
             day12.transform.Translate(Vector3.up * -(localR - 2.25f));
 
-            day22 = Items.NewText(Calendar.daysofweekAbr[datelineDay], Color.white, 30, TextAnchor.MiddleCenter, false);
+            day22 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day22.transform.SetParent(intDatelineSplit.transform);
             day22.transform.Rotate(Vector3.forward * (180f - angOffset));
             day22.transform.Translate(Vector3.up * -(localR - 2.25f));

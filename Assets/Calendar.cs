@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Assets.UI.Text;
+using TMPro;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -179,7 +181,6 @@ namespace Assets
             }
 
             yearCal = new GameObject("YearCal");
-            Items.AddCanvas(yearCal);
             yearCal.transform.Rotate(Vector3.right * -90);
             foreach (MyEvent ev in yearQueue)
             {
@@ -200,7 +201,6 @@ namespace Assets
             }
 
             dayCal = new GameObject("DayCal");
-            Items.AddCanvas(dayCal);
             dayCal.transform.Rotate((Vector3.right * -90));
             foreach (MyEvent ev in dayQueue)
             {
@@ -255,7 +255,7 @@ namespace Assets
             {
                 displayTitle = displayTitle.Substring(0, 12);
             }
-            Text titleT = Items.NewText(displayTitle, passEv.color, 50, TextAnchor.MiddleCenter, false);
+            TextBox titleT = TextBox.Create(displayTitle, TextBox.FontType.MainFont, 50, TextAlignmentOptions.Center);
             titleT.transform.SetParent(newRing.transform);
             titleT.transform.Translate(Vector3.up * (R - 10));
             titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360 + 180);
