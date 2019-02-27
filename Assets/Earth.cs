@@ -245,7 +245,7 @@ namespace Assets
             float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
             if (strip != null)
             {
-                Destroy(strip);
+                Destroy(strip.gameObject);
             }
 
             strip = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
