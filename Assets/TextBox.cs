@@ -41,6 +41,7 @@ namespace Assets.UI.Text
         public TextMeshPro TextField;
         public ContentSizeFitter ContentSizeFitter;
         public RectTransform RectTransform;
+        public int SpecialInt;
 
         // State
         public Vector3 HomePosition;

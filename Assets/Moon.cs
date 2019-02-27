@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
@@ -126,7 +127,7 @@ namespace Assets
                     if (forward)
                     {
                         // time is moving forward
-                        day = System.Convert.ToInt32(dL.Text) + 1;
+                        day = dL.SpecialInt + 1;
                         if (passDate.Month > 1)
                         {
                             // if not January
@@ -157,6 +158,7 @@ namespace Assets
                     }
 
                     dL.Text = day.ToString();
+                    dL.SpecialInt = day;
                 }
             }
 
@@ -182,7 +184,7 @@ namespace Assets
             // detect if 1st is not in 1st pos
             for (int ii = 0; ii < 29; ii++)
             {
-                if (System.Convert.ToInt32(dayList[ii].Text) != 1 || ii <= 0) continue;
+                if (dayList[ii].SpecialInt != 1 || ii <= 0) continue;
                 setOn = true;
                 break;
             }
@@ -208,6 +210,7 @@ namespace Assets
             for (int ht = passDate.Day; ht <= System.DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
             {
                 dLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
+                dLabel.SpecialInt = ht;
                 dLabel.transform.SetParent(newDLabelWheel.transform, false);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (ht - passDate.Day) * (360 / lunarSynodic) + 2);
@@ -225,6 +228,7 @@ namespace Assets
             while (count < 29)
             {
                 dLabel = TextBox.Create(nextD.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
+                dLabel.SpecialInt = nextD;
                 dLabel.transform.SetParent(newDLabelWheel.transform, false);
                 dayList[count2] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (htr - passDate.Day) * (360 / lunarSynodic) + 2);
