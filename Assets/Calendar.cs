@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
 using Object = UnityEngine.Object;
@@ -224,7 +225,7 @@ namespace Assets
             return newDate;
         }
 
-        GameObject DrawEvent(MyEvent passEv, string type)
+        Circle DrawEvent(MyEvent passEv, string type)
         {
             const float evH = 7;
             float R = 0;
@@ -246,7 +247,9 @@ namespace Assets
                         (passEv.start.Minute - passEv.end.Minute) / 60f) / 24f;
             }
 
-            GameObject newRing = Shapes.DrawRing(R, R - evH, one * prct, passEv.color, 0, false);
+            Circle newRing = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            newRing.DrawRing(R, R - evH, one * prct, 0,0, false);
+            newRing.SetColor(passEv.color);
 
             string displayTitle = passEv.title;
             if (displayTitle.Length > 12)

@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.GraphicsUtil.Shapes;
 using UnityEngine;
 
 namespace Assets
@@ -7,7 +8,7 @@ namespace Assets
     {
         // container for 4 inner planets
         public GameObject[] planets = new GameObject[4];
-        public GameObject[] paths = new GameObject[4];
+        public Circle[] paths = new Circle[4];
 
         // calibration vars
         const float earthR = 5f;
@@ -51,7 +52,7 @@ namespace Assets
             GameObject planetOrbit;
             int count = 0;
             GameObject planet;
-            GameObject path;
+            Circle path;
             GameObject planetTri;
             Color minorColor = new Color(1, 1, 1, .5f);
             float minorThick = .3f;
@@ -67,15 +68,17 @@ namespace Assets
                 planet.transform.Translate(Vector3.forward * planetData.orbitMultiplier * earthOR);
                 planet.transform.localScale = Vector3.one * planetData.radius;
 
+                path = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
                 if (count != 2)
                 {
-                    path = Shapes.DrawRing(
+                    path.DrawRing(
                         planetData.orbitMultiplier * earthOR,
                         planetData.orbitMultiplier * earthOR - minorThick,
                         .33f,
-                        minorColor,
+                        0,
                         planetData.orbitMultiplier * earthOR * DoverR * velComp,
                         true);
+                    path.SetColor(minorColor);
                     planetTri = Shapes.DrawTri(
                         planetData.orbitMultiplier * earthOR,
                         2,
@@ -84,13 +87,14 @@ namespace Assets
                 else
                 {
                     // earth
-                    path = Shapes.DrawRing(
+                    path.DrawRing(
                         earthOR,
                         earthOR - .5f,
                         .833f,
-                        new Color(1, 1, 1, 1),
+                        0,
                         earthOR * DoverR * velComp,
                         true);
+                    path.SetColor(new Color(1, 1, 1, 1));
                     planetTri = Shapes.DrawTri(
                         earthOR,
                         5,

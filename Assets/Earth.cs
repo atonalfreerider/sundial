@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
 using UnityEngine.UI;
@@ -24,7 +25,7 @@ namespace Assets
         public GameObject intDatelineSplit;
         public TextBox day21;
         public TextBox day22;
-        GameObject strip;
+        Circle strip;
         GameObject earthSprock;
 
         // INIT Functions
@@ -56,7 +57,7 @@ namespace Assets
             // create point cloud for earth sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
-            object[] retArr = new object[3];
+            Circle.SprocketTick retArr;
             int pointCounter = 0;
             int counter = 0;
             float alpha;
@@ -72,21 +73,21 @@ namespace Assets
                 alpha = -counter * stepD;
                 // create hour tick
 
-                retArr = Shapes.SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
+                retArr = Circle.SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
                     pointCounter, 0);
-                pointList.AddRange((List<Vector3>) retArr[0]);
-                indList.AddRange((List<int>) retArr[1]);
-                pointCounter = (int) retArr[2];
+                pointList.AddRange(retArr.pointList);
+                indList.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
                 counter++;
                 for (int dd = 0; dd < 3; dd++)
                 {
                     alpha = -counter * stepD;
                     // create 15min tick
-                    retArr = Shapes.SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
+                    retArr = Circle.SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
                         pointCounter, 0);
-                    pointList.AddRange((List<Vector3>) retArr[0]);
-                    indList.AddRange((List<int>) retArr[1]);
-                    pointCounter = (int) retArr[2];
+                    pointList.AddRange(retArr.pointList);
+                    indList.AddRange(retArr.indexList);
+                    pointCounter = retArr.pointCounter;
                     counter++;
                 }
             }
@@ -169,15 +170,15 @@ namespace Assets
             {
                 alpha = -tt * stepD;
                 if (tt == 0) // local tick
-                    retArr = Shapes.SprockTick(localR, -bigH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl * 2, pointAl,
+                    retArr = Circle.SprockTick(localR, -bigH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl * 2, pointAl,
                         pointCounter, 0f);
                 else
-                    retArr = Shapes.SprockTick(localR, -smallH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl, pointAl,
+                    retArr = Circle.SprockTick(localR, -smallH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl, pointAl,
                         pointCounter, 0f);
 
-                pointList2.AddRange((List<Vector3>) retArr[0]);
-                indList2.AddRange((List<int>) retArr[1]);
-                pointCounter = (int) retArr[2];
+                pointList2.AddRange(retArr.pointList);
+                indList2.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
             }
 
             indList2.RemoveRange(0, 24);
@@ -242,14 +243,15 @@ namespace Assets
                 Destroy(strip);
             }
 
-            strip = Shapes.DrawRing(
+            strip = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            strip.DrawRing(
                 localR - 1,
                 localR - 3.5f,
                 prct,
-                new Color(1, 1, 1, .3f),
+                0,
                 0,
                 false);
-            strip.name = "strip";
+            strip.SetColor(new Color(1, 1, 1, .3f));
             strip.transform.SetParent(earthSprock.transform, false);
         }
 

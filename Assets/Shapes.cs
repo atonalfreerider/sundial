@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Assets.GraphicsUtil.Shapes;
 
 namespace Assets
 {
@@ -7,189 +8,31 @@ namespace Assets
     {
         static Material mainMat;
 
-        public static void Init(Shader mainShade)
+        public static void Init(Shader mainShader)
         {
-            mainMat = new Material(mainShade);
+            mainMat = new Material(mainShader);
         }
 
-        public static object[] SprockTick(float R, float H, float alpha, float aDelt, float sprockTh, float baseAl,
-            float pointAl, int counter, float spiralH)
-        {
-            List<Vector3> pointList = new List<Vector3>();
-            List<int> indList = new List<int>();
-
-            pointList.Add(new Vector3((R) * Mathf.Sin(alpha + baseAl), spiralH, (R) * Mathf.Cos(alpha + baseAl)));
-            pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(alpha + baseAl), spiralH,
-                (R - sprockTh) * Mathf.Cos(alpha + baseAl)));
-
-            pointList.Add(new Vector3((R - H) * Mathf.Sin(alpha + pointAl), spiralH,
-                (R - H) * Mathf.Cos(alpha + pointAl)));
-            pointList.Add(new Vector3((R - H) * Mathf.Sin(alpha - pointAl), spiralH,
-                (R - H) * Mathf.Cos(alpha - pointAl)));
-
-            pointList.Add(new Vector3((R) * Mathf.Sin(alpha - baseAl), spiralH, (R) * Mathf.Cos(alpha - baseAl)));
-            pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(alpha - baseAl), spiralH,
-                (R - sprockTh) * Mathf.Cos(alpha - baseAl)));
-
-            indList.Add(counter + 0);
-            indList.Add(counter + 1);
-            indList.Add(counter + 4);
-
-            indList.Add(counter + 1);
-            indList.Add(counter + 5);
-            indList.Add(counter + 4);
-
-            indList.Add(counter + 1);
-            indList.Add(counter + 2);
-            indList.Add(counter + 5);
-
-            indList.Add(counter + 2);
-            indList.Add(counter + 3);
-            indList.Add(counter + 5);
-
-            counter += 6;
-            // in-fill;       
-            float tempA = alpha - .03f;
-            while (tempA > aDelt + .03f)
-            {
-                pointList.Add(new Vector3(R * Mathf.Sin(tempA), 0, R * Mathf.Cos(tempA)));
-                pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(tempA), 0, (R - sprockTh) * Mathf.Cos(tempA)));
-                indList.Add(counter - 2);
-                indList.Add(counter - 1);
-                indList.Add(counter + 0);
-
-                indList.Add(counter - 1);
-                indList.Add(counter + 1);
-                indList.Add(counter + 0);
-
-                counter += 2;
-                tempA -= .03f;
-            }
-
-            indList.Add(counter - 2);
-            indList.Add(counter - 1);
-            indList.Add(counter + 0);
-
-            indList.Add(counter - 1);
-            indList.Add(counter + 1);
-            indList.Add(counter + 0);
-
-            object[] retArr = new object[3] {pointList, indList, counter};
-            return retArr;
-        }
-
-        public static GameObject DrawLine(string type, Vector3 pt0, Vector3 pt1, Color passColor, float passLW)
+        public static GameObject DrawDottedLine(Vector3 pt0, Vector3 pt1, Color passColor, float passLW)
         {
             GameObject line;
-            float D = Vector3.Distance(pt0, pt1);
-            if (type == "flat")
+            line = new GameObject("Line");
+            float length = Vector3.Distance(pt0, pt1);
+            int totalDot = Mathf.FloorToInt(length * .15f);
+            Polygon dot;
+            for (int ii = 0; ii < totalDot; ii++)
             {
-                line = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                line.transform.localPosition = Vector3.Lerp(pt0, pt1, .5f);
-                line.transform.LookAt(pt0);
-                line.transform.localScale = new Vector3(D, passLW, 1f);
-                line.transform.Rotate(Vector3.up, 90);
-                line.transform.Rotate(Vector3.right, 90);
-
-                Material Outline = mainMat;
-                line.transform.GetComponent<Renderer>().material = Outline;
-                line.transform.GetComponent<Renderer>().material.color = passColor;
+                dot = Object.Instantiate(NewCylinder.rootDot);
+                dot.transform.SetParent(line.transform, false);
+                dot.transform.localScale = Vector3.one * passLW;
+                float mag = -ii * length / totalDot;
+                if (pt1.x > 0)
+                    dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0, 0);
+                else
+                    dot.transform.localPosition = pt0 + new Vector3(0, 0, mag - .5f);
             }
-            else if (type == "dotted")
-            {
-                line = new GameObject();
-                float length = Vector3.Distance(pt0, pt1);
-                int totalDot = Mathf.FloorToInt(length * .15f);
-                GameObject dot;
-                for (int ii = 0; ii < totalDot; ii++)
-                {
-                    dot = DrawCirc(passLW, 1f, passColor);
-                    dot.transform.SetParent(line.transform, false);
-                    float mag = -ii * length / totalDot;
-                    if (pt1.x > 0)
-                        dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0, 0);
-                    else
-                        dot.transform.localPosition = pt0 + new Vector3(0, 0, mag - .5f);
-                }
-            }
-            else
-                line = new GameObject();
 
-            line.name = "Line";
             return line;
-        }
-
-        static Vector3 VectArc(float R, float alpha, float prct, float offSet, float cX, float cY, float cZ)
-        {
-            return new Vector3(R * Mathf.Sin(alpha * prct * Mathf.PI / 180 + offSet * Mathf.PI / 180) + cX, cY,
-                R * Mathf.Cos(alpha * prct * Mathf.PI / 180 + offSet * Mathf.PI / 180) + cZ);
-        }
-
-        static GameObject DrawCirc(float R, float prct, Color passColor)
-        {
-            List<Vector3> skinList = new List<Vector3>();
-            List<int> indList = new List<int>();
-
-            skinList.Add(Vector3.zero);
-            int side = (int) (18 * prct);
-            int count = 1;
-            for (int ii = side - 1; ii >= 0; ii--)
-            {
-                skinList.Add(VectArc(R, ii * 360f / side, prct, 0, 0, 0, 0));
-                indList.Add(0);
-                indList.Add(count + 1);
-                indList.Add(count);
-                count++;
-            }
-
-            indList[indList.Count - 2] = 1;
-
-            return CreatePoly(skinList, indList, passColor);
-        }
-
-        public static GameObject DrawRing(float R1, float R2, float prct, Color passColor, float spiralH, bool dim)
-        {
-            List<Vector3> skinList = new List<Vector3>();
-            List<int> indList = new List<int>();
-            int side = (int) (36 * prct * R1 / 10);
-            int count = 0;
-            float spirBit = 0;
-
-            float dimR = 0;
-
-            for (int ii = side - 1; ii >= 0; ii--)
-            {
-                spirBit = -(ii) * spiralH / side;
-                if (dim)
-                {
-                    dimR = Mathf.Lerp(0, R1 - R2, (float) ii / side);
-                }
-
-                skinList.Add(VectArc(R1 - dimR, ii * 360f / side, prct, 0, 0, spirBit, 0));
-                skinList.Add(VectArc(R2, ii * 360f / side, prct, 0, 0, spirBit, 0));
-                indList.Add(count);
-                indList.Add(count + 1);
-                indList.Add(count + 2);
-
-                indList.Add(count + 1);
-                indList.Add(count + 3);
-                indList.Add(count + 2);
-
-                count += 2;
-            }
-
-            if (prct >= 1 - float.Epsilon)
-            {
-                indList[indList.Count - 1] = 0;
-                indList[indList.Count - 2] = 1;
-
-                indList[indList.Count - 4] = 0;
-            }
-            else if (indList.Count > 6)
-                indList.RemoveRange(indList.Count - 6, 6);
-
-            GameObject chord = CreatePoly(skinList, indList, passColor);
-            return chord;
         }
 
         public static GameObject DrawTri(float h, float b, Color passColor)

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
 
@@ -35,6 +36,8 @@ namespace Assets
         GameObject sunSprockCont, sunSprock, mLabelWheel, sunLine;
         TextBox summerText, springText;
         Calendar calendar;
+        public PolygonFactory polygonFactory;
+        [HideInInspector] public Material mainMat;
 
         public DigitalClock digiClock;
         public TextBox TextBoxPrefab;
@@ -90,6 +93,9 @@ namespace Assets
             QualitySettings.antiAliasing = 4;
             Shapes.Init(mainShader);
             orthoSize = solOrthoSize;
+            mainMat = new Material(mainShader);
+            
+            NewCylinder.Init(polygonFactory, mainMat);
 
             /*
             // time testing
@@ -187,13 +193,19 @@ namespace Assets
             // .......(0) SEASONS;
             GameObject seasonCross = new GameObject("SeasonCross");
             Color axisColor = new Color(1, 1, 1, .5f);
-            GameObject solsticeLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR), axisColor, .5f);
+            GameObject solsticeLine = Shapes.DrawDottedLine(
+                new Vector3(0, 0, sundialR),
+                new Vector3(0, 0, -sundialR),
+                axisColor,
+                20);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
 
-            GameObject equinoxLine = Shapes.DrawLine("dotted", new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR), axisColor, .5f);
+            GameObject equinoxLine = Shapes.DrawDottedLine(
+                new Vector3(0, 0, sundialR),
+                new Vector3(0, 0, -sundialR),
+                axisColor, 
+                20);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.SetParent(seasonCross.transform, false);
             equinoxLine.transform.Rotate(Vector3.up, 90);
@@ -292,7 +304,7 @@ namespace Assets
             // create point cloud for sprocket mesh;
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
-            object[] retArr = new object[3];
+            Circle.SprocketTick retArr;
             int counter = 0;
             int pointCounter = 0;
             float alpha;
@@ -314,7 +326,7 @@ namespace Assets
                 }
 
                 // add first-of-month tick;
-                retArr = Shapes.SprockTick(
+                retArr = Circle.SprockTick(
                     sundialR,
                     bigH,
                     alpha,
@@ -324,9 +336,9 @@ namespace Assets
                     pointAl,
                     pointCounter,
                     0);
-                pointList.AddRange((List<Vector3>) retArr[0]);
-                indList.AddRange((List<int>) retArr[1]);
-                pointCounter = (int) retArr[2];
+                pointList.AddRange(retArr.pointList);
+                indList.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
                 counter++;
                 dayCounter++;
                 for (int dd = 0; dd < diM - 1; dd++)
@@ -335,7 +347,7 @@ namespace Assets
                     if (dayCounter == 7)
                     {
                         // add Sunday tick;
-                        retArr = Shapes.SprockTick(
+                        retArr = Circle.SprockTick(
                             sundialR,
                             medH,
                             alpha,
@@ -350,7 +362,7 @@ namespace Assets
                     else
                     {
                         // add day tick;
-                        retArr = Shapes.SprockTick(
+                        retArr = Circle.SprockTick(
                             sundialR,
                             smallH,
                             alpha,
@@ -362,9 +374,9 @@ namespace Assets
                             0);
                     }
 
-                    pointList.AddRange((List<Vector3>) retArr[0]);
-                    indList.AddRange((List<int>) retArr[1]);
-                    pointCounter = (int) retArr[2];
+                    pointList.AddRange(retArr.pointList);
+                    indList.AddRange(retArr.indexList);
+                    pointCounter = retArr.pointCounter;
                     counter++;
                     dayCounter++;
                 }
@@ -495,7 +507,7 @@ namespace Assets
                 dirLight.enabled = false;
             }
 
-            foreach (GameObject path in orbits.paths)
+            foreach (Circle path in orbits.paths)
             {
                 path.transform.localScale = Vector3.Lerp(
                     path.transform.localScale,

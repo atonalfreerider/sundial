@@ -9,11 +9,7 @@ namespace Assets.GraphicsUtil.Shapes
         // regular polygons
         [HideInInspector]
         public Polygon tri, hex, tetra, icoSphere0, icoSphereCut0, dodecSphere, dodecSphereCut;
-
-        // non-regular
-        [HideInInspector]
-        public Polygon pointerArrow, retArrHead, argArrow, selectArrHead, arrayBracket;
-
+  
         // INIT
         public void BuildPolygons(Material mainMat)
         {
@@ -88,7 +84,7 @@ namespace Assets.GraphicsUtil.Shapes
             return newPoly;
         }
 
-        public static Circle NewCirclePoly(Material passMat, bool wireFrame)
+        public static Circle NewCirclePoly(Material passMat, bool wireFrame = false)
         {
             Circle newPoly = new GameObject("CirclePolygon").AddComponent<Circle>();
             AddMesh(newPoly.gameObject, newPoly, passMat, wireFrame);

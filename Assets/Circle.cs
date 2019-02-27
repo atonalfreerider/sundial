@@ -45,7 +45,7 @@ namespace Assets.GraphicsUtil.Shapes
             int[] insInd;
             for (int ii = side - 1; ii >= 0; ii--)
             {
-                skinList[count] = VectArc(R, ii * alpha, prct, offset, 0f, 0f);
+                skinList[count] = VectArc(R, ii * alpha, prct, offset, 0, 0, 0);
                 insInd = new[] {0, count, count + 1};
                 insInd.CopyTo(indList, (count - 1) * 3);
                 count++;
@@ -64,11 +64,13 @@ namespace Assets.GraphicsUtil.Shapes
             }
         }
 
-        public void DrawRing(float R1, float R2, float prct, float h)
+        public void DrawRing(float R1, float R2, float prct, float h, float spiralH = 0, bool diminishTail = false)
         {
             curR = (R1 + R2) * .5f;
             prct = Mathf.Abs(prct);
             curPrct = prct;
+            float spirBit = 0;
+            float diminishingR = 0;
 
             // calculate the number of sides to this ring;
             // there is one less side because a full ring fills the last side;
@@ -78,7 +80,9 @@ namespace Assets.GraphicsUtil.Shapes
 
             // if an incomplete ring, draw one more side;
             if (prct < 1f)
+            {
                 side += 1;
+            }
 
             // generate vertices and indices;
             Vector3[] skinList = new Vector3[side * 2];
@@ -88,8 +92,14 @@ namespace Assets.GraphicsUtil.Shapes
 
             for (int ii = 0; ii < side; ii++)
             {
-                skinList[ii] = VectArc(R1, ii * alpha, prct, 0f, 0f, 0f);
-                skinList[side * 2 - ii - 1] = VectArc(R2, ii * alpha, prct, 0f, 0f, 0f);
+                spirBit = -(ii) * spiralH / side;
+                if (diminishTail)
+                {
+                    diminishingR = Mathf.Lerp(0, R1 - R2, (float) ii / side);
+                }
+                
+                skinList[ii] = VectArc(R1 - diminishingR, ii * alpha, prct, 0, 0,spirBit, 0);
+                skinList[side * 2 - ii - 1] = VectArc(R2, ii * alpha, prct, 0, 0, spirBit, 0);
 
                 insInd = new[] {ii, side * 2 - ii - 2, side * 2 - ii - 1};
                 insInd.CopyTo(indList, ii * 6);
@@ -127,14 +137,14 @@ namespace Assets.GraphicsUtil.Shapes
             }
         }
 
-        static Vector3 VectArc(float R, float alpha, float prct, float offSet, float cX, float cZ)
+        static Vector3 VectArc(float R, float alpha, float prct, float offSet, float cX, float cY, float cZ)
         {
             return new Vector3(
                 R * Mathf.Sin(
                     alpha * prct * Mathf.PI / 180f +
                     offSet * 2f * Mathf.PI) +
                 cX,
-                0f,
+                cY,
                 R * Mathf.Cos(
                     alpha * prct * Mathf.PI / 180f +
                     offSet * 2f * Mathf.PI) +
@@ -142,7 +152,7 @@ namespace Assets.GraphicsUtil.Shapes
             );
         }
 
-        static object[] SprockTick(float R, float H, float alpha, float aDelt, float sprockTh, float baseAl,
+        public static SprocketTick SprockTick(float R, float H, float alpha, float aDelt, float sprockTh, float baseAl,
             float pointAl, int counter, float spiralH)
         {
             List<Vector3> pointList = new List<Vector3>();
@@ -182,8 +192,8 @@ namespace Assets.GraphicsUtil.Shapes
             float tempA = alpha - .03f;
             while (tempA > aDelt + .03f)
             {
-                pointList.Add(new Vector3(R * Mathf.Sin(tempA), 0f, R * Mathf.Cos(tempA)));
-                pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(tempA), 0f, (R - sprockTh) * Mathf.Cos(tempA)));
+                pointList.Add(new Vector3(R * Mathf.Sin(tempA), 0, R * Mathf.Cos(tempA)));
+                pointList.Add(new Vector3((R - sprockTh) * Mathf.Sin(tempA), 0, (R - sprockTh) * Mathf.Cos(tempA)));
                 indList.Add(counter - 2);
                 indList.Add(counter - 1);
                 indList.Add(counter + 0);
@@ -204,8 +214,21 @@ namespace Assets.GraphicsUtil.Shapes
             indList.Add(counter + 1);
             indList.Add(counter + 0);
 
-            object[] retArr = {pointList, indList, counter};
-            return retArr;
+           return new SprocketTick(pointList, indList, counter);
+        }
+
+        public struct SprocketTick
+        {
+            public readonly List<Vector3> pointList;
+            public readonly List<int> indexList;
+            public readonly int pointCounter;
+
+            public SprocketTick(List<Vector3> pointList, List<int> indexList, int pointCounter)
+            {
+                this.pointList = pointList;
+                this.indexList = indexList;
+                this.pointCounter = pointCounter;
+            }
         }
 
         public void DrawSprocket()
@@ -215,7 +238,7 @@ namespace Assets.GraphicsUtil.Shapes
             // create point cloud for earth sprocket mesh;
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
-            object[] retArr;
+            SprocketTick retArr;
             int pointCounter = 0;
             int counter = 0;
             float alpha;
@@ -236,9 +259,9 @@ namespace Assets.GraphicsUtil.Shapes
 
                 retArr = SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl, pointCounter,
                     0f);
-                pointList.AddRange((List<Vector3>) retArr[0]);
-                indList.AddRange((List<int>) retArr[1]);
-                pointCounter = (int) retArr[2];
+                pointList.AddRange(retArr.pointList);
+                indList.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
                 counter++;
                 for (int dd = 0; dd < subSegments - 1; dd++)
                 {
@@ -246,9 +269,9 @@ namespace Assets.GraphicsUtil.Shapes
                     // create 15min tick;
                     retArr = SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
                         pointCounter, 0f);
-                    pointList.AddRange((List<Vector3>) retArr[0]);
-                    indList.AddRange((List<int>) retArr[1]);
-                    pointCounter = (int) retArr[2];
+                    pointList.AddRange(retArr.pointList);
+                    indList.AddRange(retArr.indexList);
+                    pointCounter = retArr.pointCounter;
                     counter++;
                 }
             }
@@ -264,14 +287,7 @@ namespace Assets.GraphicsUtil.Shapes
     public static class NewCylinder
     {
         public static Circle cylinder;
-
-        public static Circle paren;
-
-        public static Circle methodRing;
-        public static Circle rootRing;
         public static Circle rootDot;
-
-        public static Circle referenceDepthIndicator;
 
         public static void Init(PolygonFactory polygonFactory, Material mainMat)
         {
@@ -283,12 +299,7 @@ namespace Assets.GraphicsUtil.Shapes
             cylinder.name = "cylinder";
             cylinder.SetColor(shapeColor);
             cylinder.transform.SetParent(polygonFactory.transform, false);
-
-            paren = PolygonFactory.NewCirclePoly(mainMat, false);
-            paren.DrawRing(.015f, .0135f, .3f, 0);
-            paren.name = "paren";
-            paren.transform.SetParent(polygonFactory.transform, false);
-
+  
             rootDot = PolygonFactory.NewCirclePoly(mainMat, false);
             rootDot.name = "RootDot";
             rootDot.DrawCirc(.035f * .5f, 1, 0);

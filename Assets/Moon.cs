@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
 
@@ -72,7 +73,7 @@ namespace Assets
             // point cloud for moon sprocket
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
-            object[] retArr = new object[3];
+            Circle.SprocketTick retArr;
             int pointCounter = 0;
             float alpha;
             float sprockTh = .7f;
@@ -84,11 +85,11 @@ namespace Assets
             for (int tt = 0; tt < 29; tt++)
             {
                 alpha = -tt * step;
-                retArr = Shapes.SprockTick(moonR, smallH, alpha, -(tt + 1) * step, sprockTh, baseAl, pointAl,
+                retArr = Circle.SprockTick(moonR, smallH, alpha, -(tt + 1) * step, sprockTh, baseAl, pointAl,
                     pointCounter, 0);
-                pointList.AddRange((List<Vector3>) retArr[0]);
-                indList.AddRange((List<int>) retArr[1]);
-                pointCounter = (int) retArr[2];
+                pointList.AddRange(retArr.pointList);
+                indList.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
             }
 
             indList.RemoveRange(indList.Count - 42, 42);
