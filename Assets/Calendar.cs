@@ -59,7 +59,7 @@ namespace Assets
         
         static MyEvent[] RetrieveCalendarEvents()
         {
-            DateTime currentYearJan1 = new DateTime(System.DateTime.Now.Year, 1, 1);
+            DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
             
             MyEvent[] calendarEvents = {};
             using (AndroidJavaClass javaClass = new AndroidJavaClass("com.example.calendar.calendarlibrary.main.EventsActivity"))
@@ -87,10 +87,11 @@ namespace Assets
                         string title = split[i];
                         if (i * 2 > eventsStartEnd.Length - 2) break;
 
+                        // note: I added a "d" for double below by accident and it worked - what are the chances?
                         int start = eventsStartEnd[i * 2];
-                        DateTime startDate = currentYearJan1.AddMilliseconds(start);
+                        DateTime startDate = Jan1Of1970.AddMilliseconds(start * 10000d);
                         int end = eventsStartEnd[i * 2 + 1];
-                        DateTime endDate = currentYearJan1.AddMilliseconds(end);
+                        DateTime endDate = Jan1Of1970.AddMilliseconds(end * 10000d);
 
                         //int TimeZone = Earth.GetTimeZone();
 
@@ -162,6 +163,7 @@ namespace Assets
             foreach (MyEvent calendarEvent in calendarEvents)
             {
                 long ticks = calendarEvent.end.Ticks - calendarEvent.start.Ticks;
+                //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
 
                 if (ticks >= TimeSpan.TicksPerDay)
                 {
@@ -172,6 +174,11 @@ namespace Assets
                     dayQueue.Add(calendarEvent);
                 }
             }
+        }
+
+        string prettyDate(DateTime dateTime)
+        {
+            return $"{dateTime.Year}/{dateTime.Month}/{dateTime.Day}";
         }
 
         public void DrawYearCalendar(System.DateTime passDate, Transform solarClock)

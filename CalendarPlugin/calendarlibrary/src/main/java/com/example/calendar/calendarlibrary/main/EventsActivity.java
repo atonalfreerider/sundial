@@ -77,9 +77,9 @@ public class EventsActivity
         for(int i = 0; i < this.mEvents.size(); i++){
             EventModel event = this.mEvents.get(i);
 
-            // these are unsafe long to int casts
-            ret[counter] = (int) event.getStartDate().getTime().getTime();
-            ret[counter + 1] = (int) event.getEndDate().getTime().getTime();
+            // these are unsafe long to int casts -> shorten them by 10000 and then re-inflate
+            ret[counter] = (int) (event.getStartDate().getTime().getTime()*.0001);
+            ret[counter + 1] = (int) (event.getEndDate().getTime().getTime()*.0001);
             counter += 2;
         }
         return ret;
