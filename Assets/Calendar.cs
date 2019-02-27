@@ -17,8 +17,8 @@ namespace Assets
 
         public MyEvent(
             string passTitle,
-            System.DateTime passStart, 
-            System.DateTime passEnd, 
+            System.DateTime passStart,
+            System.DateTime passEnd,
             Color passColor)
         {
             title = passTitle;
@@ -40,14 +40,17 @@ namespace Assets
 
         List<MyEvent> yearQueue;
         List<MyEvent> dayQueue;
+
         public static string[] daysofweek =
         {
             "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
         };
+
         public static readonly string[] daysofweekAbr =
         {
             "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
         };
+
         public static readonly string[] monthofYrAbr =
         {
             "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
@@ -56,31 +59,32 @@ namespace Assets
         float sunSprockOffset;
 
         // INIT Functions
-        
+
         static MyEvent[] RetrieveCalendarEvents()
         {
             DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
-            
-            MyEvent[] calendarEvents = {};
-            using (AndroidJavaClass javaClass = new AndroidJavaClass("com.example.calendar.calendarlibrary.main.EventsActivity"))
+
+            MyEvent[] calendarEvents = { };
+            using (AndroidJavaClass javaClass =
+                new AndroidJavaClass("com.example.calendar.calendarlibrary.main.EventsActivity"))
             {
                 using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("ctx"))
                 {
                     AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd");
-                    int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0 
-                        ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject()) 
+                    int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0
+                        ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject())
                         : new int[0];
                     obj.Dispose();
-                    
+
                     AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles");
-                    byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0 
-                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject()) 
+                    byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0
+                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject())
                         : new byte[0];
                     obj2.Dispose();
 
                     string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
                     string[] split = rectify.Split('|');
-                    
+
                     calendarEvents = new MyEvent[split.Length];
                     for (int i = 0; i < calendarEvents.Length; i++)
                     {
@@ -130,14 +134,14 @@ namespace Assets
                     return new Color(0f, 0f, 1f, .5f);
             }
         }
-        
+
         public void Init(float passYEAR, float passCR, float passER, float passSunSprockOffset)
         {
             YEAR = passYEAR;
             calR = passCR;
             earthR = passER;
             sunSprockOffset = passSunSprockOffset;
-            
+
             yearQueue = new List<MyEvent>();
             dayQueue = new List<MyEvent>();
 
@@ -158,7 +162,7 @@ namespace Assets
 */
 
             if (Application.platform != RuntimePlatform.Android) return;
-            
+
             MyEvent[] calendarEvents = RetrieveCalendarEvents();
             foreach (MyEvent calendarEvent in calendarEvents)
             {
@@ -193,7 +197,7 @@ namespace Assets
             {
                 if (ev.start.Year == passDate.Year)
                 {
-                    DrawEvent(ev, "year").transform.SetParent(yearCal.transform, false);
+                    DrawEvent(ev, true).transform.SetParent(yearCal.transform, false);
                 }
             }
 
@@ -214,7 +218,7 @@ namespace Assets
                     ev.start.Month == passDate.Month &&
                     ev.start.Day == passDate.Day)
                 {
-                    DrawEvent(ev, "day").transform.SetParent(dayCal.transform, false);
+                    DrawEvent(ev, false).transform.SetParent(dayCal.transform, false);
                 }
             }
 
@@ -232,47 +236,54 @@ namespace Assets
             return newDate;
         }
 
-        Circle DrawEvent(MyEvent passEv, string type)
+        Circle DrawEvent(MyEvent passEv, bool isYearEvent)
         {
             const float evH = 7;
             float R = 0;
             float prct = 0;
-            int one = -1;
-            if (type == "year")
+            string displayTitle;
+            TimeSpan span = new TimeSpan(passEv.end.Ticks - passEv.start.Ticks);
+            if (isYearEvent)
             {
                 R = calR - 1;
-                one = 1;
-                prct = (Orbits.GetEarthOrbitAngle(passEv.start, YEAR) - 
-                        Orbits.GetEarthOrbitAngle(passEv.end, YEAR)) / 
-                       YEAR;
-                prct += 1 / YEAR;
+                prct = (float) span.TotalDays / YEAR;
+
+                displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalDays, passEv.title.Length));
             }
             else
             {
                 R = earthR - 1;
-                prct = ((passEv.start.Hour - passEv.end.Hour) +
-                        (passEv.start.Minute - passEv.end.Minute) / 60f) / 24f;
+                prct = prct = (float) span.TotalHours / 24;
+                displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalHours * 4, passEv.title.Length));
             }
 
             Circle newRing = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
-            newRing.DrawRing(R, R - evH, one * prct, 0,0, false);
+            newRing.DrawRing(R, R - evH, prct, 0, 0, false);
             newRing.SetColor(passEv.color);
 
-            string displayTitle = passEv.title;
-            if (displayTitle.Length > 12)
-            {
-                displayTitle = displayTitle.Substring(0, 12);
-            }
             TextBox titleT = TextBox.Create(displayTitle, TextBox.FontType.MainFont, 50, TextAlignmentOptions.Center);
             titleT.transform.SetParent(newRing.transform, false);
-            titleT.transform.Translate(Vector3.forward * (R - 10));
-            titleT.transform.parent.Rotate(Vector3.up, one * (prct * .5f) * 360 + 180);
+
+            float halfAng = (prct * .5f);
+            titleT.transform.localPosition = new Vector3(
+                (R - 10) * Mathf.Sin(halfAng * 2 * Mathf.PI),
+                0,
+                (R - 10) * Mathf.Cos(halfAng * 2 * Mathf.PI));
+            titleT.transform.parent.Rotate(Vector3.up, (prct * .5f) * 360 + 180);
             titleT.transform.Rotate(Vector3.right * 90);
+            if (isYearEvent || (!isYearEvent && passEv.end.Hour < 6) || (!isYearEvent && passEv.end.Hour > 18))
+            {
+                titleT.transform.Rotate(Vector3.forward * (180 - 360 * halfAng));
+            }
+            else
+            {
+                titleT.transform.Rotate(Vector3.forward * (-360 * halfAng));
+            }
+
             titleT.Color = passEv.color;
-            //titleT.gameObject.SetActive(false);
 
             newRing.transform.rotation = Quaternion.AngleAxis(
-                type == "year"
+                isYearEvent
                     ? Orbits.GetEarthOrbitAngle(passEv.end, YEAR, sunSprockOffset)
                     : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
