@@ -71,8 +71,6 @@ namespace Assets.GraphicsUtil.Shapes
             dodecSphereCut.name = "dodecCut";
             dodecSphereCut.SetColor(shapeColor);
             dodecSphereCut.transform.SetParent(transform, false);
-
-            
         }
 
         public static Polygon NewPoly(Material passMat, bool wireFrame)
@@ -93,6 +91,46 @@ namespace Assets.GraphicsUtil.Shapes
             return newPoly;
         }
 
+        public static Polygon DrawTri(float h, float b, Color passColor)
+        {
+            Polygon newTri = new GameObject("TrianglePolygon").AddComponent<Polygon>();
+            AddMesh(newTri.gameObject, newTri, SolarClock.Instance.mainMat, false);
+            newTri.rend = newTri.GetComponent<Renderer>();
+            Vector3[] skinList = {
+                new Vector3(0, 0, h), 
+                new Vector3(b * .5f, 0, 0),
+                new Vector3(-b * .5f, 0, 0)
+            };
+
+            int[] indList = {0, 1, 2};
+            
+            newTri.Draw3DPoly(skinList, indList);
+            newTri.SetColor(passColor);
+            return newTri;
+        }
+        
+        public static GameObject DrawDottedLine(Vector3 pt0, Vector3 pt1, Color passColor, float passLW)
+        {
+            GameObject line;
+            line = new GameObject("Line");
+            float length = Vector3.Distance(pt0, pt1);
+            int totalDot = Mathf.FloorToInt(length * .15f);
+            Polygon dot;
+            for (int ii = 0; ii < totalDot; ii++)
+            {
+                dot = Object.Instantiate(NewCylinder.rootDot);
+                dot.transform.SetParent(line.transform, false);
+                dot.transform.localScale = Vector3.one * passLW;
+                float mag = -ii * length / totalDot;
+                if (pt1.x > 0)
+                    dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0, 0);
+                else
+                    dot.transform.localPosition = pt0 + new Vector3(0, 0, mag - .5f);
+            }
+
+            return line;
+        }
+        
         public static void AddMesh(GameObject polyGO, Polygon basePoly, Material passMat, bool wireFrame)
         {
             // add mesh;

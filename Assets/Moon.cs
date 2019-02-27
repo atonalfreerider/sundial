@@ -18,7 +18,7 @@ namespace Assets
         public GameObject moonSys;
         public GameObject moon;
         public GameObject moonSprockCont;
-        GameObject moonSprock;
+        Polygon moonSprock;
         public GameObject moonLabels;
         TextBox month1L;
         GameObject monthSplitCont;
@@ -41,10 +41,10 @@ namespace Assets
             //...........(0) Moon Hand
             GameObject moonHandCont = new GameObject("MoonHandCont");
             float moonH = moonR * .95f;
-            GameObject moonHand = Shapes.DrawTri(moonH, moonR * .1f, Color.white);
+            Polygon moonHand = PolygonFactory.DrawTri(moonH, moonR * .1f, Color.white);
             moonHand.transform.parent = moonHandCont.transform;
 
-            GameObject moonHand2 = Shapes.DrawTri(moonH * .85f, moonH * .05f, new Color(.5f, .5f, .5f));
+            Polygon moonHand2 = PolygonFactory.DrawTri(moonH * .85f, moonH * .05f, new Color(.5f, .5f, .5f));
             moonHand2.transform.Translate(Vector3.up * .2f);
             moonHand2.transform.parent = moonHandCont.transform;
             moonHandCont.transform.parent = moonSys.transform;
@@ -94,11 +94,13 @@ namespace Assets
 
             indList.RemoveRange(indList.Count - 42, 42);
 
-            moonSprock = Shapes.CreatePoly(pointList, indList, Color.white);
+            moonSprock = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
+            moonSprock.Draw3DPoly(pointList.ToArray(), indList.ToArray());
+            moonSprock.SetColor(Color.white);
             moonSprock.name = "MoonSprock";
             moonSprock.transform.parent = newMoonSprockCont.transform;
 
-            GameObject monthTick = Shapes.DrawTri(7, 1, Color.white);
+            Polygon monthTick = PolygonFactory.DrawTri(7, 1, Color.white);
             monthTick.transform.parent = moonSprock.transform;
             monthTick.transform.Translate(Vector3.forward * moonR);
 
@@ -244,7 +246,7 @@ namespace Assets
             monthSplitCont = new GameObject("month split contain");
             monthSplitCont.transform.SetParent(newDLabelWheel.transform, false);
 
-            GameObject monthTick = Shapes.DrawTri(7, 1, Color.white);
+            Polygon monthTick = PolygonFactory.DrawTri(7, 1, Color.white);
             monthTick.transform.SetParent(monthSplitCont.transform, false);
             monthTick.transform.Translate(Vector3.forward * moonR);
 

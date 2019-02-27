@@ -33,7 +33,8 @@ namespace Assets
         // persistent objects
         Earth earth;
         Orbits orbits;
-        GameObject sunSprockCont, sunSprock, mLabelWheel, sunLine;
+        GameObject sunSprockCont, sunLine, mLabelWheel;
+        Polygon sunSprock;
         TextBox summerText, springText;
         Calendar calendar;
         public PolygonFactory polygonFactory;
@@ -91,7 +92,6 @@ namespace Assets
         {
             Instance = this;
             QualitySettings.antiAliasing = 4;
-            Shapes.Init(mainShader);
             orthoSize = solOrthoSize;
             mainMat = new Material(mainShader);
             
@@ -193,7 +193,7 @@ namespace Assets
             // .......(0) SEASONS;
             GameObject seasonCross = new GameObject("SeasonCross");
             Color axisColor = new Color(1, 1, 1, .5f);
-            GameObject solsticeLine = Shapes.DrawDottedLine(
+            GameObject solsticeLine = PolygonFactory.DrawDottedLine(
                 new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR),
                 axisColor,
@@ -201,7 +201,7 @@ namespace Assets
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
 
-            GameObject equinoxLine = Shapes.DrawDottedLine(
+            GameObject equinoxLine = PolygonFactory.DrawDottedLine(
                 new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR),
                 axisColor, 
@@ -290,7 +290,7 @@ namespace Assets
             return newSunSprockCont;
         }
 
-        GameObject DrawSunSprock(float sundialR, System.DateTime passDate)
+        Polygon DrawSunSprock(float sundialR, System.DateTime passDate)
         {
             // ........(2) DAYS;
             int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -383,7 +383,11 @@ namespace Assets
             }
 
             indList.RemoveRange(indList.Count - 6, 6);
-            return Shapes.CreatePoly(pointList, indList, Color.white);
+            
+            Polygon newSunSprocket = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
+            newSunSprocket.Draw3DPoly(pointList.ToArray(), indList.ToArray());
+            newSunSprocket.SetColor(Color.white);
+            return newSunSprocket;
         }
         
         void CreateOrToggleCalendar()

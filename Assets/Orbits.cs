@@ -53,7 +53,7 @@ namespace Assets
             int count = 0;
             GameObject planet;
             Circle path;
-            GameObject planetTri;
+            Polygon planetTri;
             Color minorColor = new Color(1, 1, 1, .5f);
             float minorThick = .3f;
             foreach (PlanetData planetData in planetDatas)
@@ -79,7 +79,7 @@ namespace Assets
                         planetData.orbitMultiplier * earthOR * DoverR * velComp,
                         true);
                     path.SetColor(minorColor);
-                    planetTri = Shapes.DrawTri(
+                    planetTri = PolygonFactory.DrawTri(
                         planetData.orbitMultiplier * earthOR,
                         2,
                         planetData.planetHandColor);
@@ -95,7 +95,7 @@ namespace Assets
                         earthOR * DoverR * velComp,
                         true);
                     path.SetColor(new Color(1, 1, 1, 1));
-                    planetTri = Shapes.DrawTri(
+                    planetTri = PolygonFactory.DrawTri(
                         earthOR,
                         5,
                         planetData.planetHandColor);

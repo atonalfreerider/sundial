@@ -26,7 +26,7 @@ namespace Assets
         public TextBox day21;
         public TextBox day22;
         Circle strip;
-        GameObject earthSprock;
+        Polygon earthSprock;
 
         // INIT Functions
         public void NewEarthSystem(float passEarthR, System.DateTime passDate)
@@ -35,7 +35,7 @@ namespace Assets
             //...(0) Earth Line
             GameObject earthLineCont = new GameObject("EarthLineCont");
             float earthH = earthR * .99f;
-            GameObject earthLine = Shapes.DrawTri(
+            Polygon earthLine = PolygonFactory.DrawTri(
                 earthH, 
                 earthR * .05f,
                 new Color(1, 1, 1, .3f));
@@ -94,7 +94,9 @@ namespace Assets
 
             indList.RemoveRange(indList.Count - 6, 6);
 
-            earthSprock = Shapes.CreatePoly(pointList, indList, Color.white);
+            earthSprock = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
+            earthSprock.Draw3DPoly(pointList.ToArray(), indList.ToArray());
+            earthSprock.SetColor(Color.white);
             earthSprock.name = "EarthSprock";
             earthSprock.transform.SetParent(earthSprockCont.transform, false);
 
@@ -186,18 +188,21 @@ namespace Assets
 
             localWheelCont = new GameObject("LocalWheelCont");
 
-            GameObject hSprock = Shapes.CreatePoly(pointList2, indList2, Color.white);
+            Polygon hSprock = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
+            hSprock.Draw3DPoly(pointList2.ToArray(), indList2.ToArray());
+            hSprock.SetColor(Color.white);
+            
             hSprock.name = "HourSprocket";
             hSprock.transform.SetParent(localWheelCont.transform, false);
 
-            GameObject whiteTri = Shapes.DrawTri(bigH, 7f, Color.white);
+            Polygon whiteTri = PolygonFactory.DrawTri(bigH, 7f, Color.white);
             whiteTri.name = "WhiteTriangle";
             whiteTri.transform.Translate(Vector3.forward * (localR));
             whiteTri.transform.Rotate(Vector3.forward, 180f);
             //whiteTri.transform.Translate(Vector3.up * .2f)
             whiteTri.transform.SetParent(localWheelCont.transform, false);
 
-            GameObject redTri = Shapes.DrawTri(bigH * .7f, 3f, Color.red);
+            Polygon redTri = PolygonFactory.DrawTri(bigH * .7f, 3f, Color.red);
             redTri.name = "RedTriangle";
             redTri.transform.Translate(Vector3.forward * (localR));
             redTri.transform.Rotate(Vector3.forward, 180f);
