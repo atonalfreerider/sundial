@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Assets.GraphicsUtil.Shapes.Lines;
 using UnityEngine;
 
 namespace Assets.GraphicsUtil.Shapes
@@ -91,6 +92,24 @@ namespace Assets.GraphicsUtil.Shapes
             return newPoly;
         }
 
+        public static Line NewLinePoly(Material passMat, bool wireFrame)
+        {
+            Line newPoly = new GameObject("LinePolygon").AddComponent<Line>();
+            AddMesh(newPoly.gameObject, newPoly, passMat, wireFrame);
+            newPoly.rend = newPoly.gameObject.GetComponent<Renderer>();
+
+            return newPoly;
+        }
+        
+        public static Rectangle NewRectPoly(Material passMat, bool wireFrame)
+        {
+            Rectangle newPoly = new GameObject("RectPolygon").AddComponent<Rectangle>();
+            AddMesh(newPoly.gameObject, newPoly, passMat, wireFrame);
+            newPoly.rend = newPoly.gameObject.GetComponent<Renderer>();
+
+            return newPoly;
+        }
+        
         public static Polygon DrawTri(float h, float b, Color passColor)
         {
             Polygon newTri = new GameObject("TrianglePolygon").AddComponent<Polygon>();

@@ -305,8 +305,6 @@ namespace Assets.GraphicsUtil.Shapes
             rootDot.DrawCirc(.035f * .5f, 1, 0);
             rootDot.SetColor(shapeColor);
             rootDot.transform.SetParent(polygonFactory.transform, false);
-            
-
         }
     }
 }

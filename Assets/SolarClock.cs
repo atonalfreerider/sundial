@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
@@ -96,6 +97,8 @@ namespace Assets
             mainMat = new Material(mainShader);
             
             NewCylinder.Init(polygonFactory, mainMat);
+            NewCube.InitCube(polygonFactory, mainMat);
+            
 
             /*
             // time testing
