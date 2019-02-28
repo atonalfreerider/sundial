@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
+using Assets.UI.Elements;
 using Assets.UI.Raycasting;
 using Assets.UI.Text;
 using TMPro;
@@ -33,14 +34,15 @@ namespace Assets
         public Material EarthMM, MoonMat;
 
         // persistent objects
-        Earth earth;
+        public Earth earth;
         Orbits orbits;
         GameObject sunSprockCont, sunLine, mLabelWheel;
         BoxCollider boxCollider;
         Raycast raycast;
         Polygon sunSprock;
         TextBox summerText, springText;
-        Calendar calendar;
+        public Calendar calendar;
+        public CalendarMenu calendarMenu;
         public PolygonFactory polygonFactory;
         [HideInInspector] public Material mainMat;
 
@@ -163,7 +165,8 @@ namespace Assets
             earth.earthSys.gameObject.SetActive(false);
             dirLight.enabled = false;
             ptLight.intensity = ptInt;
-            
+
+            calendarMenu = Camera.main.GetComponent<CalendarMenu>();
             CreateOrToggleCalendar();
         }
         
@@ -406,14 +409,9 @@ namespace Assets
             {
                 calendar = new Calendar();
                 calendar.Init(YEAR, sysDia, sysDia * .4f, SunSprockOffset() + 360 / YEAR);
-                System.DateTime date2 = System.DateTime.Now;
-                calendar.DrawYearCalendar(date2, transform);
 
-                calendar.DrawDayCalendar(date2, earth.earthSys.transform);
                 calCreated = true;
             }
-
-            calendar.Toggle();
         }
 
         // TOGGLE Functions
@@ -441,8 +439,6 @@ namespace Assets
                 dirLight.enabled = true;
                 orthoSize = earthOrthoSize;
                 FlipMonthLabels(false);
-                if (calCreated)
-                    calendar.dayCal.SetActive(calendar.vis);
             }
             else
             {

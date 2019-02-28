@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Assets.GraphicsUtil;
+﻿using System.Threading.Tasks;
 using Assets.GraphicsUtil.Shapes;
 using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI.Text;
@@ -21,7 +19,7 @@ namespace Assets.UI.Elements
 
         public Vector3 HomePosition;
         public bool ToggleButton = false;
-        bool isToggled = false;
+        public bool isToggled = false;
         bool isLoadingBar = false;
 
         const float Pad = 0.02f;

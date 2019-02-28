@@ -66,6 +66,20 @@ namespace Assets.UI.Elements
             menuButtons.Clear();
         }
 
+        public void Show(bool show)
+        {
+            if (!show)
+            {
+                StopAllCoroutines();
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                gameObject.SetActive(true);
+                DoLayout();
+            }
+        }
+        
         void SetRadial(float animSec = 0)
         {
             int longest = menuButtons.Keys.Select(buttonName => buttonName.Length).Concat(new[] {0}).Max();
@@ -133,6 +147,7 @@ namespace Assets.UI.Elements
                     SetRadial(animSec);
                     break;
                 case Layout.List:
+                    if (!gameObject.activeInHierarchy) return;
                     StartCoroutine(SetList(animSec));
                     break;
                 default:

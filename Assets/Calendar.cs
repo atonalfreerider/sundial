@@ -11,21 +11,28 @@ namespace Assets
 {
     public struct MyEvent
     {
+        public readonly string parentCalendar;
         public readonly string title;
-        public System.DateTime start;
-        public System.DateTime end;
+        public DateTime start;
+        public DateTime end;
         public Color color;
+        public readonly bool isYearEvent;
 
         public MyEvent(
+            string parentCalendar,
             string passTitle,
-            System.DateTime passStart,
-            System.DateTime passEnd,
+            DateTime passStart,
+            DateTime passEnd,
             Color passColor)
         {
+            this.parentCalendar = parentCalendar;
             title = passTitle;
             start = passStart;
             end = passEnd;
             color = passColor;
+
+            long ticks = end.Ticks - start.Ticks;
+            isYearEvent = ticks >= TimeSpan.TicksPerDay;
         }
     }
 
@@ -39,8 +46,10 @@ namespace Assets
         GameObject yearCal;
         public bool vis = false;
 
-        List<MyEvent> yearQueue;
-        List<MyEvent> dayQueue;
+        List<string> displayedCalendars = new List<string>();
+        private Dictionary<string, MyEvent[]> calendarEvents;
+        List<MyEvent> yearQueue = new List<MyEvent>();
+        List<MyEvent> dayQueue = new List<MyEvent>();
 
         public static string[] daysofweek =
         {
@@ -60,9 +69,22 @@ namespace Assets
         float sunSprockOffset;
 
         // INIT Functions
+        public void Init(float passYEAR, float passCR, float passER, float passSunSprockOffset)
+        {
+            YEAR = passYEAR;
+            calR = passCR;
+            earthR = passER;
+            sunSprockOffset = passSunSprockOffset;
 
+            // TestCalendar();
 
-        static Dictionary<string, MyEvent[]> RetrieveCalendarEvents()
+            if (Application.platform != RuntimePlatform.Android) return;
+
+            calendarEvents = RetrieveAndroidCalendarEvents();
+            SolarClock.Instance.calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
+        }
+
+        static Dictionary<string, MyEvent[]> RetrieveAndroidCalendarEvents()
         {
             Dictionary<string, MyEvent[]> calendarsAndEvents = new Dictionary<string, MyEvent[]>();
             DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
@@ -118,6 +140,7 @@ namespace Assets
 
                             //int TimeZone = Earth.GetTimeZone();
                             calendarEvents[i] = new MyEvent(
+                                calName,
                                 title,
                                 startDate,
                                 endDate,
@@ -133,6 +156,54 @@ namespace Assets
             }
 
             return calendarsAndEvents;
+        }
+
+        #region DRAW
+
+        void FilterIntoYearAndDayCalendars()
+        {
+            yearQueue.Clear();
+            dayQueue.Clear();
+
+            foreach (KeyValuePair<string, MyEvent[]> kvp in calendarEvents)
+            {
+                if (!displayedCalendars.Contains(kvp.Key)) continue;
+
+                foreach (MyEvent calendarEvent in kvp.Value)
+                {
+                    //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
+
+                    if (calendarEvent.isYearEvent)
+                    {
+                        yearQueue.Add(calendarEvent);
+                    }
+                    else
+                    {
+                        dayQueue.Add(calendarEvent);
+                    }
+                }
+            }
+
+            DateTime date2 = DateTime.Now;
+            DrawYearCalendar(date2, SolarClock.Instance.transform);
+            DrawDayCalendar(date2, SolarClock.Instance.earth.earthSys.transform);
+            Toggle(true);
+        }
+      
+        public void AddDisplayedCalendar(string calToDisplay)
+        {
+            displayedCalendars.Add(calToDisplay);
+            FilterIntoYearAndDayCalendars();
+        }
+
+        public void RemoveDisplayedCalendar(string calToRemove)
+        {
+            if (displayedCalendars.Contains(calToRemove))
+            {
+                displayedCalendars.Remove(calToRemove);
+            }
+
+            FilterIntoYearAndDayCalendars();
         }
 
         static Color GetEventColor(string title)
@@ -157,62 +228,8 @@ namespace Assets
                     return new Color(0f, 0f, 1f, .5f);
             }
         }
-
-        public void Init(float passYEAR, float passCR, float passER, float passSunSprockOffset)
-        {
-            YEAR = passYEAR;
-            calR = passCR;
-            earthR = passER;
-            sunSprockOffset = passSunSprockOffset;
-
-            yearQueue = new List<MyEvent>();
-            dayQueue = new List<MyEvent>();
-
-            /*
-            System.DateTime now = System.DateTime.Now;
-            yearQueue.Add(new MyEvent(
-                "TEST",
-                CreateDate(now.Year, 1, 1, 0, 0),
-                CreateDate(now.Year, 2, 1, 0, 0),
-                Color.red));
-
-            dayQueue.Add(
-                new MyEvent(
-                    "TEST",
-                    CreateDate(now.Year, now.Month, now.Day, 1, 0),
-                    CreateDate(now.Year, now.Month, now.Day, 5, 0),
-                    Color.red));
-*/
-
-            if (Application.platform != RuntimePlatform.Android) return;
-
-            Dictionary<string, MyEvent[]> calendarEvents = RetrieveCalendarEvents();
-            foreach (KeyValuePair<string, MyEvent[]> kvp in calendarEvents)
-            {
-                if (!kvp.Key.Contains("johnbvoorhees@gmail.com")) continue;
-                foreach (MyEvent calendarEvent in kvp.Value)
-                {
-                    long ticks = calendarEvent.end.Ticks - calendarEvent.start.Ticks;
-                    //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
-
-                    if (ticks >= TimeSpan.TicksPerDay)
-                    {
-                        yearQueue.Add(calendarEvent);
-                    }
-                    else
-                    {
-                        dayQueue.Add(calendarEvent);
-                    }
-                }
-            }
-        }
-
-        string prettyDate(DateTime dateTime)
-        {
-            return $"{dateTime.Year}/{dateTime.Month}/{dateTime.Day}";
-        }
-
-        public void DrawYearCalendar(System.DateTime passDate, Transform solarClock)
+        
+        public void DrawYearCalendar(DateTime passDate, Transform solarClock)
         {
             if (yearCal)
             {
@@ -224,14 +241,17 @@ namespace Assets
             {
                 if (ev.start.Year == passDate.Year)
                 {
-                    DrawEvent(ev, true).transform.SetParent(yearCal.transform, false);
+                    DrawEvent(
+                        ev,
+                        true,
+                        displayedCalendars.IndexOf(ev.parentCalendar)).transform.SetParent(yearCal.transform, false);
                 }
             }
 
             yearCal.transform.SetParent(solarClock, false);
         }
 
-        public void DrawDayCalendar(System.DateTime passDate, Transform solarClock)
+        public void DrawDayCalendar(DateTime passDate, Transform solarClock)
         {
             if (dayCal)
             {
@@ -245,25 +265,17 @@ namespace Assets
                     ev.start.Month == passDate.Month &&
                     ev.start.Day == passDate.Day)
                 {
-                    DrawEvent(ev, false).transform.SetParent(dayCal.transform, false);
+                    DrawEvent(
+                        ev,
+                        false,
+                        displayedCalendars.IndexOf(ev.parentCalendar)).transform.SetParent(dayCal.transform, false);
                 }
             }
 
             dayCal.transform.SetParent(solarClock, false);
         }
 
-        static System.DateTime CreateDate(int yr, int month, int day, int hour, int min)
-        {
-            System.DateTime newDate = new System.DateTime();
-            newDate = newDate.AddYears(yr - 1);
-            newDate = newDate.AddMonths(month - 1);
-            newDate = newDate.AddDays(day - 1);
-            newDate = newDate.AddHours(hour);
-            newDate = newDate.AddMinutes(min);
-            return newDate;
-        }
-
-        Circle DrawEvent(MyEvent passEv, bool isYearEvent)
+        Circle DrawEvent(MyEvent passEv, bool isYearEvent, int index)
         {
             const float evH = 7;
             float R = 0;
@@ -272,15 +284,14 @@ namespace Assets
             TimeSpan span = new TimeSpan(passEv.end.Ticks - passEv.start.Ticks);
             if (isYearEvent)
             {
-                R = calR - 1;
+                R = calR - 1 - index * evH;
                 prct = (float) span.TotalDays / YEAR;
-
                 displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalDays, passEv.title.Length));
             }
             else
             {
-                R = earthR - 1;
-                prct = prct = (float) span.TotalHours / 24;
+                R = earthR - 1 - index * evH;
+                prct = (float) span.TotalHours / 24;
                 displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalHours * 4, passEv.title.Length));
             }
 
@@ -318,14 +329,16 @@ namespace Assets
             return newRing;
         }
 
-        public void Toggle()
+        void Toggle(bool toShow)
         {
-            vis = !vis;
-            yearCal.SetActive(vis);
-            dayCal.SetActive(vis);
+            yearCal.SetActive(toShow);
+            dayCal.SetActive(toShow);
         }
 
-        // REFERENCE Functions;
+        #endregion
+
+        #region REFERENCE
+        
         public static int ConvertMonth(int passMonth)
         {
             return passMonth > 11 ? 0 : passMonth;
@@ -408,6 +421,67 @@ namespace Assets
                 default:
                     return 0;
             }
+        }
+
+        static DateTime CreateDate(int yr, int month, int day, int hour, int min)
+        {
+            DateTime newDate = new DateTime();
+            newDate = newDate.AddYears(yr - 1);
+            newDate = newDate.AddMonths(month - 1);
+            newDate = newDate.AddDays(day - 1);
+            newDate = newDate.AddHours(hour);
+            newDate = newDate.AddMinutes(min);
+            return newDate;
+        }
+        
+        string prettyDate(DateTime dateTime)
+        {
+            return $"{dateTime.Year}/{dateTime.Month}/{dateTime.Day}";
+        }
+
+        #endregion
+        
+        void TestCalendar()
+        {
+            calendarEvents = new Dictionary<string, MyEvent[]>();
+            DateTime now = DateTime.Now;
+            string testCal = "1:testCal";
+            MyEvent testYearEvent = new MyEvent(
+                testCal,
+                "TEST",
+                CreateDate(now.Year, 1, 1, 0, 0),
+                CreateDate(now.Year, 2, 1, 0, 0),
+                Color.red);
+
+            MyEvent testDayEvent =
+                new MyEvent(
+                    testCal,
+                    "TEST",
+                    CreateDate(now.Year, now.Month, now.Day, 1, 0),
+                    CreateDate(now.Year, now.Month, now.Day, 5, 0),
+                    Color.red);
+
+            calendarEvents.Add(testCal, new[] {testYearEvent, testDayEvent});
+
+            string testCal2 = "2:testCal";
+            MyEvent testYearEvent2 = new MyEvent(
+                testCal2,
+                "TEST",
+                CreateDate(now.Year, 1, 1, 0, 0),
+                CreateDate(now.Year, 2, 1, 0, 0),
+                Color.green);
+
+            MyEvent testDayEvent2 =
+                new MyEvent(
+                    testCal2,
+                    "TEST",
+                    CreateDate(now.Year, now.Month, now.Day, 1, 0),
+                    CreateDate(now.Year, now.Month, now.Day, 5, 0),
+                    Color.green);
+
+            calendarEvents.Add(testCal2, new[] {testYearEvent2, testDayEvent2});
+
+            SolarClock.Instance.calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
         }
     }
 }
