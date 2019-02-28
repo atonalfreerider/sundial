@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI.Text;
 using TMPro;
@@ -60,56 +61,78 @@ namespace Assets
 
         // INIT Functions
 
-        static MyEvent[] RetrieveCalendarEvents()
+
+        static Dictionary<string, MyEvent[]> RetrieveCalendarEvents()
         {
+            Dictionary<string, MyEvent[]> calendarsAndEvents = new Dictionary<string, MyEvent[]>();
             DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
 
-            MyEvent[] calendarEvents = { };
             using (AndroidJavaClass javaClass =
-                new AndroidJavaClass("com.example.calendar.calendarlibrary.main.EventsActivity"))
+                new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {
-                using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("ctx"))
+                using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("currentActivity"))
                 {
-                    AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd");
-                    int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0
-                        ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject())
-                        : new int[0];
-                    obj.Dispose();
-
-                    AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles");
-                    byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0
-                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject())
+                    AndroidJavaObject calObj = activity.Call<AndroidJavaObject>("getAllCalendarNames");
+                    byte[] calendarNamesBytes = calObj.GetRawObject().ToInt32() != 0
+                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(calObj.GetRawObject())
                         : new byte[0];
-                    obj2.Dispose();
+                    calObj.Dispose();
 
-                    string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
-                    string[] split = rectify.Split('|');
-
-                    calendarEvents = new MyEvent[split.Length];
-                    for (int i = 0; i < calendarEvents.Length; i++)
+                    string rectifyCalNames = System.Text.Encoding.Default.GetString(calendarNamesBytes);
+                    string[] calNames = rectifyCalNames.Split('|');
+                    int count = 0;
+                    foreach (string calName in calNames)
                     {
-                        string title = split[i];
-                        if (i * 2 > eventsStartEnd.Length - 2) break;
+                        //Debug.Log(calName);
+                        string[] pair = calName.Split(':');
 
-                        // note: I added a "d" for double below by accident and it worked - what are the chances?
-                        int start = eventsStartEnd[i * 2];
-                        DateTime startDate = Jan1Of1970.AddMilliseconds(start * 10000d);
-                        int end = eventsStartEnd[i * 2 + 1];
-                        DateTime endDate = Jan1Of1970.AddMilliseconds(end * 10000d);
+                        bool parsed = int.TryParse(pair[0], out int index);
+                        if (!parsed) continue;
 
-                        //int TimeZone = Earth.GetTimeZone();
+                        AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd", index);
+                        int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0
+                            ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject())
+                            : new int[0];
+                        obj.Dispose();
 
-                        calendarEvents[i] = new MyEvent(
-                            title,
-                            startDate,
-                            endDate,
-                            GetEventColor(title)
-                        );
+                        AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles", index);
+                        byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0
+                            ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject())
+                            : new byte[0];
+                        obj2.Dispose();
+
+                        string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
+                        string[] split = rectify.Split('|');
+
+                        MyEvent[] calendarEvents = new MyEvent[split.Length];
+                        for (int i = 0; i < calendarEvents.Length; i++)
+                        {
+                            string title = split[i];
+                            if (i * 2 > eventsStartEnd.Length - 2) break;
+
+                            // note: I added a "d" for double below by accident and it worked - what are the chances?
+                            int start = eventsStartEnd[i * 2];
+                            DateTime startDate = Jan1Of1970.AddMilliseconds(start * 10000d);
+                            int end = eventsStartEnd[i * 2 + 1];
+                            DateTime endDate = Jan1Of1970.AddMilliseconds(end * 10000d);
+
+                            //int TimeZone = Earth.GetTimeZone();
+                            calendarEvents[i] = new MyEvent(
+                                title,
+                                startDate,
+                                endDate,
+                                GetEventColor(title)
+                            );
+                        }
+
+                        calendarsAndEvents.Add(calName, calendarEvents);
+
+                        count++;
                     }
                 }
             }
 
-            return calendarEvents;
+            return calendarsAndEvents;
         }
 
         static Color GetEventColor(string title)
@@ -163,19 +186,23 @@ namespace Assets
 
             if (Application.platform != RuntimePlatform.Android) return;
 
-            MyEvent[] calendarEvents = RetrieveCalendarEvents();
-            foreach (MyEvent calendarEvent in calendarEvents)
+            Dictionary<string, MyEvent[]> calendarEvents = RetrieveCalendarEvents();
+            foreach (KeyValuePair<string, MyEvent[]> kvp in calendarEvents)
             {
-                long ticks = calendarEvent.end.Ticks - calendarEvent.start.Ticks;
-                //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
+                if (!kvp.Key.Contains("johnbvoorhees@gmail.com")) continue;
+                foreach (MyEvent calendarEvent in kvp.Value)
+                {
+                    long ticks = calendarEvent.end.Ticks - calendarEvent.start.Ticks;
+                    //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
 
-                if (ticks >= TimeSpan.TicksPerDay)
-                {
-                    yearQueue.Add(calendarEvent);
-                }
-                else
-                {
-                    dayQueue.Add(calendarEvent);
+                    if (ticks >= TimeSpan.TicksPerDay)
+                    {
+                        yearQueue.Add(calendarEvent);
+                    }
+                    else
+                    {
+                        dayQueue.Add(calendarEvent);
+                    }
                 }
             }
         }
