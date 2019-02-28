@@ -80,11 +80,15 @@ public class EventsActivity
         String eventString = "";
         List<EventModel> events = this.allCalendarsAndEvents.get(index);
         if(events == null) return new byte[0];
+        CharSequence pipe = "|";
         for (int i = 0; i < events.size(); i++) {
             EventModel event = events.get(i);
             if (event.getTitle() == null || event.getTitle() == "") {
                 eventString += "0|";
-            } else {
+            } else if (event.getTitle().contains(pipe)) {
+                eventString += event.getTitle().replace('|', '!') + "|";
+            }
+            else {
                 eventString += event.getTitle() + "|";
             }
         }
