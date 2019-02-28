@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Assets.GraphicsUtil.Shapes;
+using Assets.UI;
+using Assets.UI.Raycasting;
 using Assets.UI.Text;
 using TMPro;
 
 namespace Assets
 {
-    public class SolarClock : MonoBehaviour
+    public class SolarClock : MonoBehaviour, ISelectable
     {
-        enum ViewState
+        public enum ViewState
         {
             Galactic,
             HelioCentric,
@@ -35,6 +36,8 @@ namespace Assets
         Earth earth;
         Orbits orbits;
         GameObject sunSprockCont, sunLine, mLabelWheel;
+        BoxCollider boxCollider;
+        Raycast raycast;
         Polygon sunSprock;
         TextBox summerText, springText;
         Calendar calendar;
@@ -94,11 +97,15 @@ namespace Assets
             Instance = this;
             QualitySettings.antiAliasing = 4;
             orthoSize = solOrthoSize;
+            boxCollider = gameObject.AddComponent<BoxCollider>();
+            boxCollider.size = new Vector3(300,1,300);
+            
             mainMat = new Material(mainShader);
             
             NewCylinder.Init(polygonFactory, mainMat);
             NewCube.InitCube(polygonFactory, mainMat);
-            
+
+            raycast = gameObject.AddComponent<Raycast>();
 
             /*
             // time testing
@@ -410,8 +417,9 @@ namespace Assets
         }
 
         // TOGGLE Functions
-        void Toggle()
+        public void Toggle(ViewState newState)
         {
+            viewState = newState;
             orbitScale = new Vector3(1, orbits.flatScale, 1);
             sunSprockCont.SetActive(true);
             earth.gameObject.SetActive(true);
@@ -420,10 +428,11 @@ namespace Assets
 
             sunLine.SetActive(false);
 
-            if (viewState == ViewState.HelioCentric)
+            if (viewState == ViewState.GeoCentric)
             {
-                // zoom to Earth;
-                viewState = ViewState.GeoCentric;
+                // zoom to Earth
+                boxCollider.enabled = false;
+                earth.sphereCollider.enabled = true;
                 GetEarthCam();
                 orbits.gameObject.SetActive(false);
                 earth.earthSys.gameObject.SetActive(true);
@@ -437,10 +446,10 @@ namespace Assets
             }
             else
             {
-                // zoom to Solar;
-                viewState = ViewState.HelioCentric;
+                // zoom to Solar
                 //420f;
                 // 270;
+                boxCollider.enabled = true;
                 targetPos = new Vector3(0, solCamY, 0);
                 targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
                 orbits.gameObject.SetActive(true);
@@ -709,12 +718,13 @@ namespace Assets
                 digiClock.SetTime(travelDateLocal);
             }
         }
-
+        
         void Update()
         {
             if (Input.GetMouseButtonDown(0))
             {
-                Toggle();
+                RaycastTarget target = raycast.TargetAfterCasting();
+                target?.AsSelectable.RequestSelection();
             }
 
             if (Input.GetKeyDown(KeyCode.I))
@@ -828,6 +838,27 @@ namespace Assets
             {
                 SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
             }
+        }
+
+        public Transform SelectionTarget => transform;
+        public void Highlight()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Unhighlight()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RequestSelection()
+        {
+            Toggle(ViewState.GeoCentric);
+        }
+
+        public void RequestDeselection()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

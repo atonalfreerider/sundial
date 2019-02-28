@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
+using Assets.UI;
 using Assets.UI.Text;
 using TMPro;
-using UnityEngine.UI;
 
 namespace Assets
 {
-    public class Earth : MonoBehaviour
+    public class Earth : MonoBehaviour, ISelectable
     {
         // calibration vars
         const float earthSidereal = 23.9344696f;
@@ -27,6 +27,7 @@ namespace Assets
         public TextBox day22;
         Circle strip;
         Polygon earthSprock;
+        public SphereCollider sphereCollider;
 
         // INIT Functions
         public void NewEarthSystem(float passEarthR, System.DateTime passDate)
@@ -213,6 +214,8 @@ namespace Assets
 
             // ........(3) Earth Sphere
             earthSph = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphereCollider = earthSph.GetComponent<SphereCollider>();
+            sphereCollider.enabled = false;
             earthSph.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
             earthSph.name = "Earth";
@@ -296,6 +299,28 @@ namespace Assets
                 .TotalMilliseconds;
             return -(time / 1000f / 60f / 60f / earthSynodic -
                      Mathf.Floor(time / 1000f / 60f / 60f / earthSynodic)) * 360 - 180 - 26;
+        }
+
+        public Transform SelectionTarget => transform;
+        public void Highlight()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Unhighlight()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RequestSelection()
+        {
+            SolarClock.Instance.Toggle(SolarClock.ViewState.HelioCentric);
+            sphereCollider.enabled = false;
+        }
+
+        public void RequestDeselection()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
