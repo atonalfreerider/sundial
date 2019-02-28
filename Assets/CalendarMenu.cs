@@ -13,6 +13,7 @@ namespace UnityEngine
         void Start()
         {
             showHideButton = Button.Create("Calendars", TextBox.FontType.MainFont, 100, TextAlignmentOptions.Left);
+            showHideButton.Pad = 20;
             showHideButton.transform.SetParent(transform, false);
             showHideButton.transform.localPosition = new Vector3(
                 30,

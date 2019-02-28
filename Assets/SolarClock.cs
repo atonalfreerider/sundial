@@ -43,6 +43,9 @@ namespace Assets
         TextBox summerText, springText;
         public Calendar calendar;
         public CalendarMenu calendarMenu;
+        Button forwardArrow;
+        Button backwardArrow;
+        Button nowButton;
         public PolygonFactory polygonFactory;
         [HideInInspector] public Material mainMat;
 
@@ -108,6 +111,34 @@ namespace Assets
             NewCube.InitCube(polygonFactory, mainMat);
 
             raycast = gameObject.AddComponent<Raycast>();
+            
+            forwardArrow = Button.Create(">", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
+            forwardArrow.Pad = 20;
+            forwardArrow.transform.SetParent(Camera.main.transform, false);
+            forwardArrow.transform.localPosition = new Vector3(
+                70,
+                -270,
+                100);
+            forwardArrow.SelectionAction = AccelerateTime;
+            
+            backwardArrow = Button.Create("<", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
+            backwardArrow.Pad = 20;
+            backwardArrow.transform.SetParent(Camera.main.transform, false);
+            backwardArrow.transform.localPosition = new Vector3(
+                -70,
+                -270,
+                100);
+            backwardArrow.SelectionAction = ReverseTime;
+
+            nowButton = Button.Create("0", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
+            nowButton.Pad = 20;
+            nowButton.transform.SetParent(Camera.main.transform, false);
+            nowButton.transform.localPosition = new Vector3(
+                0,
+                -270,
+                100);
+            nowButton.SelectionAction = NowTime;
+
 
             /*
             // time testing
@@ -756,27 +787,17 @@ namespace Assets
             // switch between realtime and speed time;
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                showNow = false;
-                spinInc += 3;
-                if (spinInc > 0)
-                    forward = true;
+                AccelerateTime();
             }
 
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                showNow = false;
-                spinInc -= 3;
-                if (spinInc < 0)
-                    forward = false;
+                ReverseTime();
             }
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                spinInc = 0;
-                SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
-                showNow = true;
-                spinInc = 0;
-                forward = true;
+                NowTime();
             }
 
             if (Input.GetKeyDown(KeyCode.C))
@@ -836,6 +857,31 @@ namespace Assets
             }
         }
 
+        void AccelerateTime()
+        {
+            showNow = false;
+            spinInc += 3;
+            if (spinInc > 0)
+                forward = true;
+        }
+        
+        void ReverseTime()
+        {
+            showNow = false;
+            spinInc -= 3;
+            if (spinInc < 0)
+                forward = false;
+        }
+
+        void NowTime()
+        {
+            spinInc = 0;
+            SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
+            showNow = true;
+            spinInc = 0;
+            forward = true;
+        }
+        
         public Transform SelectionTarget => transform;
         public void Highlight()
         {

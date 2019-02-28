@@ -22,7 +22,7 @@ namespace Assets.UI.Elements
         public bool isToggled = false;
         bool isLoadingBar = false;
 
-        const float Pad = 0.02f;
+        public float Pad = 0;
         Color normalColor = new Color(0, 0, 0, 0.02f);
         public Vector2 Size = Vector2.zero;
 
@@ -111,7 +111,7 @@ namespace Assets.UI.Elements
                 buttonBack.transform.localPosition = center;
             }
 
-            boxCollider.size = new Vector3(Size.x, Size.y, 0.05f);
+            boxCollider.size = new Vector3(Size.x + Pad, Size.y + Pad, 10);
             boxCollider.center = center;
 
             Vector3[] frame =
