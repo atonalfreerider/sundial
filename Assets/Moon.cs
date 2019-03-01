@@ -2,12 +2,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
+using Assets.UI;
 using Assets.UI.Text;
 using TMPro;
 
 namespace Assets
 {
-    public class Moon : MonoBehaviour
+    public class Moon : MonoBehaviour, ISelectable
     {
         // calibration vars
         public System.DateTime offsetDate;
@@ -52,7 +53,7 @@ namespace Assets
 
             //.........................(0) Moon
             moon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //  moon = GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().LowPolySphere
+            moon.GetComponent<SphereCollider>().radius = 2;
             moon.name = "Moon";
             moon.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().MoonMat;
@@ -271,6 +272,27 @@ namespace Assets
             month2L.transform.Rotate(Vector3.up, 5f);
 
             return newDLabelWheel;
+        }
+
+        public Transform SelectionTarget { get; }
+        public void Highlight()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Unhighlight()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RequestSelection()
+        {
+            SolarClock.Instance.solarTime.isMoonTracking = true;
+        }
+
+        public void RequestDeselection()
+        {
+            throw new NotImplementedException();
         }
     }
 }

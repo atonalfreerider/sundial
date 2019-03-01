@@ -141,7 +141,8 @@ namespace Assets
             TimeSpan timeSpan = new TimeSpan(ticksFrom_2019_01_01);
             float periodInSeconds = passPeriodInDays * 24 * 60 * 60;
             // convert to degrees
-            return -((float) timeSpan.TotalSeconds / periodInSeconds) * 360 + passOffset;
+            float woundAngle = -((float) timeSpan.TotalSeconds / periodInSeconds) * 360 + passOffset;
+            return UnwindAngle(woundAngle);
         }
         
         public static float UnwindAngle(float angle)

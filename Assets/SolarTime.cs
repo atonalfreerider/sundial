@@ -13,7 +13,8 @@ namespace DefaultNamespace
 
         Coroutine minuteUpdate;
         Coroutine secondUpdate;
-        public bool isTracking = false;
+        public bool isEarthTracking = false;
+        public bool isMoonTracking = false;
 
         bool showNow = true;
 
@@ -29,25 +30,29 @@ namespace DefaultNamespace
         {
             float startingAngDifference = AngularDifference(test, targetAngle);
 
-            if (startingAngDifference > 5 && startingAngDifference < 270 ||
-                startingAngDifference <= -270)
+            const float minDistance = 5;
+            const float wraparoundDistance = 350;
+            
+            if (startingAngDifference > minDistance && startingAngDifference < wraparoundDistance ||
+                startingAngDifference <= -wraparoundDistance)
             {
-                // either the target is positively ahead on the RHS or has just crossed to the LHS from the bottom
-                while (AngularDifference(test, targetAngle) > 5 ||
-                       AngularDifference(test, targetAngle) <= -270)
+                // either the target is positively ahead or has just crossed going right to left on the bottom
+                while (AngularDifference(test, targetAngle) > minDistance ||
+                       AngularDifference(test, targetAngle) <= -wraparoundDistance)
                 {
-                    // reverse time
-                    test = test.AddHours(-12);
+                    // reverse time for earth or moon
+                    test = test.AddHours(isEarthTracking ? -12 : -1);
                 }
             }
-            else if (startingAngDifference < -5 && startingAngDifference > -270 ||
-                     startingAngDifference >= 270)
+            else if (startingAngDifference < -minDistance && startingAngDifference > -wraparoundDistance ||
+                     startingAngDifference >= wraparoundDistance)
             {
-                // either the target is negatively behind on the RHS
-                while (AngularDifference(test, targetAngle) < -5 ||
-                       AngularDifference(test, targetAngle) >= 270)
+                // either the target is negatively behind or has just crossed going left to right on the bottom
+                while (AngularDifference(test, targetAngle) < -minDistance ||
+                       AngularDifference(test, targetAngle) >= wraparoundDistance)
                 {
-                    test = test.AddHours(12);
+                    // advance time for earth or moon
+                    test = test.AddHours(isEarthTracking ? 12 : 1);
                 }
             }
 
@@ -57,9 +62,11 @@ namespace DefaultNamespace
             return test;
         }
 
-        static float AngularDifference(DateTime test, float targetAngle)
+        float AngularDifference(DateTime test, float targetAngle)
         {
-            return targetAngle - Orbits.GetEarthOrbitAngle(test);
+            return isEarthTracking
+                ? targetAngle - Orbits.GetEarthOrbitAngle(test)
+                : targetAngle - Orbits.GetNonEarthOrbitAngle(test, Moon.lunarSidereal, 60) + Orbits.GetEarthOrbitAngle(test) - 180;
         }
 
         // UPDATE Functions
@@ -67,10 +74,11 @@ namespace DefaultNamespace
         {
             if (Input.GetMouseButtonUp(0))
             {
-                isTracking = false;
+                isEarthTracking = false;
+                isMoonTracking = false;
             }
 
-            if (Input.GetMouseButton(0) && isTracking)
+            if (Input.GetMouseButton(0) && (isEarthTracking || isMoonTracking))
             {
                 showNow = false;
                 Vector2 mouseAroundCenter = new Vector2(
