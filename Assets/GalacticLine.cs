@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets
 {
-    public static class Items
+    public static class GalacticLine
     {
         public static GameObject YearLine(string year, float earthLineL)
         {

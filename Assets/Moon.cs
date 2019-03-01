@@ -112,7 +112,7 @@ namespace Assets
             return newMoonSprockCont;
         }
 
-        public void MoveMoonSprockCont(System.DateTime passDate, bool dayChange, bool monthChange, bool forward)
+        public void MoveMoonSprockCont(System.DateTime passDate, bool dayChange, bool monthChange)
         {
             moonSprockCont.transform.rotation = Quaternion.AngleAxis(
                 moonSys.transform.rotation.eulerAngles.y + passDate.Hour * 360 / (24 * lunarSynodic),
@@ -124,7 +124,7 @@ namespace Assets
                 int day;
                 foreach (TextBox dL in dayList)
                 {
-                    if (forward)
+                    if (true)
                     {
                         // time is moving forward
                         day = dL.SpecialInt + 1;

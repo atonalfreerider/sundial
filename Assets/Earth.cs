@@ -327,7 +327,7 @@ namespace Assets
             }
             else
             {
-                SolarClock.Instance.isTracking = true;
+                SolarClock.Instance.solarTime.isTracking = true;
             }
         }
 
