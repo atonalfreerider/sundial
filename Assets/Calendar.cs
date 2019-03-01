@@ -66,17 +66,14 @@ namespace Assets
             "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
         };
 
-        float sunSprockOffset;
-
         // INIT Functions
-        public void Init(float passYEAR, float passCR, float passER, float passSunSprockOffset)
+        public void Init(float passYEAR, float passCR, float passER)
         {
             YEAR = passYEAR;
             calR = passCR;
             earthR = passER;
-            sunSprockOffset = passSunSprockOffset;
-
-            // TestCalendar();
+  
+            //TestCalendar();
 
             if (Application.platform != RuntimePlatform.Android) return;
 
@@ -322,7 +319,7 @@ namespace Assets
 
             newRing.transform.rotation = Quaternion.AngleAxis(
                 isYearEvent
-                    ? Orbits.GetEarthOrbitAngle(passEv.end, YEAR, sunSprockOffset)
+                    ? Orbits.GetEarthOrbitAngle(passEv.end) + 360 / YEAR
                     : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
 

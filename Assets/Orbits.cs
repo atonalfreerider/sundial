@@ -113,10 +113,7 @@ namespace Assets
             }
         }
 
-        public static float GetEarthOrbitAngle(
-            DateTime passDate, 
-            float passPeriodInDays, 
-            float passOffset = 0)
+        public static float GetEarthOrbitAngle(DateTime passDate)
         {
             // Earth's orbit is always fixed to the amount of days into the year divided by a year
             long ticksIntoCurrentYear = passDate.Ticks -
@@ -126,7 +123,8 @@ namespace Assets
             TimeSpan timeSpan = new TimeSpan(ticksIntoCurrentYear);
 
             // convert to degrees
-            return -((float)timeSpan.TotalDays / passPeriodInDays) * 360 + passOffset;
+            float woundAngle = -((float) timeSpan.TotalDays / SolarClock.YEAR) * 360 + SolarClock.SunSprockOffset();
+            return UnwindAngle(woundAngle);
         }
 
         public static float GetNonEarthOrbitAngle(
@@ -144,6 +142,20 @@ namespace Assets
             float periodInSeconds = passPeriodInDays * 24 * 60 * 60;
             // convert to degrees
             return -((float) timeSpan.TotalSeconds / periodInSeconds) * 360 + passOffset;
+        }
+        
+        public static float UnwindAngle(float angle)
+        {
+            while (angle > 180)
+            {
+                angle -= 360;
+            }
+
+            while (angle < -180)
+            {
+                angle += 360;
+            }
+            return angle;
         }
 
         struct PlanetData

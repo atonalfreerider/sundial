@@ -27,14 +27,21 @@ namespace Assets
         public TextBox day22;
         Circle strip;
         Polygon earthSprock;
-        public SphereCollider sphereCollider;
-
+        public SphereCollider earthSphereCollider;
+        SphereCollider handSphereCollider;
+        
         // INIT Functions
         public void NewEarthSystem(float passEarthR, System.DateTime passDate)
         {
             earthR = passEarthR;
             //...(0) Earth Line
             GameObject earthLineCont = new GameObject("EarthLineCont");
+            earthLineCont.transform.SetParent(transform, false);
+
+            handSphereCollider = gameObject.AddComponent<SphereCollider>();
+            handSphereCollider.radius = 30;
+            handSphereCollider.center = new Vector3(0, 0, earthR);
+
             float earthH = earthR * .99f;
             Polygon earthLine = PolygonFactory.DrawTri(
                 earthH, 
@@ -42,10 +49,7 @@ namespace Assets
                 new Color(1, 1, 1, .3f));
             earthLine.name = "EarthLine";
             earthLine.transform.SetParent(earthLineCont.transform, false);
-            //GameObject earthLine2 = Shapes.DrawTri(earthH * .7f, earthR * .02f, Color.white)
-            //earthLine2.transform.SetParent(earthLineCont.transform
-            earthLineCont.transform.SetParent(transform, false);
-
+            
             // ...(1) Earth System
             earthSys = new GameObject("EarthSys");
             earthSys.transform.SetParent(transform, false);
@@ -214,8 +218,8 @@ namespace Assets
 
             // ........(3) Earth Sphere
             earthSph = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphereCollider = earthSph.GetComponent<SphereCollider>();
-            sphereCollider.enabled = false;
+            earthSphereCollider = earthSph.GetComponent<SphereCollider>();
+            earthSphereCollider.enabled = false;
             earthSph.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
             earthSph.name = "Earth";
@@ -238,7 +242,7 @@ namespace Assets
             ////........(6) Moon;    
             GameObject moonDialGO = new GameObject("MoonDial");
             moonDialGO.transform.SetParent(earthSys.transform, false);
-            moonDial = (Moon) moonDialGO.AddComponent<Moon>();
+            moonDial = moonDialGO.AddComponent<Moon>();
             moonDial.NewMoon(earthR * .45f, passDate);
         }
 
@@ -282,9 +286,10 @@ namespace Assets
         public static float getDiurnalPos(System.DateTime passDate)
         {
             //Debug.Log(-((System.Convert.ToSingle(passDate.Ticks - System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / earthSidereal) * 360f );
-            return -(System.Convert.ToSingle(passDate.Ticks -
+            float woundAngle = -(System.Convert.ToSingle(passDate.Ticks -
                                              System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks) /
                      10000f / 1000f / 60f / 60f / earthSidereal) * 360 + 75;
+            return Orbits.UnwindAngle(woundAngle);
         }
 
         public static float getLocalClockAlpha(System.DateTime passDate)
@@ -301,6 +306,7 @@ namespace Assets
                      Mathf.Floor(time / 1000f / 60f / 60f / earthSynodic)) * 360 - 180 - 26;
         }
 
+        
         public Transform SelectionTarget => transform;
         public void Highlight()
         {
@@ -314,13 +320,20 @@ namespace Assets
 
         public void RequestSelection()
         {
-            SolarClock.Instance.Toggle(SolarClock.ViewState.HelioCentric);
-            sphereCollider.enabled = false;
+            if (SolarClock.Instance.viewState == SolarClock.ViewState.GeoCentric)
+            {
+                SolarClock.Instance.Toggle(SolarClock.ViewState.HelioCentric);
+                earthSphereCollider.enabled = false;
+            }
+            else
+            {
+                SolarClock.Instance.isTracking = true;
+            }
         }
 
         public void RequestDeselection()
         {
-            throw new System.NotImplementedException();
+            
         }
     }
 }

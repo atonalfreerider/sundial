@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
@@ -20,9 +21,9 @@ namespace Assets
         }
 
         public static SolarClock Instance;
-        
+
         // calibration vars
-        const float YEAR = 365.256363004f;
+        public const float YEAR = 365.256363004f;
         const float sysDia = 150;
         float earthScale = .001f;
         const float earthLineL = 400;
@@ -37,14 +38,12 @@ namespace Assets
         public Earth earth;
         Orbits orbits;
         GameObject sunSprockCont, sunLine, mLabelWheel;
-        BoxCollider boxCollider;
+        SphereCollider sphereCollider;
         Raycast raycast;
         Polygon sunSprock;
         TextBox summerText, springText;
         public Calendar calendar;
         public CalendarMenu calendarMenu;
-        Button forwardArrow;
-        Button backwardArrow;
         Button nowButton;
         public PolygonFactory polygonFactory;
         [HideInInspector] public Material mainMat;
@@ -54,12 +53,8 @@ namespace Assets
         readonly GameObject[] seasonLabels = new GameObject[4];
         readonly TextBox[] yearQueue = new TextBox[3];
 
-        // time initialization
-        System.DateTime travelDateUTC = System.DateTime.UtcNow;
-        System.DateTime travelDateLocal = System.DateTime.Now;
-
         // camera vars
-        ViewState viewState = ViewState.HelioCentric;
+        public ViewState viewState = ViewState.HelioCentric;
         const float solCamY = 270;
         const float earthCamY = 135;
         Vector3 targetPos = new Vector3(0, solCamY, 0);
@@ -83,12 +78,14 @@ namespace Assets
         // state vars
         bool minuteFound = false;
         bool secondFound = false;
+
         bool calCreated = false;
+
         //bool newDayFound = false
         int currentDay, currentMonth, currentYear, currentTimeZone, currentINDL, dst;
-        int spinInc = 0;
         bool showNow = true;
-        System.DateTime jan1ofthisYear;
+        DateTime jan1ofthisYear;
+        public bool isTracking = false;
 
         bool forward = true;
         bool labelUp = false;
@@ -102,33 +99,15 @@ namespace Assets
             Instance = this;
             QualitySettings.antiAliasing = 4;
             orthoSize = solOrthoSize;
-            boxCollider = gameObject.AddComponent<BoxCollider>();
-            boxCollider.size = new Vector3(300,1,300);
-            
+            sphereCollider = gameObject.AddComponent<SphereCollider>();
+            sphereCollider.radius = 100;
+
             mainMat = new Material(mainShader);
-            
+
             NewCylinder.Init(polygonFactory, mainMat);
             NewCube.InitCube(polygonFactory, mainMat);
 
             raycast = gameObject.AddComponent<Raycast>();
-            
-            forwardArrow = Button.Create(">", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
-            forwardArrow.Pad = 20;
-            forwardArrow.transform.SetParent(Camera.main.transform, false);
-            forwardArrow.transform.localPosition = new Vector3(
-                70,
-                -270,
-                100);
-            forwardArrow.SelectionAction = AccelerateTime;
-            
-            backwardArrow = Button.Create("<", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
-            backwardArrow.Pad = 20;
-            backwardArrow.transform.SetParent(Camera.main.transform, false);
-            backwardArrow.transform.localPosition = new Vector3(
-                -70,
-                -270,
-                100);
-            backwardArrow.SelectionAction = ReverseTime;
 
             nowButton = Button.Create("0", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
             nowButton.Pad = 20;
@@ -187,7 +166,7 @@ namespace Assets
             // move 11 days past winter EQUINOX + local hour difference
             sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
         }
-        
+
         void Start()
         {
             // move camera to Solar View - initialize lights
@@ -200,7 +179,7 @@ namespace Assets
             calendarMenu = Camera.main.GetComponent<CalendarMenu>();
             CreateOrToggleCalendar();
         }
-        
+
         void NewSolarClock(float clockR, System.DateTime passDate)
         {
             // (0) SUNDIAL
@@ -248,7 +227,7 @@ namespace Assets
             GameObject equinoxLine = PolygonFactory.DrawDottedLine(
                 new Vector3(0, 0, sundialR),
                 new Vector3(0, 0, -sundialR),
-                axisColor, 
+                axisColor,
                 20);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.SetParent(seasonCross.transform, false);
@@ -297,7 +276,7 @@ namespace Assets
             yearLine.transform.SetParent(sunLine.transform, false);
             yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
             yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
-            
+
             sunLine.SetActive(false);
 
             return sunDial;
@@ -318,7 +297,8 @@ namespace Assets
             TextBox monthText;
             for (int mt = 1; mt <= 12; mt++)
             {
-                monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60, TextAlignmentOptions.Center);
+                monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60,
+                    TextAlignmentOptions.Center);
                 monthText.transform.Rotate(Vector3.forward, 30 * mt);
                 monthText.transform.Translate(Vector3.up * (-sundialR + 6));
 
@@ -427,19 +407,19 @@ namespace Assets
             }
 
             indList.RemoveRange(indList.Count - 6, 6);
-            
+
             Polygon newSunSprocket = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
             newSunSprocket.Draw3DPoly(pointList.ToArray(), indList.ToArray());
             newSunSprocket.SetColor(Color.white);
             return newSunSprocket;
         }
-        
+
         void CreateOrToggleCalendar()
         {
             if (!calCreated)
             {
                 calendar = new Calendar();
-                calendar.Init(YEAR, sysDia, sysDia * .4f, SunSprockOffset() + 360 / YEAR);
+                calendar.Init(YEAR, sysDia, sysDia * .4f);
 
                 calCreated = true;
             }
@@ -460,8 +440,8 @@ namespace Assets
             if (viewState == ViewState.GeoCentric)
             {
                 // zoom to Earth
-                boxCollider.enabled = false;
-                earth.sphereCollider.enabled = true;
+                sphereCollider.enabled = false;
+                earth.earthSphereCollider.enabled = true;
                 GetEarthCam();
                 orbits.gameObject.SetActive(false);
                 earth.earthSys.gameObject.SetActive(true);
@@ -476,7 +456,7 @@ namespace Assets
                 // zoom to Solar
                 //420f;
                 // 270;
-                boxCollider.enabled = true;
+                sphereCollider.enabled = true;
                 targetPos = new Vector3(0, solCamY, 0);
                 targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
                 orbits.gameObject.SetActive(true);
@@ -560,13 +540,13 @@ namespace Assets
         }
 
         // TIME Functions
-        void SetOrbit(System.DateTime newDateUTC, System.DateTime newDateLocal)
+        DateTime lastDate = DateTime.Now;
+        void SetOrbit(DateTime newDateUTC, DateTime newDateLocal)
         {
+            lastDate = newDateLocal;
             // Earth System Orbit
-            // January 1st is 10 days past the solstice which is 180 deg from where the top of the circle is 
-            const float yearStartOffset = -180 - (10 / YEAR) * 360;
             earth.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetEarthOrbitAngle(newDateUTC, YEAR, yearStartOffset),
+                Orbits.GetEarthOrbitAngle(newDateUTC),
                 Vector3.up);
 
             // reset Earth Sphere
@@ -696,6 +676,42 @@ namespace Assets
                 0);
         }
 
+        DateTime UTCDateThatMatchesAngle(float targetAngle, DateTime test)
+        {
+            float startingAngDifference = AngularDifference(test, targetAngle);
+
+            if (startingAngDifference > 5 && startingAngDifference < 270 ||
+                startingAngDifference <= -270)
+            {
+                // either the target is positively ahead on the RHS or has just crossed to the LHS from the bottom
+                while (AngularDifference(test, targetAngle) > 5 ||
+                       AngularDifference(test, targetAngle) <= -270)
+                {
+                    // reverse time
+                    test = test.AddHours(-12);
+                }
+            }
+            else if (startingAngDifference < -5 && startingAngDifference > -270 ||
+                     startingAngDifference >= 270)
+            {
+                // either the target is negatively behind on the RHS
+                while (AngularDifference(test, targetAngle) < -5 ||
+                       AngularDifference(test, targetAngle) >= 270)
+                {
+                    test = test.AddHours(12);
+                }
+            }
+
+            digiClock.SetTime(test);
+
+            return test;
+        }
+
+        static float AngularDifference(DateTime test, float targetAngle)
+        {
+            return targetAngle - Orbits.GetEarthOrbitAngle(test);
+        }
+
         void GetEarthCam()
         {
             targetPos = new Vector3(
@@ -708,8 +724,10 @@ namespace Assets
                 0));
         }
 
-        static float SunSprockOffset()
+        public static float SunSprockOffset()
         {
+            // January 1st is 10 days past the solstice which is 180 deg from where the top of the circle is 
+            // also nudge by the amount of hours that this timezone is ahead or behind INDL
             return -10 * 360 / YEAR - 180 + Earth.GetTimeZone() * 360 / (YEAR * 24);
         }
 
@@ -734,24 +752,39 @@ namespace Assets
             secondUpdate = StartCoroutine(SecondUpdate());
         }
 
-        void FixedUpdate()
-        {
-            // default tick is .02 sec;       
-            if (!showNow)
-            {
-                SetOrbit(travelDateUTC, travelDateLocal);
-                travelDateUTC = travelDateUTC.AddMinutes(spinInc);
-                travelDateLocal = travelDateLocal.AddMinutes(spinInc);
-                digiClock.SetTime(travelDateLocal);
-            }
-        }
-        
         void Update()
         {
             if (Input.GetMouseButtonDown(0))
             {
                 RaycastTarget target = raycast.TargetAfterCasting();
                 target?.AsSelectable.RequestSelection();
+            }
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                isTracking = false;
+            }
+
+            if (Input.GetMouseButton(0) && isTracking)
+            {
+                showNow = false;
+                Vector2 mouseAroundCenter = new Vector2(
+                    Input.mousePosition.x - Screen.width * .5f,
+                    Input.mousePosition.y - Screen.height * .5f);
+                float angularPosition = -Mathf.Atan2(mouseAroundCenter.y, mouseAroundCenter.x) + Mathf.PI * .5f;
+                if (angularPosition < -Mathf.PI)
+                {
+                    angularPosition += 2 * Mathf.PI;
+                }
+
+                if (angularPosition > Mathf.PI)
+                {
+                    angularPosition -= 2 * Mathf.PI;
+                }
+
+                DateTime utcDateThatMatchesAngle = UTCDateThatMatchesAngle(angularPosition * 180 / Mathf.PI, lastDate);
+                DateTime localTimeThatMatchesAngle = utcDateThatMatchesAngle.AddHours(currentTimeZone);
+                SetOrbit(utcDateThatMatchesAngle, localTimeThatMatchesAngle);
             }
 
             if (Input.GetKeyDown(KeyCode.I))
@@ -783,18 +816,7 @@ namespace Assets
                 digiClock.gameObject.SetActive(!digiClock.gameObject.activeInHierarchy);
             }
 
-
-            // switch between realtime and speed time;
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                AccelerateTime();
-            }
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                ReverseTime();
-            }
-
+            // switch between realtime and speed time
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
                 NowTime();
@@ -818,7 +840,7 @@ namespace Assets
 
             if (secondFound) return;
             //  Debug.Log("Searching...");
-            
+
             if (System.DateTime.Now.Millisecond >= 10) return;
             //    Debug.Log("FOUND");
             secondFound = true;
@@ -857,32 +879,15 @@ namespace Assets
             }
         }
 
-        void AccelerateTime()
-        {
-            showNow = false;
-            spinInc += 3;
-            if (spinInc > 0)
-                forward = true;
-        }
-        
-        void ReverseTime()
-        {
-            showNow = false;
-            spinInc -= 3;
-            if (spinInc < 0)
-                forward = false;
-        }
-
         void NowTime()
         {
-            spinInc = 0;
             SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
             showNow = true;
-            spinInc = 0;
             forward = true;
         }
-        
+
         public Transform SelectionTarget => transform;
+
         public void Highlight()
         {
             throw new System.NotImplementedException();
