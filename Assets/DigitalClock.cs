@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets
@@ -11,33 +12,16 @@ namespace Assets
 
         void Awake()
         {
-            /*
-                    Text sundial = Items.NewText("SUNDIAL", Color.white, 30, TextAnchor.MiddleCenter, true);
-                    sundial.transform.SetParent(this.transform);
-                    sundial.transform.Translate(Vector3.down * 1f);
-                    */
             sundialText = transform.GetChild(0).GetComponent<Text>();
             sundialText.text = "SUNDIAL";
-
-            /*
-            date = Items.NewText(GetDate(System.DateTime.Now), Color.white, 60, TextAnchor.MiddleCenter, true);
-            date.transform.SetParent(this.transform);
-            date.transform.Translate(Vector3.down * 3f);
-            date.transform.Translate(Vector3.forward * 5f);
-    
-            time = Items.NewText(GetTime(System.DateTime.Now), Color.white, 60, TextAnchor.MiddleCenter, true);
-            time.transform.SetParent(this.transform);
-            time.transform.Translate(Vector3.down * 3f);
-            time.transform.Translate(Vector3.back * 5f);
-            */
 
             date = transform.GetChild(1).GetComponent<Text>();
             time = transform.GetChild(2).GetComponent<Text>();
 
-            SetTime(System.DateTime.Now);
+            SetTime(DateTime.Now);
         }
 
-        static string GetDate(System.DateTime passDate)
+        static string GetDate(DateTime passDate)
         {
             string day = passDate.Day.ToString();
             if (passDate.Day < 10)
@@ -52,7 +36,7 @@ namespace Assets
             return day + " / " + month + " / " + year;
         }
 
-        static string GetTime(System.DateTime passDate)
+        static string GetTime(DateTime passDate)
         {
             string sec = passDate.Second.ToString();
             string min = passDate.Minute.ToString();
@@ -66,7 +50,7 @@ namespace Assets
             return hr + " : " + min + " : " + sec;
         }
 
-        public void SetTime(System.DateTime passDate)
+        public void SetTime(DateTime passDate)
         {
             // sundialText.text = GetDate(passDate).ToString() + "\r\n" + "SUNDIAL\r\n" + GetTime(passDate).ToString();
             if (gameObject.activeInHierarchy)

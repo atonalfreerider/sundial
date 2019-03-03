@@ -53,7 +53,7 @@ namespace Assets
         Polygon sunSprock;
         TextBox summerText, springText;
         [HideInInspector] public CalendarMenu calendarMenu;
-        Button nowButton;
+        public Button nowButton;
         readonly GameObject[] seasonLabels = new GameObject[4];
         readonly TextBox[] yearQueue = new TextBox[3];
 
@@ -102,35 +102,18 @@ namespace Assets
 
             raycast = gameObject.AddComponent<Raycast>();
 
-            nowButton = Button.Create("0", TextBox.FontType.MainFont, 120, TextAlignmentOptions.Center);
+            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 100, TextAlignmentOptions.Center);
             nowButton.Pad = 20;
             nowButton.transform.SetParent(Camera.main.transform, false);
             nowButton.transform.localPosition = new Vector3(
                 0,
-                -270,
+                -280,
                 100);
             nowButton.SelectionAction = solarTime.NowTime;
-
-            /*
-            // time testing
-            DateTime test1 = new DateTime()
-            test1 = test1.AddYears(2014)
-            DateTime test2 = new DateTime()
-            test2 = test2.AddYears(2014)
-            test2 = test2.AddHours(-11)
-            test1 = test1.AddDays(200)
-            test1 = test1.AddHours(5)
-   
-            //Switch between test and real time
-            DateTime date1 = test1
-            DateTime date2 = test2
-            */
+            nowButton.gameObject.SetActive(false);
 
             DateTime utcNow = DateTime.UtcNow;
             DateTime now = DateTime.Now;
-
-            //  Debug.Log(date1)
-            //  Debug.Log(date2)
 
             // store time values to check for days/year/timezone switch
             currentYear = now.Year;

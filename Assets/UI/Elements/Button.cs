@@ -73,7 +73,7 @@ namespace Assets.UI.Elements
                 {
                     Vector3.zero, new Vector3(0.001f, 0, 0)
                 },
-                0.001f,
+                1,
                 false,
                 2);
             button.buttonOutline.transform.SetParent(button.transform, false);
@@ -122,7 +122,7 @@ namespace Assets.UI.Elements
                 new Vector3(-Size.x * 0.5f - Pad, 0, -Size.y * 0.5f - Pad * 0.5f)
             };
 
-            buttonOutline.DrawLine(frame, 0.002f, true, 2);
+            buttonOutline.DrawLine(frame, .5f, true, 2);
             buttonOutline.transform.localPosition = center;
         }
 
@@ -143,7 +143,7 @@ namespace Assets.UI.Elements
                 buttonBack.SetColor(ColorForState(ButtonState.Pushed));
                 buttonBack.SetColor(
                     ColorForState(ButtonState.Normal),
-                    0.7f);
+                    0);
             }
             else
             {

@@ -20,8 +20,9 @@ namespace DefaultNamespace
 
         public void NowTime()
         {
-            SolarClock.Instance.SetOrbit(DateTime.UtcNow, System.DateTime.Now);
+            SolarClock.Instance.SetOrbit(DateTime.UtcNow, DateTime.Now);
             showNow = true;
+            SolarClock.Instance.nowButton.gameObject.SetActive(false);
         }
 
         DateTime UTCDateThatMatchesAngle(float targetAngle, DateTime test)
@@ -79,6 +80,7 @@ namespace DefaultNamespace
             if (Input.GetMouseButton(0) && (isEarthTracking || isMoonTracking))
             {
                 showNow = false;
+                SolarClock.Instance.nowButton.gameObject.SetActive(true);
                 Vector2 mouseAroundCenter = new Vector2(
                     Input.mousePosition.x - Screen.width * .5f,
                     Input.mousePosition.y - Screen.height * .5f);
@@ -106,7 +108,7 @@ namespace DefaultNamespace
             if (!minuteFound)
             {
                 //  Debug.Log("Searching...");
-                if (System.DateTime.Now.Second < 1)
+                if (DateTime.Now.Second < 1)
                 {
                     //    Debug.Log("FOUND");
                     minuteFound = true;
@@ -128,7 +130,7 @@ namespace DefaultNamespace
             if (showNow)
             {
                 //set orbit exactly every minute
-                SolarClock.Instance.SetOrbit(System.DateTime.UtcNow, System.DateTime.Now);
+                SolarClock.Instance.SetOrbit(DateTime.UtcNow, DateTime.Now);
             }
 
             yield return new WaitForSeconds(60);
@@ -137,7 +139,7 @@ namespace DefaultNamespace
 
         IEnumerator SecondUpdate()
         {
-            SolarClock.Instance.digiClock.SetTime(System.DateTime.Now);
+            SolarClock.Instance.digiClock.SetTime(DateTime.Now);
 
             yield return new WaitForSeconds(1);
             secondUpdate = StartCoroutine(SecondUpdate());
@@ -163,7 +165,7 @@ namespace DefaultNamespace
             }
             else
             {
-                SolarClock.Instance.SetOrbit(DateTime.UtcNow, System.DateTime.Now);
+                SolarClock.Instance.SetOrbit(DateTime.UtcNow, DateTime.Now);
             }
         }
     }
