@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
 using Assets.UI.Text;
@@ -114,142 +115,79 @@ namespace Assets
             monthTick.transform.parent = moonSprock.transform;
             monthTick.transform.Translate(Vector3.forward * moonR);
 
-            moonLabels = NewDayMonthLabels(passDate);
+            moonLabels = NewDayMonthLabels();
             moonLabels.transform.SetParent(newMoonSprockCont.transform, false);
             moonLabels.transform.Rotate(Vector3.right * 90);
 
             return newMoonSprockCont;
         }
 
-        public void MoveMoonSprockCont(DateTime passDate, bool dayChange, bool monthChange)
+        public void MoveMoonSprockCont(DateTime passDate)
         {
             moonSprockCont.transform.rotation = Quaternion.AngleAxis(
-                moonSys.transform.rotation.eulerAngles.y + passDate.Hour * 360 / (24 * lunarSynodic),
+                moonSys.transform.rotation.eulerAngles.y +
+                // retreat moon dial by number of hours into current day
+                passDate.Hour * 360 / (24 * lunarSynodic),
                 Vector3.up);
 
-            if (dayChange)
-            {
-                // increment or decrement each day by 1 
-                int day;
-                foreach (TextBox dL in dayList)
-                {
-                    if (true)
-                    {
-                        // time is moving forward
-                        day = dL.SpecialInt + 1;
-                        if (passDate.Month > 1)
-                        {
-                            // if not January
-                            if (monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month - 1) ||
-                                !monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month))
-                            {
-                                day = 1; // month has changed over and current day in queue has exceeded next months num days || month has not changed and current day in queue is greater than current month's num days -> reset to 1;
-                            }
-                        }
-                        else
-                        {
-                            // January
-                            if (monthChange && day > DateTime.DaysInMonth(passDate.Year - 1, 12) ||
-                                !monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month))
-                            {
-                                day = 1;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // time is moving backward
-                        day = Convert.ToInt32(dL.Text) - 1;
-                        if (day < 1)
-                        {
-                            day = DateTime.DaysInMonth(passDate.Year, passDate.Month);
-                        }
-                    }
+            int thisDay = passDate.Day;
+            int thisMonth = passDate.Month;
+            int thisYear = passDate.Year;
 
-                    dL.Text = day.ToString();
-                    dL.SpecialInt = day;
+            // set each day 
+            foreach (TextBox dL in dayList)
+            {
+                dL.Text = thisDay.ToString();
+                thisDay++;
+
+                if (dayList.Last() == dL) break;
+                // only test for changes if we're still mid-list
+
+                if (thisDay > DateTime.DaysInMonth(thisYear, thisMonth))
+                {
+                    // month has changed and current day in queue is greater than current month's num days -> reset to 1;
+                    thisDay = 1;
+                    thisMonth++;
+                    if (thisMonth > 12)
+                    {
+                        thisMonth = 1;
+                        thisYear++;
+                    }
                 }
             }
+
+            // update text
+            month1L.Text = Calendar.monthofYrAbr[passDate.Month - 1];
+            month1L2.Text = Calendar.monthofYrAbr[passDate.Month - 1];
+            month2L.Text = Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)];
+
+            monthSplitCont.SetActive(thisMonth != passDate.Month);
 
             int daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year, passDate.Month) - passDate.Day + 1;
-            if (monthChange)
-            {
-                if (passDate.Month < 12)
-                {
-                    daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year, passDate.Month + 1) - passDate.Day;
-                }
-                else
-                {
-                    daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year + 1, 1) - passDate.Day;
-                }
-
-                // update text
-                month1L.Text = Calendar.monthofYrAbr[passDate.Month - 1];
-                month1L2.Text = Calendar.monthofYrAbr[passDate.Month - 1];
-                month2L.Text = Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)];
-            }
-
-            bool setOn = false;
-            // detect if 1st is not in 1st pos
-            for (int ii = 0; ii < 29; ii++)
-            {
-                if (dayList[ii].SpecialInt != 1 || ii <= 0) continue;
-                setOn = true;
-                break;
-            }
-
-            monthSplitCont.SetActive(setOn);
-
             monthSplitCont.transform.rotation = Quaternion.AngleAxis(
                 moonSprock.transform.rotation.eulerAngles.y - daysUntilNextMonth * 360 / lunarSynodic,
                 Vector3.up);
         }
 
-        GameObject NewDayMonthLabels(DateTime passDate)
+        GameObject NewDayMonthLabels()
         {
             //...........................(1) hLabelWheel
             // create days in month;        
             dayList = new TextBox[29];
             GameObject newDLabelWheel = new GameObject("MoonLabels");
-            TextBox dLabel;
-            int count = 0;
-            int count2 = 0;
-            int htr = 0;
             const float dayLabelPad = 2;
-            for (int ht = passDate.Day; ht <= DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
+            for (int ht = 0; ht < dayList.Length; ht++)
             {
-                dLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
-                dLabel.SpecialInt = ht;
+                TextBox dLabel = TextBox.Create("", TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
                 dLabel.transform.SetParent(newDLabelWheel.transform, false);
-                dayList[count2] = dLabel;
-                dLabel.transform.Rotate(Vector3.forward, (ht - passDate.Day) * (360 / lunarSynodic) + 2);
+                dayList[ht] = dLabel;
+                dLabel.transform.Rotate(Vector3.forward, (ht) * (360 / lunarSynodic) + 2);
                 dLabel.transform.Translate(Vector3.up * (moonR - dayLabelPad));
                 dLabel.transform.Rotate(Vector3.forward, 90);
-                count++;
-                count2++;
-                htr = ht;
-                if (count > 28)
-                    break;
             }
 
-            int nextD = 1;
-            htr++;
-            while (count < 29)
-            {
-                dLabel = TextBox.Create(nextD.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
-                dLabel.SpecialInt = nextD;
-                dLabel.transform.SetParent(newDLabelWheel.transform, false);
-                dayList[count2] = dLabel;
-                dLabel.transform.Rotate(Vector3.forward, (htr - passDate.Day) * (360 / lunarSynodic) + 2);
-                dLabel.transform.Translate(Vector3.up * (moonR - dayLabelPad));
-                dLabel.transform.Rotate(Vector3.forward, 90);
-                nextD++;
-                count++;
-                count2++;
-                htr++;
-            }
-
-            month1L = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
+            month1L = TextBox.Create("", TextBox.FontType.MainFont, 28,
+                TextAlignmentOptions.Left);
             month1L.transform.SetParent(newDLabelWheel.transform, false);
             month1L.transform.Translate(Vector3.up * (moonR + dayLabelPad));
             month1L.transform.Translate(Vector3.left * 2);
@@ -263,15 +201,17 @@ namespace Assets
             monthTick.transform.SetParent(monthSplitCont.transform, false);
             monthTick.transform.Translate(Vector3.forward * moonR);
 
-            month1L2 = TextBox.Create(Calendar.monthofYrAbr[passDate.Month - 1], TextBox.FontType.MainFont , 28, TextAlignmentOptions.Left);
+            month1L2 = TextBox.Create("", TextBox.FontType.MainFont, 28,
+                TextAlignmentOptions.Left);
             month1L2.transform.SetParent(monthSplitCont.transform, false);
             month1L2.transform.Rotate(Vector3.right * 90);
             month1L2.transform.Translate(Vector3.up * (moonR + 1));
             month1L2.transform.Translate(Vector3.right * 2);
             month1L2.transform.Rotate(Vector3.forward * 90);
             month1L2.transform.Rotate(Vector3.up, -1);
-            
-            month2L = TextBox.Create(Calendar.monthofYrAbr[Calendar.ConvertMonth(passDate.Month)], TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
+
+            month2L = TextBox.Create("",
+                TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
             month2L.transform.SetParent(monthSplitCont.transform, false);
             month2L.transform.Rotate(Vector3.right * 90);
             month2L.transform.Translate(Vector3.up * (moonR + 1));
@@ -288,32 +228,12 @@ namespace Assets
             moonSys.transform.rotation = Quaternion.AngleAxis(
                 Orbits.GetNonEarthOrbitAngle(newDateUTC, Moon.lunarSidereal, 60),
                 Vector3.up);
-            
-            if (currentDay != newDateLocal.Day)
-            {
-                // day has switched over -> move month tri
-                if (currentMonth != newDateLocal.Month)
-                {
-                    MoveMoonSprockCont(newDateLocal, true, true);
-                    currentMonth = newDateLocal.Month;
-                }
-                else
-                {
-                    MoveMoonSprockCont(newDateLocal, true, false);
-                }
 
-                currentDay = newDateLocal.Day;
-
-                // update dayCal
-                if (SolarClock.Instance.calCreated)
-                {
-                    SolarClock.Instance.calendar.DrawDayCalendar(newDateLocal, transform.parent);
-                }
-            }
+            MoveMoonSprockCont(newDateLocal);
         }
-        
+
         #region ISelectable
-        
+
         public Transform SelectionTarget { get; }
 
         public void RequestSelection()

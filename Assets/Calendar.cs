@@ -44,17 +44,11 @@ namespace Assets
 
         GameObject dayCal;
         GameObject yearCal;
-        public bool vis = false;
 
         readonly List<string> displayedCalendars = new List<string>();
         private Dictionary<string, MyEvent[]> calendarEvents;
-        List<MyEvent> yearQueue = new List<MyEvent>();
-        List<MyEvent> dayQueue = new List<MyEvent>();
-
-        public static string[] daysofweek =
-        {
-            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-        };
+        readonly List<MyEvent> yearQueue = new List<MyEvent>();
+        readonly List<MyEvent> dayQueue = new List<MyEvent>();
 
         public static readonly string[] daysofweekAbr =
         {
@@ -248,7 +242,7 @@ namespace Assets
             yearCal.transform.SetParent(solarClock, false);
         }
 
-        public void DrawDayCalendar(DateTime passDate, Transform solarClock)
+        public void DrawDayCalendar(DateTime passDate, Transform earthSysTransform)
         {
             if (dayCal)
             {
@@ -269,7 +263,7 @@ namespace Assets
                 }
             }
 
-            dayCal.transform.SetParent(solarClock, false);
+            dayCal.transform.SetParent(earthSysTransform, false);
         }
 
         Circle DrawEvent(MyEvent passEv, bool isYearEvent, int index)

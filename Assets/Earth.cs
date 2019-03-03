@@ -29,12 +29,12 @@ namespace Assets
         SphereCollider handSphereCollider;
         
         // state vars
-        int currentINDL;
+        int currentINDLday, currentDay;
         
         // INIT Functions
         void Awake()
         {
-            currentINDL = GetDatelineDay(DateTime.UtcNow);
+            currentINDLday = GetDatelineDay(DateTime.UtcNow);
         }
         
         public void NewEarthSystem(float passEarthR, DateTime passDate)
@@ -279,7 +279,7 @@ namespace Assets
                     Vector3.up);
 
             int datelineDay = GetDatelineDay(newDateUTC);
-            if (datelineDay != currentINDL)
+            if (datelineDay != currentINDLday)
             {
                 int yesterday = datelineDay - 1;
                 if (yesterday < 0)
@@ -291,7 +291,18 @@ namespace Assets
                 day21.Text = Calendar.daysofweekAbr[datelineDay];
                 day22.Text = Calendar.daysofweekAbr[datelineDay];
 
-                currentINDL = datelineDay;
+                currentINDLday = datelineDay;
+            }
+            
+            if (currentDay != newDateLocal.Day)
+            {
+                currentDay = newDateLocal.Day;
+
+                // update dayCal
+                if (SolarClock.Instance.calCreated)
+                {
+                    SolarClock.Instance.calendar.DrawDayCalendar(newDateLocal, earthSys.transform);
+                }
             }
 
             RedrawStrip(newDateUTC.AddHours(12));

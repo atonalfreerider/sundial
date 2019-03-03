@@ -149,7 +149,6 @@ namespace Assets
             NewSolarClock(sysDia, now);
 
             SetOrbit(utcNow, now);
-            earth.moonDial.MoveMoonSprockCont(now, false, false);
             // move 10 days past winter SOLSTICE + local hour difference
             sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
         }
