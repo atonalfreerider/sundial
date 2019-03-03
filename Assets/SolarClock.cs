@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
 using Assets.UI.Elements;
@@ -166,7 +167,7 @@ namespace Assets
             ptLight.intensity = ptInt;
 
             calendarMenu = Camera.main.GetComponent<CalendarMenu>();
-            CreateOrToggleCalendar();
+            CreateCalendar();
         }
 
         void NewSolarClock(float clockR, System.DateTime passDate)
@@ -404,7 +405,7 @@ namespace Assets
             return newSunSprocket;
         }
 
-        void CreateOrToggleCalendar()
+        void CreateCalendar()
         {
             if (!calCreated)
             {
@@ -643,7 +644,7 @@ namespace Assets
 
             if (Input.GetKeyDown(KeyCode.C))
             {
-                CreateOrToggleCalendar();
+                calendarMenu.calendars.menuButtons.First().Value.RequestSelection();
             }
         }
 

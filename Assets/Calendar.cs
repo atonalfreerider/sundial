@@ -42,11 +42,11 @@ namespace Assets
         float calR;
         float earthR;
 
-        public GameObject dayCal;
+        GameObject dayCal;
         GameObject yearCal;
         public bool vis = false;
 
-        List<string> displayedCalendars = new List<string>();
+        readonly List<string> displayedCalendars = new List<string>();
         private Dictionary<string, MyEvent[]> calendarEvents;
         List<MyEvent> yearQueue = new List<MyEvent>();
         List<MyEvent> dayQueue = new List<MyEvent>();
@@ -319,7 +319,7 @@ namespace Assets
 
             newRing.transform.rotation = Quaternion.AngleAxis(
                 isYearEvent
-                    ? Orbits.GetEarthOrbitAngle(passEv.end) + 360 / YEAR
+                    ? Orbits.GetEarthOrbitAngle(passEv.end)
                     : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
 
