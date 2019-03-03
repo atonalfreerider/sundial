@@ -305,7 +305,6 @@ namespace Assets
             return -(time / 1000f / 60f / 60f / earthSynodic -
                      Mathf.Floor(time / 1000f / 60f / 60f / earthSynodic)) * 360 - 180 - 26;
         }
-
         
         public Transform SelectionTarget => transform;
         public void Highlight()

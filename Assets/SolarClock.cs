@@ -605,12 +605,6 @@ namespace Assets
                 Quaternion.AngleAxis(
                     earth.earthSph.transform.rotation.eulerAngles.y - 90,
                     Vector3.up);
-            string temp1 = earth.day21.Text;
-            earth.day21.Text = "";
-            earth.day21.Text = temp1;
-            string temp2 = earth.day22.Text;
-            earth.day22.Text = "";
-            earth.day22.Text = temp2;
 
             int datelineDay = Earth.GetDatelineDay(newDateUTC);
             if (datelineDay != currentINDL)
