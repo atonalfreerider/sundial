@@ -7,7 +7,7 @@ namespace Assets
     public class Orbits : MonoBehaviour
     {
         // container for 4 inner planets
-        public GameObject[] planets = new GameObject[4];
+        readonly GameObject[] planets = new GameObject[4];
         public Circle[] paths = new Circle[4];
 
         // calibration vars
@@ -113,6 +113,29 @@ namespace Assets
             }
         }
 
+        public void SetLittlePlanetsOrbit(DateTime newDateUTC)
+        {
+            // Mercury Orbit: 88 days
+            planets[0].transform.localRotation = Quaternion.AngleAxis(
+                GetNonEarthOrbitAngle(newDateUTC, 88, 120),
+                Vector3.up);
+
+            // Venus Orbit: 224.698 days
+            planets[1].transform.localRotation = Quaternion.AngleAxis(
+                GetNonEarthOrbitAngle(newDateUTC, 224.698f, 120),
+                Vector3.up);
+
+            // little Earth Orbit:365.256363004 days
+            planets[2].transform.localRotation = Quaternion.AngleAxis(
+                GetEarthOrbitAngle(newDateUTC),
+                Vector3.up);
+
+            // Mars Orbit:  686.971
+            planets[3].transform.localRotation = Quaternion.AngleAxis(
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, 686.971f, -130),
+                Vector3.up);
+        }
+        
         public static float GetEarthOrbitAngle(DateTime passDate)
         {
             // Earth's orbit is always fixed to the amount of days into the year divided by a year

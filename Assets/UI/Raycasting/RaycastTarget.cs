@@ -36,20 +36,5 @@ namespace Assets.UI.Raycasting
                 target);
             return null;
         }
-
-        public void Highlight()
-        {
-            // We are always using this method during the same frame the target was hit. We don't have to worry about
-            // the target being destroyed in that time, so we can skip the UnityUtil.IsDestroyedUnityObject that is part
-            // of the IsSelectable boolean.
-            AsSelectable?.Highlight();
-        }
-
-        public void Unhighlight()
-        {
-            // This method may be called on a destroyed target. We need to check if `IsSelectable` is true because that
-            // property includes a check to see if the game object of the AsSelectable was destroyed.
-            AsSelectable.Unhighlight();
-        }
     }
 }

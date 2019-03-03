@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
@@ -20,18 +21,23 @@ namespace Assets
         public GameObject earthSph;
         public GameObject localWheelCont;
         public Moon moonDial;
-        public TextBox day11;
-        public TextBox day12;
+        public TextBox day11, day12, day21, day22;
         public GameObject intDatelineSplit;
-        public TextBox day21;
-        public TextBox day22;
         Circle strip;
         Polygon earthSprock;
         public SphereCollider earthSphereCollider;
         SphereCollider handSphereCollider;
         
+        // state vars
+        int currentINDL;
+        
         // INIT Functions
-        public void NewEarthSystem(float passEarthR, System.DateTime passDate)
+        void Awake()
+        {
+            currentINDL = GetDatelineDay(DateTime.UtcNow);
+        }
+        
+        public void NewEarthSystem(float passEarthR, DateTime passDate)
         {
             earthR = passEarthR;
             //...(0) Earth Line
@@ -126,11 +132,11 @@ namespace Assets
             //...........................(3) dayDil
             localR = earthR * .28f;
 
-            //System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> zones = System.TimeZoneInfo.GetSystemTimeZones()
-            //System.TimeZoneInfo dstZone = zones[0]
+            //Collections.ObjectModel.ReadOnlyCollection<TimeZoneInfo> zones = TimeZoneInfo.GetSystemTimeZones()
+            //TimeZoneInfo dstZone = zones[0]
 
-            // System.DateTime dsTime = System.TimeZoneInfo.ConvertTimeFromUtc(System.DateTime.UtcNow, dstZone)
-            int datelineDay = GetDatelineDay(System.DateTime.UtcNow);
+            // DateTime dsTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, dstZone)
+            int datelineDay = GetDatelineDay(DateTime.UtcNow);
             int yesterday = datelineDay - 1;
             if (yesterday < 0)
                 yesterday = 6;
@@ -246,7 +252,54 @@ namespace Assets
             moonDial.NewMoon(earthR * .45f, passDate);
         }
 
-        public void RedrawStrip(System.DateTime passDate)
+        public void SetEarthSystemOrbit(DateTime newDateUTC, DateTime newDateLocal)
+        {
+            // Earth System Orbit
+            transform.rotation = Quaternion.AngleAxis(
+                Orbits.GetEarthOrbitAngle(newDateUTC),
+                Vector3.up);
+
+            // reset Earth Sphere
+            earthSph.transform.rotation = Quaternion.identity;
+            // the polar axis of the earth is tilted
+            earthSph.transform.Rotate(Vector3.right, -23.4f);
+            // the Earth is rotated by the hours into the day
+            earthSph.transform.Rotate(Vector3.up, getDiurnalPos(newDateUTC));
+
+            // Clock Sprocket - reverse rotated from the diurnal position of the Earth
+            localWheelCont.transform.localRotation =
+                Quaternion.Euler(new Vector3(
+                    180,
+                    -getLocalClockAlpha(newDateLocal) + 180,
+                    0));
+            
+            intDatelineSplit.transform.rotation =
+                Quaternion.AngleAxis(
+                    earthSph.transform.rotation.eulerAngles.y - 90,
+                    Vector3.up);
+
+            int datelineDay = GetDatelineDay(newDateUTC);
+            if (datelineDay != currentINDL)
+            {
+                int yesterday = datelineDay - 1;
+                if (yesterday < 0)
+                    yesterday = 6;
+
+                day11.Text = Calendar.daysofweekAbr[yesterday];
+                day12.Text = Calendar.daysofweekAbr[yesterday];
+
+                day21.Text = Calendar.daysofweekAbr[datelineDay];
+                day22.Text = Calendar.daysofweekAbr[datelineDay];
+
+                currentINDL = datelineDay;
+            }
+
+            RedrawStrip(newDateUTC.AddHours(12));
+
+            moonDial.SetMoonOrbit(newDateUTC, newDateLocal);
+        }
+        
+        void RedrawStrip(DateTime passDate)
         {
             // for some reason, 3 of these are getting created
             float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
@@ -267,55 +320,48 @@ namespace Assets
             strip.transform.SetParent(earthSprock.transform, false);
         }
 
-        // TIME Functions;
+        // TIME Functions
         public static int GetTimeZone()
         {
-            System.DateTime loc = System.DateTime.Now;
-            System.TimeZone tz = System.TimeZone.CurrentTimeZone;
-            System.TimeSpan ts = tz.GetUtcOffset(loc);
+            DateTime loc = DateTime.Now;
+            TimeZone tz = TimeZone.CurrentTimeZone;
+            TimeSpan ts = tz.GetUtcOffset(loc);
 
             return ts.Hours;
         }
 
-        public static int GetDatelineDay(System.DateTime passUTC)
+        static int GetDatelineDay(DateTime passUTC)
         {
-            System.DateTime dateline = passUTC.AddHours(12);
-            return System.Convert.ToInt32(dateline.DayOfWeek);
+            DateTime dateline = passUTC.AddHours(12);
+            return Convert.ToInt32(dateline.DayOfWeek);
         }
 
-        public static float getDiurnalPos(System.DateTime passDate)
+        static float getDiurnalPos(DateTime passDate)
         {
-            //Debug.Log(-((System.Convert.ToSingle(passDate.Ticks - System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / earthSidereal) * 360f );
-            float woundAngle = -(System.Convert.ToSingle(passDate.Ticks -
-                                             System.DateTime.MinValue.AddYears(System.DateTime.Now.Year - 1).Ticks) /
+            //Debug.Log(-((Convert.ToSingle(passDate.Ticks - DateTime.MinValue.AddYears(DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / earthSidereal) * 360f );
+            float woundAngle = -(Convert.ToSingle(passDate.Ticks -
+                                             DateTime.MinValue.AddYears(DateTime.Now.Year - 1).Ticks) /
                      10000f / 1000f / 60f / 60f / earthSidereal) * 360 + 75;
             return Orbits.UnwindAngle(woundAngle);
         }
 
-        public static float getLocalClockAlpha(System.DateTime passDate)
+        static float getLocalClockAlpha(DateTime passDate)
         {
             return (passDate.Hour * 60 * 60 + passDate.Minute * 60 + passDate.Second) /
                    (earthSynodic * 60 * 60) * 360;
         }
 
-        public float getSynodicPos(System.DateTime passDate)
+        static float getSynodicPos(DateTime passDate)
         {
-            float time = (float) System.DateTime.Now.Subtract(System.DateTime.MinValue.AddYears(1969))
+            float time = (float) DateTime.Now.Subtract(DateTime.MinValue.AddYears(1969))
                 .TotalMilliseconds;
             return -(time / 1000f / 60f / 60f / earthSynodic -
                      Mathf.Floor(time / 1000f / 60f / 60f / earthSynodic)) * 360 - 180 - 26;
         }
         
+        #region ISelectable
+        
         public Transform SelectionTarget => transform;
-        public void Highlight()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Unhighlight()
-        {
-            throw new System.NotImplementedException();
-        }
 
         public void RequestSelection()
         {
@@ -330,9 +376,6 @@ namespace Assets
             }
         }
 
-        public void RequestDeselection()
-        {
-            
-        }
+        #endregion
     }
 }

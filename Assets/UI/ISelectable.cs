@@ -7,12 +7,6 @@ namespace Assets.UI
     {
         Transform SelectionTarget { get; }
 
-        void Highlight();
-
-        void Unhighlight();
-
         void RequestSelection();
-
-        void RequestDeselection();
     }
 }

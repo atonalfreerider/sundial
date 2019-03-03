@@ -10,15 +10,13 @@ namespace DefaultNamespace
         // state vars
         bool minuteFound = false;
         bool secondFound = false;
-
-        Coroutine minuteUpdate;
-        Coroutine secondUpdate;
         public bool isEarthTracking = false;
         public bool isMoonTracking = false;
-
         bool showNow = true;
-
         DateTime lastDate = DateTime.Now;
+        
+        Coroutine minuteUpdate;
+        Coroutine secondUpdate;
 
         public void NowTime()
         {

@@ -11,7 +11,7 @@ namespace Assets
     public class Moon : MonoBehaviour, ISelectable
     {
         // calibration vars
-        public System.DateTime offsetDate;
+        public DateTime offsetDate;
         const float lunarSynodic = 29.531f;
         public const float lunarSidereal = 27.321582f;
         float moonR;
@@ -22,14 +22,22 @@ namespace Assets
         public GameObject moonSprockCont;
         Polygon moonSprock;
         public GameObject moonLabels;
-        TextBox month1L;
+        TextBox month1L, month1L2, month2L;
         GameObject monthSplitCont;
-        TextBox month1L2;
-        TextBox month2L;
         TextBox[] dayList;
 
+        // state vars
+        int currentDay, currentMonth;
+
         // INIT Functions
-        public void NewMoon(float passMoonR, System.DateTime passDate)
+        void Awake()
+        {
+            DateTime date2 = DateTime.Now;
+            currentDay = date2.Day;
+            currentMonth = date2.Month;
+        }
+
+        public void NewMoon(float passMoonR, DateTime passDate)
         {
             moonR = passMoonR;
             //...............(5) MOON
@@ -65,7 +73,7 @@ namespace Assets
             moonSys.transform.SetParent(transform, false);
         }
 
-        GameObject NewMoonSprockCont(float passMoonR, System.DateTime passDate)
+        GameObject NewMoonSprockCont(float passMoonR, DateTime passDate)
         {
             moonR = passMoonR;
             GameObject newMoonSprockCont = new GameObject("MoonSprockCont");
@@ -113,7 +121,7 @@ namespace Assets
             return newMoonSprockCont;
         }
 
-        public void MoveMoonSprockCont(System.DateTime passDate, bool dayChange, bool monthChange)
+        public void MoveMoonSprockCont(DateTime passDate, bool dayChange, bool monthChange)
         {
             moonSprockCont.transform.rotation = Quaternion.AngleAxis(
                 moonSys.transform.rotation.eulerAngles.y + passDate.Hour * 360 / (24 * lunarSynodic),
@@ -132,8 +140,8 @@ namespace Assets
                         if (passDate.Month > 1)
                         {
                             // if not January
-                            if (monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month - 1) ||
-                                !monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month))
+                            if (monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month - 1) ||
+                                !monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month))
                             {
                                 day = 1; // month has changed over and current day in queue has exceeded next months num days || month has not changed and current day in queue is greater than current month's num days -> reset to 1;
                             }
@@ -141,8 +149,8 @@ namespace Assets
                         else
                         {
                             // January
-                            if (monthChange && day > System.DateTime.DaysInMonth(passDate.Year - 1, 12) ||
-                                !monthChange && day > System.DateTime.DaysInMonth(passDate.Year, passDate.Month))
+                            if (monthChange && day > DateTime.DaysInMonth(passDate.Year - 1, 12) ||
+                                !monthChange && day > DateTime.DaysInMonth(passDate.Year, passDate.Month))
                             {
                                 day = 1;
                             }
@@ -151,10 +159,10 @@ namespace Assets
                     else
                     {
                         // time is moving backward
-                        day = System.Convert.ToInt32(dL.Text) - 1;
+                        day = Convert.ToInt32(dL.Text) - 1;
                         if (day < 1)
                         {
-                            day = System.DateTime.DaysInMonth(passDate.Year, passDate.Month);
+                            day = DateTime.DaysInMonth(passDate.Year, passDate.Month);
                         }
                     }
 
@@ -163,16 +171,16 @@ namespace Assets
                 }
             }
 
-            int daysUntilNextMonth = System.DateTime.DaysInMonth(passDate.Year, passDate.Month) - passDate.Day + 1;
+            int daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year, passDate.Month) - passDate.Day + 1;
             if (monthChange)
             {
                 if (passDate.Month < 12)
                 {
-                    daysUntilNextMonth = System.DateTime.DaysInMonth(passDate.Year, passDate.Month + 1) - passDate.Day;
+                    daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year, passDate.Month + 1) - passDate.Day;
                 }
                 else
                 {
-                    daysUntilNextMonth = System.DateTime.DaysInMonth(passDate.Year + 1, 1) - passDate.Day;
+                    daysUntilNextMonth = DateTime.DaysInMonth(passDate.Year + 1, 1) - passDate.Day;
                 }
 
                 // update text
@@ -197,7 +205,7 @@ namespace Assets
                 Vector3.up);
         }
 
-        GameObject NewDayMonthLabels(System.DateTime passDate)
+        GameObject NewDayMonthLabels(DateTime passDate)
         {
             //...........................(1) hLabelWheel
             // create days in month;        
@@ -208,7 +216,7 @@ namespace Assets
             int count2 = 0;
             int htr = 0;
             const float dayLabelPad = 2;
-            for (int ht = passDate.Day; ht <= System.DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
+            for (int ht = passDate.Day; ht <= DateTime.DaysInMonth(passDate.Year, passDate.Month); ht++)
             {
                 dLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
                 dLabel.SpecialInt = ht;
@@ -274,25 +282,45 @@ namespace Assets
             return newDLabelWheel;
         }
 
-        public Transform SelectionTarget { get; }
-        public void Highlight()
+        public void SetMoonOrbit(DateTime newDateUTC, DateTime newDateLocal)
         {
-            throw new NotImplementedException();
-        }
+            // Moon Orbit
+            moonSys.transform.rotation = Quaternion.AngleAxis(
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, Moon.lunarSidereal, 60),
+                Vector3.up);
+            
+            if (currentDay != newDateLocal.Day)
+            {
+                // day has switched over -> move month tri
+                if (currentMonth != newDateLocal.Month)
+                {
+                    MoveMoonSprockCont(newDateLocal, true, true);
+                    currentMonth = newDateLocal.Month;
+                }
+                else
+                {
+                    MoveMoonSprockCont(newDateLocal, true, false);
+                }
 
-        public void Unhighlight()
-        {
-            throw new NotImplementedException();
+                currentDay = newDateLocal.Day;
+
+                // update dayCal
+                if (SolarClock.Instance.calCreated)
+                {
+                    SolarClock.Instance.calendar.DrawDayCalendar(newDateLocal, transform.parent);
+                }
+            }
         }
+        
+        #region ISelectable
+        
+        public Transform SelectionTarget { get; }
 
         public void RequestSelection()
         {
             SolarClock.Instance.solarTime.isMoonTracking = true;
         }
 
-        public void RequestDeselection()
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

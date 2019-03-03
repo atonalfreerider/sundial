@@ -32,27 +32,27 @@ namespace Assets
         const float earthLineL = 400;
         const float SiderealDayInSeconds = 86164.0905f;
 
-        // text vars
+        // font, shader material vars
         public TMP_FontAsset mainFont;
         public Shader mainShader;
         public Material EarthMM, MoonMat;
-
+        [HideInInspector] public Material mainMat;
+        public TextBox TextBoxPrefab;
+        
         // persistent objects
         [HideInInspector] public Earth earth;
         Orbits orbits;
+        public PolygonFactory polygonFactory;
+        public DigitalClock digiClock;
+        public Calendar calendar;
+        
         GameObject sunSprockCont, sunLine, mLabelWheel;
         SphereCollider sphereCollider;
         Raycast raycast;
         Polygon sunSprock;
         TextBox summerText, springText;
-        public Calendar calendar;
         [HideInInspector] public CalendarMenu calendarMenu;
         Button nowButton;
-        public PolygonFactory polygonFactory;
-        [HideInInspector] public Material mainMat;
-
-        public DigitalClock digiClock;
-        public TextBox TextBoxPrefab;
         readonly GameObject[] seasonLabels = new GameObject[4];
         readonly TextBox[] yearQueue = new TextBox[3];
 
@@ -78,13 +78,10 @@ namespace Assets
         public Light ptLight, dirLight;
         float ptInt = .5f;
 
-        bool calCreated = false;
-
-        //bool newDayFound = false
-        int currentDay, currentMonth, currentYear, currentINDL, dst;
-
+        // state vars
+        public bool calCreated = false;
+        int currentYear, dst;
         DateTime jan1ofthisYear;
-
         bool labelUp = false;
 
         // INIT Functions
@@ -129,8 +126,8 @@ namespace Assets
             System.DateTime date2 = test2
             */
 
-            System.DateTime date1 = System.DateTime.UtcNow;
-            System.DateTime date2 = System.DateTime.Now;
+            DateTime date1 = DateTime.UtcNow;
+            DateTime date2 = DateTime.Now;
 
             //  Debug.Log(date1)
             //  Debug.Log(date2)
@@ -138,10 +135,8 @@ namespace Assets
             // store time values to check for days/year/timezone switch
             jan1ofthisYear = new System.DateTime();
             jan1ofthisYear = jan1ofthisYear.AddYears(date2.Year - 1);
-            currentDay = date2.Day;
-            currentMonth = date2.Month;
             currentYear = date2.Year;
-            currentINDL = Earth.GetDatelineDay(date1);
+       
             dst = 0;
             if (date2.IsDaylightSavingTime())
             {
@@ -195,7 +190,8 @@ namespace Assets
             orbitsGO.transform.SetParent(transform, false);
         }
 
-        // CREATION Functions
+        #region CREATION Functions
+        
         GameObject NewSunDial(float sundialR, System.DateTime passDate)
         {
             GameObject sunDial = new GameObject();
@@ -419,7 +415,10 @@ namespace Assets
             }
         }
 
-        // TOGGLE Functions
+        #endregion
+        
+        #region TOGGLE Functions
+        
         public void Toggle(ViewState newState)
         {
             viewState = newState;
@@ -533,50 +532,15 @@ namespace Assets
             }
         }
 
-        // TIME Functions
+        #endregion
+        
+        #region TIME Functions
+        
         public void SetOrbit(DateTime newDateUTC, DateTime newDateLocal)
         {
-            // Earth System Orbit
-            earth.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetEarthOrbitAngle(newDateUTC),
-                Vector3.up);
-
-            // reset Earth Sphere
-            earth.earthSph.transform.rotation = Quaternion.identity;
-            // the polar axis of the earth is tilted
-            earth.earthSph.transform.Rotate(Vector3.right, -23.4f);
-            // the Earth is rotated by the hours into the day
-            earth.earthSph.transform.Rotate(Vector3.up, Earth.getDiurnalPos(newDateUTC));
-
-            // Clock Sprocket - reverse rotated from the diurnal position of the Earth
-            earth.localWheelCont.transform.localRotation =
-                Quaternion.Euler(new Vector3(
-                    180,
-                    -Earth.getLocalClockAlpha(newDateLocal) + 180,
-                    0));
-
-            // Moon Orbit
-            earth.moonDial.moonSys.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, Moon.lunarSidereal, 60),
-                Vector3.up);
-
-            if (currentDay != newDateLocal.Day)
-            {
-                // day has switched over -> move month tri
-                if (currentMonth != newDateLocal.Month)
-                {
-                    earth.moonDial.MoveMoonSprockCont(newDateLocal, true, true);
-                    currentMonth = newDateLocal.Month;
-                }
-                else
-                    earth.moonDial.MoveMoonSprockCont(newDateLocal, true, false);
-
-                currentDay = newDateLocal.Day;
-
-                // update dayCal
-                if (calCreated)
-                    calendar.DrawDayCalendar(newDateLocal, earth.earthSys.transform);
-            }
+            earth.SetEarthSystemOrbit(newDateUTC, newDateLocal);
+            
+            orbits.SetLittlePlanetsOrbit(newDateUTC);
 
             if (currentYear != newDateLocal.Year)
             {
@@ -588,61 +552,20 @@ namespace Assets
                 yearQueue[1].Text = (currentYear).ToString();
                 yearQueue[2].Text = (currentYear + 1).ToString();
 
-                jan1ofthisYear = new System.DateTime();
+                jan1ofthisYear = new DateTime();
                 jan1ofthisYear = jan1ofthisYear.AddYears(newDateLocal.Year - 1);
 
-                Destroy(sunSprock);
+                Destroy(sunSprock.gameObject);
                 sunSprock = DrawSunSprock(sysDia, newDateLocal);
                 sunSprock.name = "SunSprock";
                 sunSprock.transform.SetParent(sunSprockCont.transform, false);
 
                 // update yearcal
                 if (calCreated)
+                {
                     calendar.DrawYearCalendar(newDateLocal, transform);
+                }
             }
-
-            earth.intDatelineSplit.transform.rotation =
-                Quaternion.AngleAxis(
-                    earth.earthSph.transform.rotation.eulerAngles.y - 90,
-                    Vector3.up);
-
-            int datelineDay = Earth.GetDatelineDay(newDateUTC);
-            if (datelineDay != currentINDL)
-            {
-                int yesterday = datelineDay - 1;
-                if (yesterday < 0)
-                    yesterday = 6;
-
-                earth.day11.Text = Calendar.daysofweekAbr[yesterday];
-                earth.day12.Text = Calendar.daysofweekAbr[yesterday];
-
-                earth.day21.Text = Calendar.daysofweekAbr[datelineDay];
-                earth.day22.Text = Calendar.daysofweekAbr[datelineDay];
-
-                currentINDL = datelineDay;
-            }
-
-            earth.RedrawStrip(newDateUTC.AddHours(12));
-
-            // Mercury Orbit: 88 days
-            orbits.planets[0].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, 88, 120),
-                Vector3.up);
-
-            // Venus Orbit: 224.698 days
-            orbits.planets[1].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, 224.698f, 120),
-                Vector3.up);
-
-            // little Earth Orbit:365.256363004 days
-            orbits.planets[2].transform.localRotation = Quaternion.AngleAxis(
-                earth.transform.localRotation.eulerAngles.y,
-                Vector3.up);
-
-            // Mars Orbit:  686.971
-            orbits.planets[3].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, 686.971f, -130),
-                Vector3.up);
 
             if (viewState == ViewState.GeoCentric)
             {
@@ -718,8 +641,6 @@ namespace Assets
                 digiClock.gameObject.SetActive(!digiClock.gameObject.activeInHierarchy);
             }
 
-
-
             if (Input.GetKeyDown(KeyCode.C))
             {
                 CreateOrToggleCalendar();
@@ -734,23 +655,17 @@ namespace Assets
             }
         }
 
+        #endregion
+        
+        #region ISelectable
+        
         public Transform SelectionTarget => transform;
-
-        public void Highlight()
-        {
-        }
-
-        public void Unhighlight()
-        {
-        }
 
         public void RequestSelection()
         {
             Toggle(ViewState.GeoCentric);
         }
-
-        public void RequestDeselection()
-        {
-        }
+        
+        #endregion
     }
 }
