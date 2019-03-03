@@ -82,7 +82,6 @@ namespace Assets
         // state vars
         public bool calCreated = false;
         int currentYear, dst;
-        DateTime jan1ofthisYear;
         bool labelUp = false;
 
         // INIT Functions
@@ -114,32 +113,30 @@ namespace Assets
 
             /*
             // time testing
-            System.DateTime test1 = new System.DateTime()
+            DateTime test1 = new DateTime()
             test1 = test1.AddYears(2014)
-            System.DateTime test2 = new System.DateTime()
+            DateTime test2 = new DateTime()
             test2 = test2.AddYears(2014)
             test2 = test2.AddHours(-11)
             test1 = test1.AddDays(200)
             test1 = test1.AddHours(5)
    
             //Switch between test and real time
-            System.DateTime date1 = test1
-            System.DateTime date2 = test2
+            DateTime date1 = test1
+            DateTime date2 = test2
             */
 
-            DateTime date1 = DateTime.UtcNow;
-            DateTime date2 = DateTime.Now;
+            DateTime utcNow = DateTime.UtcNow;
+            DateTime now = DateTime.Now;
 
             //  Debug.Log(date1)
             //  Debug.Log(date2)
 
             // store time values to check for days/year/timezone switch
-            jan1ofthisYear = new System.DateTime();
-            jan1ofthisYear = jan1ofthisYear.AddYears(date2.Year - 1);
-            currentYear = date2.Year;
+            currentYear = now.Year;
        
             dst = 0;
-            if (date2.IsDaylightSavingTime())
+            if (now.IsDaylightSavingTime())
             {
                 dst = 1;
             }
@@ -149,11 +146,11 @@ namespace Assets
 
             // create new SolarClock and set celestial positions
             gameObject.name = "SolarClock";
-            NewSolarClock(sysDia, date2);
+            NewSolarClock(sysDia, now);
 
-            SetOrbit(date1, date2);
-            earth.moonDial.MoveMoonSprockCont(date2, false, false);
-            // move 11 days past winter EQUINOX + local hour difference
+            SetOrbit(utcNow, now);
+            earth.moonDial.MoveMoonSprockCont(now, false, false);
+            // move 10 days past winter SOLSTICE + local hour difference
             sunSprockCont.transform.localRotation = Quaternion.AngleAxis(SunSprockOffset(), Vector3.up);
         }
 
@@ -170,7 +167,7 @@ namespace Assets
             CreateCalendar();
         }
 
-        void NewSolarClock(float clockR, System.DateTime passDate)
+        void NewSolarClock(float clockR, DateTime passDate)
         {
             // (0) SUNDIAL
             GameObject sunDial = NewSunDial(clockR, passDate);
@@ -193,7 +190,7 @@ namespace Assets
 
         #region CREATION Functions
         
-        GameObject NewSunDial(float sundialR, System.DateTime passDate)
+        GameObject NewSunDial(float sundialR, DateTime passDate)
         {
             GameObject sunDial = new GameObject();
             //.........(1) Sun;
@@ -273,7 +270,7 @@ namespace Assets
             return sunDial;
         }
 
-        GameObject DrawSunSprockCont(float sundialR, System.DateTime passDate)
+        GameObject DrawSunSprockCont(float sundialR, DateTime passDate)
         {
             GameObject newSunSprockCont = new GameObject("SunSprocketContainer");
 
@@ -305,18 +302,21 @@ namespace Assets
             return newSunSprockCont;
         }
 
-        Polygon DrawSunSprock(float sundialR, System.DateTime passDate)
+        Polygon DrawSunSprock(float sundialR, DateTime passDate)
         {
             // ........(2) DAYS;
             int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-            if (System.DateTime.IsLeapYear(passDate.Year))
+            if (DateTime.IsLeapYear(passDate.Year))
             {
+                // add one day to February
                 daysinMonth[1]++;
             }
 
-            // determine start point of first Sunday;       
-            int firstSunday = 8 - Calendar.ConvertDaytoInt(jan1ofthisYear.DayOfWeek.ToString());
-            // create point cloud for sprocket mesh;
+            // determine start point of first day of year
+            DateTime jan1OfDate = new DateTime(passDate.Year, 1, 1);
+            int dayCounter = Calendar.ConvertDaytoInt(jan1OfDate.DayOfWeek.ToString());
+            
+            // create point cloud for sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
             Circle.SprocketTick retArr;
@@ -329,18 +329,18 @@ namespace Assets
             const float bigH = 10;
             const float medH = 5;
             const float smallH = 3;
-            int dayCounter = firstSunday;
             const float step = 360f / YEAR * Mathf.PI / 180f;
 
             foreach (int diM in daysinMonth)
             {
                 alpha = -counter * step;
-                if (dayCounter == 7)
+                if (dayCounter > 6)
                 {
+                    // set back to Monday
                     dayCounter = 0;
                 }
 
-                // add first-of-month tick;
+                // add first-of-month tick
                 retArr = Circle.SprockTick(
                     sundialR,
                     bigH,
@@ -361,7 +361,7 @@ namespace Assets
                     alpha = -counter * step;
                     if (dayCounter == 7)
                     {
-                        // add Sunday tick;
+                        // add Sunday tick
                         retArr = Circle.SprockTick(
                             sundialR,
                             medH,
@@ -376,7 +376,7 @@ namespace Assets
                     }
                     else
                     {
-                        // add day tick;
+                        // add day tick
                         retArr = Circle.SprockTick(
                             sundialR,
                             smallH,
@@ -553,9 +553,6 @@ namespace Assets
                 yearQueue[1].Text = (currentYear).ToString();
                 yearQueue[2].Text = (currentYear + 1).ToString();
 
-                jan1ofthisYear = new DateTime();
-                jan1ofthisYear = jan1ofthisYear.AddYears(newDateLocal.Year - 1);
-
                 Destroy(sunSprock.gameObject);
                 sunSprock = DrawSunSprock(sysDia, newDateLocal);
                 sunSprock.name = "SunSprock";
@@ -577,12 +574,11 @@ namespace Assets
             }
 
             // move the sun line horizontally as a percentage of how far the solar system is through the year
+            
+            TimeSpan yearProgress = new TimeSpan(newDateLocal.Ticks - new DateTime(newDateLocal.Year, 1, 1).Ticks);
             sunLine.transform.position = new Vector3(
                 0,
-                earthLineL * (.5f - (newDateLocal.Ticks - jan1ofthisYear.Ticks) /
-                              10000000f /
-                              SiderealDayInSeconds /
-                              YEAR),
+                earthLineL * (.5f - yearProgress.Days / YEAR),
                 0);
         }
 
