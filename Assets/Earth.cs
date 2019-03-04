@@ -13,7 +13,6 @@ namespace Assets
         // calibration vars
         const float earthSidereal = 23.9344696f;
         const float earthSynodic = 24;
-        public float earthR;
         float localR;
 
         // persistent object
@@ -37,21 +36,20 @@ namespace Assets
             currentINDLday = GetDatelineDay(DateTime.UtcNow);
         }
         
-        public void NewEarthSystem(float passEarthR, DateTime passDate)
+        public void NewEarthSystem(DateTime passDate)
         {
-            earthR = passEarthR;
             //...(0) Earth Line
             GameObject earthLineCont = new GameObject("EarthLineCont");
             earthLineCont.transform.SetParent(transform, false);
 
             handSphereCollider = gameObject.AddComponent<SphereCollider>();
             handSphereCollider.radius = 30;
-            handSphereCollider.center = new Vector3(0, 0, earthR);
+            handSphereCollider.center = new Vector3(0, 0, SolarClock.SYSTEM_DIAMETER);
 
-            float earthH = earthR * .99f;
+            float earthH = SolarClock.SYSTEM_DIAMETER * .99f;
             Polygon earthLine = PolygonFactory.DrawTri(
                 earthH, 
-                earthR * .05f,
+                SolarClock.SYSTEM_DIAMETER * .05f,
                 new Color(1, 1, 1, .3f));
             earthLine.name = "EarthLine";
             earthLine.transform.SetParent(earthLineCont.transform, false);
@@ -59,7 +57,7 @@ namespace Assets
             // ...(1) Earth System
             earthSys = new GameObject("EarthSys");
             earthSys.transform.SetParent(transform, false);
-            earthSys.transform.Translate(Vector3.forward * earthR * .5f);
+            earthSys.transform.Translate(Vector3.forward * SolarClock.SYSTEM_DIAMETER * .5f);
             
             // .........(1) Earth Sprocket;
             GameObject earthSprockCont = new GameObject("EarthSprockCont");
@@ -77,7 +75,7 @@ namespace Assets
             float pointAl = .003f;
             float smallH = 3f;
             float bigH = 7f;
-            float hR = earthR * .4f;
+            float hR = SolarClock.SYSTEM_DIAMETER * .4f;
             float stepD = 360f / 96 * Mathf.PI / 180f;
             for (int tt = 0; tt < 24; tt++)
             {
@@ -121,7 +119,7 @@ namespace Assets
                 hLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 40, TextAlignmentOptions.Center);
                 hLabel.transform.SetParent(hLabelWheel.transform, false);
                 hLabel.transform.Rotate(Vector3.forward, ht * (360f / 24f));
-                hLabel.transform.Translate(Vector3.up * (earthR * .4f - 10));
+                hLabel.transform.Translate(Vector3.up * (SolarClock.SYSTEM_DIAMETER * .4f - 10));
                 if ((ht >= 0 && ht < 6) || ht > 18)
                 {
                     hLabel.transform.Rotate(Vector3.forward, 180);
@@ -130,7 +128,7 @@ namespace Assets
             hLabelWheel.transform.Rotate(Vector3.right * 90);
 
             //...........................(3) dayDil
-            localR = earthR * .28f;
+            localR = SolarClock.SYSTEM_DIAMETER * .28f;
 
             //Collections.ObjectModel.ReadOnlyCollection<TimeZoneInfo> zones = TimeZoneInfo.GetSystemTimeZones()
             //TimeZoneInfo dstZone = zones[0]
@@ -229,17 +227,17 @@ namespace Assets
             earthSph.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
             earthSph.name = "Earth";
-            earthSph.transform.localScale = Vector3.one * 75;
+            earthSph.transform.localScale = Vector3.one * SolarClock.SYSTEM_DIAMETER * .5f;
             earthSph.transform.SetParent(earthSys.transform, false);
 
             //.........(4) Day Calendar
-            //earth.addChild(Calendar.NewDayCalendar(earthR*.4))
+            //earth.addChild(Calendar.NewDayCalendar(SolarClock.SYSTEM_DIAMETER*.4))
 
             //.........(5) shade
             //var shade = new GameObject()
-            //shade.addChild(Shapes.NewTrapazoid(earthR*.822,earthR*.418,20,.5,0x000000))
-            //shade.addChild(Shapes.NewChord(earthR*.822,earthR*.185, .5, 0x000000))
-            //shade.getChildAt(1).y = earthR * .418
+            //shade.addChild(Shapes.NewTrapazoid(SolarClock.SYSTEM_DIAMETER*.822,SolarClock.SYSTEM_DIAMETER*.418,20,.5,0x000000))
+            //shade.addChild(Shapes.NewChord(SolarClock.SYSTEM_DIAMETER*.822,SolarClock.SYSTEM_DIAMETER*.185, .5, 0x000000))
+            //shade.getChildAt(1).y = SolarClock.SYSTEM_DIAMETER * .418
             //shade.getChildAt(1).x =  -  shade.getChildAt(1).width / 2
             //shade.filters = [blur]
             //shade.alpha = .7
@@ -249,7 +247,7 @@ namespace Assets
             GameObject moonDialGO = new GameObject("MoonDial");
             moonDialGO.transform.SetParent(earthSys.transform, false);
             moonDial = moonDialGO.AddComponent<Moon>();
-            moonDial.NewMoon(earthR * .45f, passDate);
+            moonDial.NewMoon(SolarClock.SYSTEM_DIAMETER * .45f, passDate);
         }
 
         public void SetEarthSystemOrbit(DateTime newDateUTC, DateTime newDateLocal)

@@ -47,8 +47,9 @@ namespace Assets
             )
         };
 
-        public void NewOrbits(float earthOR)
+        public void NewOrbits()
         {
+            const float earthOR = SolarClock.SYSTEM_DIAMETER * .5f;
             GameObject planetOrbit;
             int count = 0;
             GameObject planet;

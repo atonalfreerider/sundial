@@ -28,7 +28,7 @@ namespace Assets
 
         // calibration vars
         public const float YEAR = 365.256363004f;
-        const float sysDia = 150;
+        public const float SYSTEM_DIAMETER = 150;
         float earthScale = .001f;
         const float earthLineL = 400;
         const float SiderealDayInSeconds = 86164.0905f;
@@ -39,14 +39,14 @@ namespace Assets
         public Material EarthMM, MoonMat;
         [HideInInspector] public Material mainMat;
         public TextBox TextBoxPrefab;
-        
+
         // persistent objects
         [HideInInspector] public Earth earth;
         Orbits orbits;
         public PolygonFactory polygonFactory;
         public DigitalClock digiClock;
         public Calendar calendar;
-        
+
         GameObject sunSprockCont, sunLine, mLabelWheel;
         SphereCollider sphereCollider;
         Raycast raycast;
@@ -59,21 +59,18 @@ namespace Assets
 
         // camera vars
         public ViewState viewState = ViewState.HelioCentric;
-        const float solCamY = 270;
-        const float earthCamY = 135;
-        Vector3 targetPos = new Vector3(0, solCamY, 0);
+        const float FIXED_CAM_Y = 200;
+        Vector3 targetPos = new Vector3(0, FIXED_CAM_Y, 0);
         Quaternion targetRot = Quaternion.AngleAxis(90, Vector3.right);
         Vector3 orbitScale = new Vector3(1, .01f, 1);
         float orthoSize;
-#if UNITY_EDITOR
-        const float solOrthoSize = sysDia;
-        const float earthOrthoSize = sysDia * .5f + 2;
-#else
-        // Viewer for Galaxy S8
-        const float solOrthoSize = 320;
-        const float earthOrthoSize = 125;
-#endif
         Coroutine zooming;
+        static float solOrthoSize => SYSTEM_DIAMETER * (Screen.width > Screen.height
+                                                 ? 1
+                                                 : (float) Screen.height / Screen.width);
+        static float earthOrthoSize => solOrthoSize * (Screen.width > Screen.height
+                                           ? .55f
+                                           : .45f); // get a little closer on phones
 
         // light vars
         public Light ptLight, dirLight;
@@ -93,7 +90,7 @@ namespace Assets
             QualitySettings.antiAliasing = 4;
             orthoSize = solOrthoSize;
             sphereCollider = gameObject.AddComponent<SphereCollider>();
-            sphereCollider.radius = 100;
+            sphereCollider.radius = SYSTEM_DIAMETER * .7f;
 
             mainMat = new Material(mainShader);
 
@@ -102,7 +99,8 @@ namespace Assets
 
             raycast = gameObject.AddComponent<Raycast>();
 
-            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 100, TextAlignmentOptions.Center);
+            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 100,
+                TextAlignmentOptions.Center);
             nowButton.Pad = 20;
             nowButton.transform.SetParent(Camera.main.transform, false);
             nowButton.transform.localPosition = new Vector3(
@@ -117,7 +115,7 @@ namespace Assets
 
             // store time values to check for days/year/timezone switch
             currentYear = now.Year;
-       
+
             dst = 0;
             if (now.IsDaylightSavingTime())
             {
@@ -129,7 +127,7 @@ namespace Assets
 
             // create new SolarClock and set celestial positions
             gameObject.name = "SolarClock";
-            NewSolarClock(sysDia, now);
+            NewSolarClock(now);
 
             SetOrbit(utcNow, now);
             // move 10 days past winter SOLSTICE + local hour difference
@@ -149,30 +147,30 @@ namespace Assets
             CreateCalendar();
         }
 
-        void NewSolarClock(float clockR, DateTime passDate)
+        void NewSolarClock(DateTime passDate)
         {
             // (0) SUNDIAL
-            GameObject sunDial = NewSunDial(clockR, passDate);
+            GameObject sunDial = NewSunDial(passDate);
             sunDial.name = "SunDial";
             sunDial.transform.SetParent(transform, false);
 
             // (1) EARTHDIAL
             GameObject earthGO = new GameObject("EarthDial");
             earth = earthGO.AddComponent<Earth>();
-            earth.NewEarthSystem(clockR, passDate);
+            earth.NewEarthSystem(passDate);
             earthGO.transform.SetParent(transform, false);
 
             // (2) SUN and Planets
             //.........(0) Planets
             GameObject orbitsGO = new GameObject("PlanetOrbits");
             orbits = orbitsGO.AddComponent<Orbits>();
-            orbits.NewOrbits(clockR * .5f);
+            orbits.NewOrbits();
             orbitsGO.transform.SetParent(transform, false);
         }
 
         #region CREATION Functions
-        
-        GameObject NewSunDial(float sundialR, DateTime passDate)
+
+        GameObject NewSunDial(DateTime passDate)
         {
             GameObject sunDial = new GameObject();
             //.........(1) Sun;
@@ -187,16 +185,16 @@ namespace Assets
             GameObject seasonCross = new GameObject("SeasonCross");
             Color axisColor = new Color(1, 1, 1, .5f);
             GameObject solsticeLine = PolygonFactory.DrawDottedLine(
-                new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR),
+                new Vector3(0, 0, SYSTEM_DIAMETER),
+                new Vector3(0, 0, -SYSTEM_DIAMETER),
                 axisColor,
                 20);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
 
             GameObject equinoxLine = PolygonFactory.DrawDottedLine(
-                new Vector3(0, 0, sundialR),
-                new Vector3(0, 0, -sundialR),
+                new Vector3(0, 0, SYSTEM_DIAMETER),
+                new Vector3(0, 0, -SYSTEM_DIAMETER),
                 axisColor,
                 20);
             equinoxLine.name = "EquinoxLine";
@@ -212,7 +210,7 @@ namespace Assets
                 TextBox seasonText = TextBox.Create(season, TextBox.FontType.SecFont, 60, TextAlignmentOptions.Center);
                 seasonText.transform.SetParent(seasonCross.transform, false);
                 seasonText.transform.Rotate(Vector3.up, count * 90 - 45);
-                seasonText.transform.Translate(Vector3.forward * sundialR * .82f);
+                seasonText.transform.Translate(Vector3.forward * SYSTEM_DIAMETER * .82f);
                 seasonText.transform.Rotate(Vector3.right * 90);
                 seasonText.transform.Rotate(Vector3.forward * 180);
                 if (count == 0)
@@ -224,7 +222,7 @@ namespace Assets
             }
 
             seasonCross.transform.SetParent(sunDial.transform, false);
-            sunSprockCont = DrawSunSprockCont(sundialR, passDate);
+            sunSprockCont = DrawSunSprockCont(passDate);
             sunSprockCont.name = "SunSprockCont";
             sunSprockCont.transform.SetParent(sunDial.transform, false);
 
@@ -252,11 +250,11 @@ namespace Assets
             return sunDial;
         }
 
-        GameObject DrawSunSprockCont(float sundialR, DateTime passDate)
+        GameObject DrawSunSprockCont(DateTime passDate)
         {
             GameObject newSunSprockCont = new GameObject("SunSprocketContainer");
 
-            sunSprock = DrawSunSprock(sundialR, passDate);
+            sunSprock = DrawSunSprock(passDate);
             sunSprock.name = "SunSprock";
             sunSprock.transform.SetParent(newSunSprockCont.transform, false);
 
@@ -270,7 +268,7 @@ namespace Assets
                 monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60,
                     TextAlignmentOptions.Center);
                 monthText.transform.Rotate(Vector3.forward, 30 * mt);
-                monthText.transform.Translate(Vector3.up * (-sundialR + 6));
+                monthText.transform.Translate(Vector3.up * (-SYSTEM_DIAMETER + 6));
 
                 monthText.transform.SetParent(mLabelWheel.transform);
             }
@@ -284,7 +282,7 @@ namespace Assets
             return newSunSprockCont;
         }
 
-        Polygon DrawSunSprock(float sundialR, DateTime passDate)
+        Polygon DrawSunSprock(DateTime passDate)
         {
             // ........(2) DAYS;
             int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -297,7 +295,7 @@ namespace Assets
             // determine start point of first day of year
             DateTime jan1OfDate = new DateTime(passDate.Year, 1, 1);
             int dayCounter = Calendar.ConvertDaytoInt(jan1OfDate.DayOfWeek.ToString());
-            
+
             // create point cloud for sprocket mesh
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
@@ -324,7 +322,7 @@ namespace Assets
 
                 // add first-of-month tick
                 retArr = Circle.SprockTick(
-                    sundialR,
+                    SYSTEM_DIAMETER,
                     bigH,
                     alpha,
                     -(counter + 1) * step,
@@ -345,7 +343,7 @@ namespace Assets
                     {
                         // add Sunday tick
                         retArr = Circle.SprockTick(
-                            sundialR,
+                            SYSTEM_DIAMETER,
                             medH,
                             alpha,
                             -(counter + 1) * step,
@@ -360,7 +358,7 @@ namespace Assets
                     {
                         // add day tick
                         retArr = Circle.SprockTick(
-                            sundialR,
+                            SYSTEM_DIAMETER,
                             smallH,
                             alpha,
                             -(counter + 1) * step,
@@ -392,16 +390,16 @@ namespace Assets
             if (!calCreated)
             {
                 calendar = new Calendar();
-                calendar.Init(YEAR, sysDia, sysDia * .4f);
+                calendar.Init(YEAR, SYSTEM_DIAMETER, SYSTEM_DIAMETER * .4f);
 
                 calCreated = true;
             }
         }
 
         #endregion
-        
+
         #region TOGGLE Functions
-        
+
         public void Toggle(ViewState newState)
         {
             viewState = newState;
@@ -430,10 +428,8 @@ namespace Assets
             else
             {
                 // zoom to Solar
-                //420f;
-                // 270;
                 sphereCollider.enabled = true;
-                targetPos = new Vector3(0, solCamY, 0);
+                targetPos = new Vector3(0, FIXED_CAM_Y, 0);
                 targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
                 orbits.gameObject.SetActive(true);
                 earthScale = .001f;
@@ -495,7 +491,7 @@ namespace Assets
                 lerp);
             earth.earthSys.transform.localScale = Vector3.Lerp(
                 earth.earthSys.transform.localScale,
-                new Vector3(earthScale, earthScale, earthScale),
+                Vector3.one * earthScale,  
                 lerp);
 
             ptLight.intensity = Mathf.Lerp(ptLight.intensity, ptInt, lerp);
@@ -516,13 +512,13 @@ namespace Assets
         }
 
         #endregion
-        
+
         #region TIME Functions
-        
+
         public void SetOrbit(DateTime newDateUTC, DateTime newDateLocal)
         {
             earth.SetEarthSystemOrbit(newDateUTC, newDateLocal);
-            
+
             orbits.SetLittlePlanetsOrbit(newDateUTC);
 
             if (currentYear != newDateLocal.Year)
@@ -536,7 +532,7 @@ namespace Assets
                 yearQueue[2].Text = (currentYear + 1).ToString();
 
                 Destroy(sunSprock.gameObject);
-                sunSprock = DrawSunSprock(sysDia, newDateLocal);
+                sunSprock = DrawSunSprock(newDateLocal);
                 sunSprock.name = "SunSprock";
                 sunSprock.transform.SetParent(sunSprockCont.transform, false);
 
@@ -556,7 +552,7 @@ namespace Assets
             }
 
             // move the sun line horizontally as a percentage of how far the solar system is through the year
-            
+
             TimeSpan yearProgress = new TimeSpan(newDateLocal.Ticks - new DateTime(newDateLocal.Year, 1, 1).Ticks);
             sunLine.transform.position = new Vector3(
                 0,
@@ -568,7 +564,7 @@ namespace Assets
         {
             targetPos = new Vector3(
                 earth.earthSys.transform.position.x,
-                earthCamY,
+                FIXED_CAM_Y,
                 earth.earthSys.transform.position.z);
             targetRot = Quaternion.Euler(new Vector3(
                 90,
@@ -635,16 +631,16 @@ namespace Assets
         }
 
         #endregion
-        
+
         #region ISelectable
-        
+
         public Transform SelectionTarget => transform;
 
         public void RequestSelection()
         {
             Toggle(ViewState.GeoCentric);
         }
-        
+
         #endregion
     }
 }
