@@ -314,7 +314,7 @@ namespace Assets
             newRing.transform.rotation = Quaternion.AngleAxis(
                 isYearEvent
                     ? Orbits.GetEarthOrbitAngle(passEv.end)
-                    : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
+                    : -360 * (passEv.end.Hour + Earth.GetTimeZone() + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
 
             return newRing;
