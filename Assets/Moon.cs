@@ -27,17 +27,7 @@ namespace Assets
         GameObject monthSplitCont;
         TextBox[] dayList;
 
-        // state vars
-        int currentDay, currentMonth;
-
         // INIT Functions
-        void Awake()
-        {
-            DateTime date2 = DateTime.Now;
-            currentDay = date2.Day;
-            currentMonth = date2.Month;
-        }
-
         public void NewMoon(float passMoonR, DateTime passDate)
         {
             moonR = passMoonR;
@@ -62,12 +52,12 @@ namespace Assets
 
             //.........................(0) Moon
             moon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            moon.GetComponent<SphereCollider>().radius = 2;
+            moon.GetComponent<SphereCollider>().radius = SolarClock.SYSTEM_DIAMETER / 75f;
             moon.name = "Moon";
             moon.GetComponent<Renderer>().material =
                 GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().MoonMat;
-            const float moonRad = 75 * .273f * .3f;
-            moon.transform.localScale = new Vector3(moonRad, moonRad, moonRad);
+            const float moonRad = SolarClock.SYSTEM_DIAMETER * .04095f;
+            moon.transform.localScale = Vector3.one * moonRad;
             moon.transform.Translate(Vector3.forward * moonR);
             moon.transform.parent = moonSys.transform;
 

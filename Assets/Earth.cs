@@ -43,7 +43,7 @@ namespace Assets
             earthLineCont.transform.SetParent(transform, false);
 
             handSphereCollider = gameObject.AddComponent<SphereCollider>();
-            handSphereCollider.radius = 30;
+            handSphereCollider.radius = SolarClock.SYSTEM_DIAMETER / 5f;
             handSphereCollider.center = new Vector3(0, 0, SolarClock.SYSTEM_DIAMETER);
 
             float earthH = SolarClock.SYSTEM_DIAMETER * .99f;

@@ -11,7 +11,7 @@ namespace Assets
         public Circle[] paths = new Circle[4];
 
         // calibration vars
-        const float earthR = 5f;
+        const float earthR = SolarClock.SYSTEM_DIAMETER * .033f;
         const float DoverR = 47.33f;
         const float velComp = .1f;
         public float flatScale = .01f;

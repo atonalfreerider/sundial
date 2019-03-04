@@ -132,7 +132,7 @@ namespace Assets.UI.Text
             TextBox textBox = Instantiate(SolarClock.Instance.TextBoxPrefab);
             textBox.name = $"TextBox: {text.Split('\n').First()}";
 
-            textBox.Font = FontFromType(fontType, fontSize);
+            textBox.Font = FontFromType(fontType, fontSize * SolarClock.SYSTEM_DIAMETER / 150f);
             textBox.Alignment = align;
             textBox.Text = text;
 

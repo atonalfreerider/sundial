@@ -175,8 +175,8 @@ namespace Assets
             GameObject sunDial = new GameObject();
             //.........(1) Sun;
             GameObject sunStar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            float sunR = 12f;
-            sunStar.transform.localScale = new Vector3(sunR, sunR, sunR);
+            float sunR = SYSTEM_DIAMETER * .08f;
+            sunStar.transform.localScale = Vector3.one * sunR;
             sunStar.name = "Sun";
             sunStar.transform.SetParent(sunDial.transform, false);
             sunStar.GetComponent<SphereCollider>().enabled = false;
