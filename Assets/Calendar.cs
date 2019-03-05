@@ -23,16 +23,23 @@ namespace Assets
             string passTitle,
             DateTime passStart,
             DateTime passEnd,
-            Color passColor)
+            Color passColor, 
+            int timeZoneOffset)
         {
             this.parentCalendar = parentCalendar;
             title = passTitle;
-            start = passStart;
-            end = passEnd;
             color = passColor;
 
+            start = passStart;
+            end = passEnd;
             long ticks = end.Ticks - start.Ticks;
             isYearEvent = ticks >= TimeSpan.TicksPerDay;
+            
+            if (isYearEvent) return;
+            
+            // all android calendar dates are UTC -> localize day events
+            start = passStart.AddHours(timeZoneOffset);
+            end = passEnd.AddHours(timeZoneOffset);
         }
     }
 
@@ -79,6 +86,7 @@ namespace Assets
         {
             Dictionary<string, MyEvent[]> calendarsAndEvents = new Dictionary<string, MyEvent[]>();
             DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
+            int timeZoneOffset = Earth.GetTimeZone();
 
             using (AndroidJavaClass javaClass =
                 new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
@@ -135,7 +143,8 @@ namespace Assets
                                 title,
                                 startDate,
                                 endDate,
-                                GetEventColor(title)
+                                GetEventColor(title),
+                                timeZoneOffset
                             );
                         }
 
@@ -314,7 +323,7 @@ namespace Assets
             newRing.transform.rotation = Quaternion.AngleAxis(
                 isYearEvent
                     ? Orbits.GetEarthOrbitAngle(passEv.end)
-                    : -360 * (passEv.end.Hour + Earth.GetTimeZone() + passEv.end.Minute / 60f) / 24f,
+                    : -360 * (passEv.end.Hour + passEv.end.Minute / 60f) / 24f,
                 Vector3.up);
 
             return newRing;
@@ -442,7 +451,8 @@ namespace Assets
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
                 CreateDate(now.Year, 2, 1, 0, 0),
-                Color.red);
+                Color.red,
+                0);
 
             MyEvent testDayEvent =
                 new MyEvent(
@@ -450,7 +460,8 @@ namespace Assets
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),
                     CreateDate(now.Year, now.Month, now.Day, 5, 0),
-                    Color.red);
+                    Color.red,
+                    0);
 
             calendarEvents.Add(testCal, new[] {testYearEvent, testDayEvent});
 
@@ -460,7 +471,8 @@ namespace Assets
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
                 CreateDate(now.Year, 2, 1, 0, 0),
-                Color.green);
+                Color.green,
+                0);
 
             MyEvent testDayEvent2 =
                 new MyEvent(
@@ -468,7 +480,8 @@ namespace Assets
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),
                     CreateDate(now.Year, now.Month, now.Day, 5, 0),
-                    Color.green);
+                    Color.green,
+                    0);
 
             calendarEvents.Add(testCal2, new[] {testYearEvent2, testDayEvent2});
 
