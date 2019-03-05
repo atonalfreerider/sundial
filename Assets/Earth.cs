@@ -230,19 +230,6 @@ namespace Assets
             earthSph.transform.localScale = Vector3.one * SolarClock.SYSTEM_DIAMETER * .5f;
             earthSph.transform.SetParent(earthSys.transform, false);
 
-            //.........(4) Day Calendar
-            //earth.addChild(Calendar.NewDayCalendar(SolarClock.SYSTEM_DIAMETER*.4))
-
-            //.........(5) shade
-            //var shade = new GameObject()
-            //shade.addChild(Shapes.NewTrapazoid(SolarClock.SYSTEM_DIAMETER*.822,SolarClock.SYSTEM_DIAMETER*.418,20,.5,0x000000))
-            //shade.addChild(Shapes.NewChord(SolarClock.SYSTEM_DIAMETER*.822,SolarClock.SYSTEM_DIAMETER*.185, .5, 0x000000))
-            //shade.getChildAt(1).y = SolarClock.SYSTEM_DIAMETER * .418
-            //shade.getChildAt(1).x =  -  shade.getChildAt(1).width / 2
-            //shade.filters = [blur]
-            //shade.alpha = .7
-            //earth.addChild(shade)
-
             ////........(6) Moon;    
             GameObject moonDialGO = new GameObject("MoonDial");
             moonDialGO.transform.SetParent(earthSys.transform, false);

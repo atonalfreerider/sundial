@@ -14,7 +14,7 @@ namespace DefaultNamespace
         public bool isMoonTracking = false;
         bool showNow = true;
         DateTime lastDate = DateTime.Now;
-        
+
         Coroutine minuteUpdate;
         Coroutine secondUpdate;
 
@@ -25,47 +25,53 @@ namespace DefaultNamespace
             SolarClock.Instance.nowButton.gameObject.SetActive(false);
         }
 
-        DateTime UTCDateThatMatchesAngle(float targetAngle, DateTime test)
+        DateTime UTCDateThatMatchesAngle(float targetAngle, DateTime currentDate)
         {
-            float startingAngDifference = AngularDifference(test, targetAngle);
-
             const float minDistance = 5;
-            const float wraparoundDistance = 350;
-            
-            if (startingAngDifference > minDistance && startingAngDifference < wraparoundDistance ||
-                startingAngDifference <= -wraparoundDistance)
+
+            DateTime pastDate = currentDate.AddHours(isEarthTracking ? -12 : -1);
+            DateTime futureDate = currentDate.AddHours(isEarthTracking ? 12 : 1);
+
+            float pastAngleDiff = AngularDifference(pastDate, targetAngle);
+            float futureAngleDiff = AngularDifference(futureDate, targetAngle);
+
+            int safety = 0;
+            while (pastAngleDiff > minDistance || futureAngleDiff > minDistance)
             {
-                // either the target is positively ahead or has just crossed going right to left on the bottom
-                while (AngularDifference(test, targetAngle) > minDistance ||
-                       AngularDifference(test, targetAngle) <= -wraparoundDistance)
-                {
-                    // reverse time for earth or moon
-                    test = test.AddHours(isEarthTracking ? -12 : -1);
-                }
-            }
-            else if (startingAngDifference < -minDistance && startingAngDifference > -wraparoundDistance ||
-                     startingAngDifference >= wraparoundDistance)
-            {
-                // either the target is negatively behind or has just crossed going left to right on the bottom
-                while (AngularDifference(test, targetAngle) < -minDistance ||
-                       AngularDifference(test, targetAngle) >= wraparoundDistance)
-                {
-                    // advance time for earth or moon
-                    test = test.AddHours(isEarthTracking ? 12 : 1);
-                }
+                currentDate = futureAngleDiff < pastAngleDiff
+                    ? futureDate
+                    : pastDate;
+
+                pastDate = currentDate.AddHours(isEarthTracking ? -12 : -1);
+                futureDate = currentDate.AddHours(isEarthTracking ? 12 : 1);
+
+                pastAngleDiff = AngularDifference(pastDate, targetAngle);
+                futureAngleDiff = AngularDifference(futureDate, targetAngle);
+
+                safety++;
+                if (safety > 1000 || pastAngleDiff < minDistance || futureAngleDiff < minDistance) break;
             }
 
-            SolarClock.Instance.digiClock.SetTime(test);
+            SolarClock.Instance.digiClock.SetTime(currentDate);
 
-            lastDate = test;
-            return test;
+            lastDate = currentDate;
+            return currentDate;
         }
 
         float AngularDifference(DateTime test, float targetAngle)
         {
-            return isEarthTracking
+            float diff = isEarthTracking
                 ? targetAngle - Orbits.GetEarthOrbitAngle(test)
-                : targetAngle - Orbits.GetNonEarthOrbitAngle(test, Moon.lunarSidereal, 60) + Orbits.GetEarthOrbitAngle(test) - 180;
+                : targetAngle - Orbits.GetNonEarthOrbitAngle(test, Moon.lunarSidereal, 60) +
+                  Orbits.GetEarthOrbitAngle(test) - 180;
+            float abs = Mathf.Abs(diff);
+            if (abs > 360)
+            {
+                // not entirely sure why, but the moon dial can return values greater than 360
+                abs -= 360;
+            }
+
+            return Mathf.Min(abs, 360 - abs);
         }
 
         // UPDATE Functions
