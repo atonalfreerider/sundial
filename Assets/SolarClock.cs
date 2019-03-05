@@ -579,6 +579,16 @@ namespace Assets
             return -10 * 360 / YEAR - 180 + Earth.GetTimeZone() * 360 / (YEAR * 24);
         }
 
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                SetOrbit(DateTime.UtcNow, DateTime.Now);
+            }
+        }
+
+        #endregion
+
         void Update()
         {
             if (Input.GetMouseButtonDown(0))
@@ -621,17 +631,7 @@ namespace Assets
                 calendarMenu.calendars.menuButtons.First().Value.RequestSelection();
             }
         }
-
-        void OnApplicationFocus(bool hasFocus)
-        {
-            if (hasFocus)
-            {
-                SetOrbit(DateTime.UtcNow, DateTime.Now);
-            }
-        }
-
-        #endregion
-
+        
         #region ISelectable
 
         public Transform SelectionTarget => transform;
