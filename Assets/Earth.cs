@@ -70,20 +70,28 @@ namespace Assets
             int pointCounter = 0;
             int counter = 0;
             float alpha;
-            float sprockTh = 1f;
+            float sprockTh = SolarClock.SYSTEM_DIAMETER / 150f;
             float baseAl = .007f;
             float pointAl = .003f;
-            float smallH = 3f;
-            float bigH = 7f;
-            float hR = SolarClock.SYSTEM_DIAMETER * .4f;
+            float smallH = SolarClock.SYSTEM_DIAMETER * .02f;
+            float bigH = SolarClock.SYSTEM_DIAMETER * .0466f;
+            const float hR = SolarClock.SYSTEM_DIAMETER * .4f;
             float stepD = 360f / 96 * Mathf.PI / 180f;
             for (int tt = 0; tt < 24; tt++)
             {
                 alpha = -counter * stepD;
                 // create hour tick
 
-                retArr = Circle.SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
-                    pointCounter, 0);
+                retArr = Circle.SprockTick(
+                    hR, 
+                    bigH,
+                    alpha,
+                    -(counter + 1) * stepD, 
+                    sprockTh, 
+                    baseAl, 
+                    pointAl,
+                    pointCounter, 
+                    0);
                 pointList.AddRange(retArr.pointList);
                 indList.AddRange(retArr.indexList);
                 pointCounter = retArr.pointCounter;
@@ -92,8 +100,16 @@ namespace Assets
                 {
                     alpha = -counter * stepD;
                     // create 15min tick
-                    retArr = Circle.SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
-                        pointCounter, 0);
+                    retArr = Circle.SprockTick(
+                        hR,
+                        smallH,
+                        alpha,
+                        -(counter + 1) * stepD,
+                        sprockTh, 
+                        baseAl, 
+                        pointAl,
+                        pointCounter,
+                        0);
                     pointList.AddRange(retArr.pointList);
                     indList.AddRange(retArr.indexList);
                     pointCounter = retArr.pointCounter;
@@ -119,7 +135,7 @@ namespace Assets
                 hLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 40, TextAlignmentOptions.Center);
                 hLabel.transform.SetParent(hLabelWheel.transform, false);
                 hLabel.transform.Rotate(Vector3.forward, ht * (360f / 24f));
-                hLabel.transform.Translate(Vector3.up * (SolarClock.SYSTEM_DIAMETER * .4f - 10));
+                hLabel.transform.Translate(Vector3.up * (SolarClock.SYSTEM_DIAMETER * .4f - SolarClock.SYSTEM_DIAMETER * .066f));
                 if ((ht >= 0 && ht < 6) || ht > 18)
                 {
                     hLabel.transform.Rotate(Vector3.forward, 180);
@@ -140,16 +156,17 @@ namespace Assets
                 yesterday = 6;
 
             const float angOffset = 4.2f;
+            const float padDay = SolarClock.SYSTEM_DIAMETER * .015f;
             day11 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day11.transform.SetParent(earthSprockCont.transform, false);
-            day11.transform.Rotate(Vector3.up * (180f + angOffset));
-            day11.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day11.transform.Rotate(Vector3.up * (180 + angOffset));
+            day11.transform.Translate(Vector3.forward * -(localR - padDay));
             day11.transform.Rotate(Vector3.right * 90);
 
             day21 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day21.transform.SetParent(earthSprockCont.transform, false);
-            day21.transform.Rotate(Vector3.up * (180f - angOffset));
-            day21.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day21.transform.Rotate(Vector3.up * (180 - angOffset));
+            day21.transform.Translate(Vector3.forward * -(localR - padDay));
             day21.transform.Rotate(Vector3.right * 90);
 
             intDatelineSplit = new GameObject("IntDatelineSplit");
@@ -158,34 +175,53 @@ namespace Assets
             day12 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day12.transform.SetParent(intDatelineSplit.transform, false);
             day12.transform.Rotate(Vector3.up * (180 - angOffset));
-            day12.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day12.transform.Translate(Vector3.forward * -(localR - padDay));
             day12.transform.Rotate(Vector3.right * 90);
 
             day22 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
             day22.transform.SetParent(intDatelineSplit.transform, false);
             day22.transform.Rotate(Vector3.up * (180 + angOffset));
-            day22.transform.Translate(Vector3.forward * -(localR - 2.25f));
+            day22.transform.Translate(Vector3.forward * -(localR - padDay));
             day22.transform.Rotate(Vector3.right * 90);
 
             //........ (2) local wheel
             List<Vector3> pointList2 = new List<Vector3>();
             List<int> indList2 = new List<int>();
             pointCounter = 0;
-            sprockTh = .7f;
+            sprockTh = SolarClock.SYSTEM_DIAMETER * .0046f;
             baseAl = .04f;
             pointAl = .001f;
-            smallH = 3f;
-            bigH = 15f;
+            smallH = SolarClock.SYSTEM_DIAMETER * .02f;
+            bigH = SolarClock.SYSTEM_DIAMETER * .1f;
             stepD = 360f / 24f * Mathf.PI / 180f;
             for (int tt = 0; tt < 24; tt++)
             {
                 alpha = -tt * stepD;
-                if (tt == 0) // local tick
-                    retArr = Circle.SprockTick(localR, -bigH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl * 2, pointAl,
-                        pointCounter, 0f);
+                if (tt == 0)
+                {
+                    // local tick
+                    retArr = Circle.SprockTick(
+                        localR, 
+                        -bigH,
+                        alpha,
+                        -(tt + 1) * stepD, 
+                        -sprockTh,
+                        baseAl * 2, pointAl,
+                        pointCounter, 
+                        0);
+                }
                 else
-                    retArr = Circle.SprockTick(localR, -smallH, alpha, -(tt + 1) * stepD, -sprockTh, baseAl, pointAl,
-                        pointCounter, 0f);
+                {
+                    retArr = Circle.SprockTick(
+                        localR,
+                        -smallH,
+                        alpha,
+                        -(tt + 1) * stepD,
+                        -sprockTh,
+                        baseAl, pointAl,
+                        pointCounter,
+                        0);
+                }
 
                 pointList2.AddRange(retArr.pointList);
                 indList2.AddRange(retArr.indexList);
@@ -204,14 +240,14 @@ namespace Assets
             hSprock.name = "HourSprocket";
             hSprock.transform.SetParent(localWheelCont.transform, false);
 
-            Polygon whiteTri = PolygonFactory.DrawTri(bigH, 7f, Color.white);
+            Polygon whiteTri = PolygonFactory.DrawTri(bigH, SolarClock.SYSTEM_DIAMETER * .04666f, Color.white);
             whiteTri.name = "WhiteTriangle";
             whiteTri.transform.Translate(Vector3.forward * (localR));
             whiteTri.transform.Rotate(Vector3.forward, 180f);
             //whiteTri.transform.Translate(Vector3.up * .2f)
             whiteTri.transform.SetParent(localWheelCont.transform, false);
 
-            Polygon redTri = PolygonFactory.DrawTri(bigH * .7f, 3f, Color.red);
+            Polygon redTri = PolygonFactory.DrawTri(bigH * .7f, SolarClock.SYSTEM_DIAMETER * .02f, Color.red);
             redTri.name = "RedTriangle";
             redTri.transform.Translate(Vector3.forward * (localR));
             redTri.transform.Rotate(Vector3.forward, 180f);
@@ -306,8 +342,8 @@ namespace Assets
 
             strip = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
             strip.DrawRing(
-                localR - 1,
-                localR - 3.5f,
+                localR - SolarClock.SYSTEM_DIAMETER / 150f,
+                localR - SolarClock.SYSTEM_DIAMETER * .0233f,
                 prct,
                 0,
                 0,

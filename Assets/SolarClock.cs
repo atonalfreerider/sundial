@@ -188,7 +188,7 @@ namespace Assets
                 new Vector3(0, 0, SYSTEM_DIAMETER),
                 new Vector3(0, 0, -SYSTEM_DIAMETER),
                 axisColor,
-                20);
+                SYSTEM_DIAMETER * .1333f);
             solsticeLine.name = "SolsticeLine";
             solsticeLine.transform.SetParent(seasonCross.transform, false);
 
@@ -196,7 +196,7 @@ namespace Assets
                 new Vector3(0, 0, SYSTEM_DIAMETER),
                 new Vector3(0, 0, -SYSTEM_DIAMETER),
                 axisColor,
-                20);
+                SYSTEM_DIAMETER * .1333f);
             equinoxLine.name = "EquinoxLine";
             equinoxLine.transform.SetParent(seasonCross.transform, false);
             equinoxLine.transform.Rotate(Vector3.up, 90);
@@ -268,7 +268,7 @@ namespace Assets
                 monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60,
                     TextAlignmentOptions.Center);
                 monthText.transform.Rotate(Vector3.forward, 30 * mt);
-                monthText.transform.Translate(Vector3.up * (-SYSTEM_DIAMETER + 6));
+                monthText.transform.Translate(Vector3.up * (-.96f * SYSTEM_DIAMETER));
 
                 monthText.transform.SetParent(mLabelWheel.transform);
             }
@@ -282,7 +282,7 @@ namespace Assets
             return newSunSprockCont;
         }
 
-        Polygon DrawSunSprock(DateTime passDate)
+        static Polygon DrawSunSprock(DateTime passDate)
         {
             // ........(2) DAYS;
             int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -303,12 +303,12 @@ namespace Assets
             int counter = 0;
             int pointCounter = 0;
             float alpha;
-            const float sprockTh = 1;
+            const float sprockTh = SYSTEM_DIAMETER / 150f;
             const float baseAl = .002f;
             const float pointAl = .001f;
-            const float bigH = 10;
-            const float medH = 5;
-            const float smallH = 3;
+            const float bigH = SYSTEM_DIAMETER * .0666f;
+            const float medH = SYSTEM_DIAMETER * .0333f;
+            const float smallH = SYSTEM_DIAMETER * .02f;
             const float step = 360f / YEAR * Mathf.PI / 180f;
 
             foreach (int diM in daysinMonth)
@@ -379,7 +379,7 @@ namespace Assets
 
             indList.RemoveRange(indList.Count - 6, 6);
 
-            Polygon newSunSprocket = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
+            Polygon newSunSprocket = PolygonFactory.NewPoly(Instance.mainMat, false);
             newSunSprocket.Draw3DPoly(pointList.ToArray(), indList.ToArray());
             newSunSprocket.SetColor(Color.white);
             return newSunSprocket;
@@ -389,9 +389,7 @@ namespace Assets
         {
             if (!calCreated)
             {
-                calendar = new Calendar();
-                calendar.Init(YEAR, SYSTEM_DIAMETER, SYSTEM_DIAMETER * .4f);
-
+                calendar = new Calendar(YEAR, SYSTEM_DIAMETER, SYSTEM_DIAMETER * .4f);
                 calCreated = true;
             }
         }

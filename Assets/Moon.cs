@@ -77,17 +77,25 @@ namespace Assets
             Circle.SprocketTick retArr;
             int pointCounter = 0;
             float alpha;
-            float sprockTh = .7f;
+            float sprockTh = SolarClock.SYSTEM_DIAMETER * .00466f;
             float baseAl = .007f;
             float pointAl = .001f;
-            float smallH = 3;
+            float smallH = SolarClock.SYSTEM_DIAMETER * .02f;;
             float step = 360 / lunarSynodic * Mathf.PI / 180f;
 
             for (int tt = 0; tt < 29; tt++)
             {
                 alpha = -tt * step;
-                retArr = Circle.SprockTick(moonR, smallH, alpha, -(tt + 1) * step, sprockTh, baseAl, pointAl,
-                    pointCounter, 0);
+                retArr = Circle.SprockTick(
+                    moonR,
+                    smallH,
+                    alpha, 
+                    -(tt + 1) * step,
+                    sprockTh, 
+                    baseAl, 
+                    pointAl,
+                    pointCounter,
+                    0);
                 pointList.AddRange(retArr.pointList);
                 indList.AddRange(retArr.indexList);
                 pointCounter = retArr.pointCounter;
@@ -165,7 +173,7 @@ namespace Assets
             // create days in month;        
             dayList = new TextBox[29];
             GameObject newDLabelWheel = new GameObject("MoonLabels");
-            const float dayLabelPad = 2;
+            const float dayLabelPad = SolarClock.SYSTEM_DIAMETER * .0133f;;
             for (int ht = 0; ht < dayList.Length; ht++)
             {
                 TextBox dLabel = TextBox.Create("", TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
@@ -180,14 +188,14 @@ namespace Assets
                 TextAlignmentOptions.Left);
             month1L.transform.SetParent(newDLabelWheel.transform, false);
             month1L.transform.Translate(Vector3.up * (moonR + dayLabelPad));
-            month1L.transform.Translate(Vector3.left * 2);
+            month1L.transform.Translate(Vector3.left * SolarClock.SYSTEM_DIAMETER * .0133f);
             month1L.transform.Rotate(Vector3.forward, 90);
             month1L.transform.Rotate(Vector3.up, -3.5f);
 
             monthSplitCont = new GameObject("month split contain");
             monthSplitCont.transform.SetParent(newDLabelWheel.transform, false);
 
-            Polygon monthTick = PolygonFactory.DrawTri(7, 1, Color.white);
+            Polygon monthTick = PolygonFactory.DrawTri(7, SolarClock.SYSTEM_DIAMETER / 150f, Color.white);
             monthTick.transform.SetParent(monthSplitCont.transform, false);
             monthTick.transform.Translate(Vector3.forward * moonR);
 
@@ -196,7 +204,7 @@ namespace Assets
             month1L2.transform.SetParent(monthSplitCont.transform, false);
             month1L2.transform.Rotate(Vector3.right * 90);
             month1L2.transform.Translate(Vector3.up * (moonR + 1));
-            month1L2.transform.Translate(Vector3.right * 2);
+            month1L2.transform.Translate(Vector3.right * SolarClock.SYSTEM_DIAMETER * .0133f);
             month1L2.transform.Rotate(Vector3.forward * 90);
             month1L2.transform.Rotate(Vector3.up, -1);
 
@@ -205,9 +213,9 @@ namespace Assets
             month2L.transform.SetParent(monthSplitCont.transform, false);
             month2L.transform.Rotate(Vector3.right * 90);
             month2L.transform.Translate(Vector3.up * (moonR + 1));
-            month2L.transform.Translate(Vector3.left * 2);
+            month2L.transform.Translate(Vector3.left * SolarClock.SYSTEM_DIAMETER * .0133f);
             month2L.transform.Rotate(Vector3.forward * 90);
-            month2L.transform.Rotate(Vector3.up, 5f);
+            month2L.transform.Rotate(Vector3.up, 5);
 
             return newDLabelWheel;
         }
@@ -216,7 +224,7 @@ namespace Assets
         {
             // Moon Orbit
             moonSys.transform.rotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, Moon.lunarSidereal, 60),
+                Orbits.GetNonEarthOrbitAngle(newDateUTC, lunarSidereal, 60),
                 Vector3.up);
 
             MoveMoonSprockCont(newDateLocal);

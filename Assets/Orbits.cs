@@ -56,7 +56,7 @@ namespace Assets
             Circle path;
             Polygon planetTri;
             Color minorColor = new Color(1, 1, 1, .5f);
-            float minorThick = .3f;
+            float minorThick = SolarClock.SYSTEM_DIAMETER * .002f;
             foreach (PlanetData planetData in planetDatas)
             {
                 planetOrbit = new GameObject(planetDatas[count].planetName);
@@ -82,7 +82,7 @@ namespace Assets
                     path.SetColor(minorColor);
                     planetTri = PolygonFactory.DrawTri(
                         planetData.orbitMultiplier * earthOR,
-                        2,
+                        SolarClock.SYSTEM_DIAMETER * .0133f,
                         planetData.planetHandColor);
                 }
                 else
@@ -90,7 +90,7 @@ namespace Assets
                     // earth
                     path.DrawRing(
                         earthOR,
-                        earthOR - .5f,
+                        earthOR - SolarClock.SYSTEM_DIAMETER * .00333f,
                         .833f,
                         0,
                         earthOR * DoverR * velComp,
@@ -98,7 +98,7 @@ namespace Assets
                     path.SetColor(new Color(1, 1, 1, 1));
                     planetTri = PolygonFactory.DrawTri(
                         earthOR,
-                        5,
+                        SolarClock.SYSTEM_DIAMETER * .0333f,
                         planetData.planetHandColor);
                 }
 

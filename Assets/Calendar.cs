@@ -45,9 +45,9 @@ namespace Assets
 
     public class Calendar
     {
-        float YEAR;
-        float calR;
-        float earthR;
+        readonly float YEAR;
+        readonly float calR;
+        readonly float earthR;
 
         GameObject dayCal;
         GameObject yearCal;
@@ -68,11 +68,11 @@ namespace Assets
         };
 
         // INIT Functions
-        public void Init(float passYEAR, float passCR, float passER)
+        public Calendar(float YEAR, float calR, float earthR)
         {
-            YEAR = passYEAR;
-            calR = passCR;
-            earthR = passER;
+            this.YEAR = YEAR;
+            this.calR = calR;
+            this.earthR = earthR;
   
             //TestCalendar();
 
@@ -277,20 +277,20 @@ namespace Assets
 
         Circle DrawEvent(MyEvent passEv, bool isYearEvent, int index)
         {
-            const float evH = 7;
+            float evH = earthR * .1166f;
             float R = 0;
             float prct = 0;
             string displayTitle;
             TimeSpan span = new TimeSpan(passEv.end.Ticks - passEv.start.Ticks);
             if (isYearEvent)
             {
-                R = calR - 1 - index * evH;
+                R = calR - earthR * .0166f - index * evH;
                 prct = (float) span.TotalDays / YEAR;
                 displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalDays, passEv.title.Length));
             }
             else
             {
-                R = earthR - 1 - index * evH;
+                R = earthR - earthR * .0166f - index * evH;
                 prct = (float) span.TotalHours / 24;
                 displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalHours * 4, passEv.title.Length));
             }
@@ -304,9 +304,9 @@ namespace Assets
 
             float halfAng = (prct * .5f);
             titleT.transform.localPosition = new Vector3(
-                (R - 10) * Mathf.Sin(halfAng * 2 * Mathf.PI),
+                (R - earthR * .1666f) * Mathf.Sin(halfAng * 2 * Mathf.PI),
                 0,
-                (R - 10) * Mathf.Cos(halfAng * 2 * Mathf.PI));
+                (R - earthR * .1666f) * Mathf.Cos(halfAng * 2 * Mathf.PI));
             titleT.transform.parent.Rotate(Vector3.up, (prct * .5f) * 360 + 180);
             titleT.transform.Rotate(Vector3.right * 90);
             if (isYearEvent || (!isYearEvent && passEv.end.Hour < 6) || (!isYearEvent && passEv.end.Hour > 18))

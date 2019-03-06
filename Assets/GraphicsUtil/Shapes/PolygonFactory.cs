@@ -133,18 +133,22 @@ namespace Assets.GraphicsUtil.Shapes
             GameObject line;
             line = new GameObject("Line");
             float length = Vector3.Distance(pt0, pt1);
-            int totalDot = Mathf.FloorToInt(length * .15f);
+            int totalDot = Mathf.FloorToInt(length / (passLW / 3f));
             Polygon dot;
             for (int ii = 0; ii < totalDot; ii++)
             {
-                dot = Object.Instantiate(NewCylinder.rootDot);
+                dot = Instantiate(NewCylinder.rootDot);
                 dot.transform.SetParent(line.transform, false);
                 dot.transform.localScale = Vector3.one * passLW;
                 float mag = -ii * length / totalDot;
                 if (pt1.x > 0)
+                {
                     dot.transform.localPosition = pt0 + new Vector3(mag - .5f, 0, 0);
+                }
                 else
+                {
                     dot.transform.localPosition = pt0 + new Vector3(0, 0, mag - .5f);
+                }
             }
 
             return line;
