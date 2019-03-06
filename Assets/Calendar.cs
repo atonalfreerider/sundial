@@ -75,11 +75,19 @@ namespace Assets
             this.earthR = earthR;
   
             //TestCalendar();
+            if (calendarEvents == null || !calendarEvents.Keys.Any())
+            {
+                SolarClock.Instance.calendarMenu.showHideButton.gameObject.SetActive(false);
+            }
 
             if (Application.platform != RuntimePlatform.Android) return;
 
             calendarEvents = RetrieveAndroidCalendarEvents();
             SolarClock.Instance.calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
+            if (calendarEvents != null && calendarEvents.Keys.Any())
+            {
+                SolarClock.Instance.calendarMenu.showHideButton.gameObject.SetActive(true);
+            }
         }
 
         static Dictionary<string, MyEvent[]> RetrieveAndroidCalendarEvents()
@@ -94,6 +102,14 @@ namespace Assets
                 using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("currentActivity"))
                 {
                     AndroidJavaObject calObj = activity.Call<AndroidJavaObject>("getAllCalendarNames");
+
+                    if (calObj.GetRawObject().ToInt32() == 0)
+                    {
+                        // this returns empty if calendars are empty OR if this is the version without the calendar plugin
+                        calObj.Dispose();
+                        return calendarsAndEvents;
+                    }
+                    
                     byte[] calendarNamesBytes = calObj.GetRawObject().ToInt32() != 0
                         ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(calObj.GetRawObject())
                         : new byte[0];

@@ -8,7 +8,7 @@ namespace UnityEngine
     public class CalendarMenu : MonoBehaviour
     {
         public ButtonMenu calendars;
-        Button showHideButton;
+        public Button showHideButton;
 
         void Start()
         {
