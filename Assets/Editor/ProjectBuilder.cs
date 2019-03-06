@@ -20,6 +20,7 @@ namespace Assets.Editor
         public static void BuildBaseRelease()
         {
             Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
+            PlayerSettings.productName = "Sundial";
 
             BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel19, false);
         }
@@ -28,6 +29,7 @@ namespace Assets.Editor
         public static void BuildProRelease()
         {
             Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
+            PlayerSettings.productName = "SundialPro";
 
             BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel19, true);
         }
@@ -38,7 +40,6 @@ namespace Assets.Editor
             bool includeCalendar)
         {
             PlayerSettings.Android.minSdkVersion = version;
-
 
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions()
             {
