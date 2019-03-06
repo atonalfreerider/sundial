@@ -23,6 +23,7 @@ namespace DefaultNamespace
             SolarClock.Instance.SetOrbit(DateTime.UtcNow, DateTime.Now);
             showNow = true;
             SolarClock.Instance.nowButton.gameObject.SetActive(false);
+            lastDate = DateTime.Now;
         }
 
         DateTime UTCDateThatMatchesAngle(float targetAngle, DateTime currentDate)
