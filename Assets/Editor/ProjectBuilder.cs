@@ -19,7 +19,7 @@ namespace Assets.Editor
         [MenuItem("Build/Build Base Release")]
         public static void BuildBaseRelease()
         {
-            //Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
+            Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
 
             BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel19, false);
         }
@@ -27,7 +27,7 @@ namespace Assets.Editor
         [MenuItem("Build/Build Pro Release")]
         public static void BuildProRelease()
         {
-            //Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
+            Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
 
             BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel19, true);
         }
