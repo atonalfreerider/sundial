@@ -260,8 +260,7 @@ namespace Assets
             earthSph = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             earthSphereCollider = earthSph.GetComponent<SphereCollider>();
             earthSphereCollider.enabled = false;
-            earthSph.GetComponent<Renderer>().material =
-                GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().EarthMM;
+            earthSph.GetComponent<Renderer>().material = SolarClock.Instance.EarthMM;
             earthSph.name = "Earth";
             earthSph.transform.localScale = Vector3.one * SolarClock.SYSTEM_DIAMETER * .5f;
             earthSph.transform.SetParent(earthSys.transform, false);
@@ -333,7 +332,6 @@ namespace Assets
         
         void RedrawStrip(DateTime passDate)
         {
-            // for some reason, 3 of these are getting created
             float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
             if (strip != null)
             {

@@ -54,8 +54,7 @@ namespace Assets
             moon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             moon.GetComponent<SphereCollider>().radius = SolarClock.SYSTEM_DIAMETER / 75f;
             moon.name = "Moon";
-            moon.GetComponent<Renderer>().material =
-                GameObject.FindGameObjectWithTag("SolarClock").GetComponent<SolarClock>().MoonMat;
+            moon.GetComponent<Renderer>().material = SolarClock.Instance.MoonMat;
             const float moonRad = SolarClock.SYSTEM_DIAMETER * .04095f;
             moon.transform.localScale = Vector3.one * moonRad;
             moon.transform.Translate(Vector3.forward * moonR);

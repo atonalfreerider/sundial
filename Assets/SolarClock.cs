@@ -123,7 +123,7 @@ namespace Assets
             }
 
             EarthMM.SetTextureOffset("_DetailAlbedoMap",
-                new Vector2((12 - Earth.GetTimeZone() - dst + .5f) / 24f, 0));
+                new Vector2((12 - Earth.GetTimeZone() + dst + .5f) / 24f, 0));
 
             // create new SolarClock and set celestial positions
             gameObject.name = "SolarClock";
