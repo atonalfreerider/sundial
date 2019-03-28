@@ -52,7 +52,12 @@ namespace Assets
 
             //.........................(0) Moon
             moon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            moon.GetComponent<SphereCollider>().radius = SolarClock.SYSTEM_DIAMETER / 75f;
+            SphereCollider moonCollider = moon.GetComponent<SphereCollider>();
+            moonCollider.radius = SolarClock.SYSTEM_DIAMETER / 75f;
+            
+            // TODO if we want an eclipse this can get set back to Default
+            moon.layer = LayerMask.NameToLayer("TransparentFX");
+            
             moon.name = "Moon";
             moon.GetComponent<Renderer>().material = SolarClock.Instance.MoonMat;
             const float moonRad = SolarClock.SYSTEM_DIAMETER * .04095f;
