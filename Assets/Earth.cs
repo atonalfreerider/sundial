@@ -25,7 +25,7 @@ namespace Assets
         Circle strip;
         Polygon earthSprock;
         public SphereCollider earthSphereCollider;
-        SphereCollider handSphereCollider;
+        public SphereCollider handSphereCollider;
         
         // state vars
         int currentINDLday, currentDay;

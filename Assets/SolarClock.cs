@@ -414,6 +414,8 @@ namespace Assets
                 // zoom to Earth
                 sphereCollider.enabled = false;
                 earth.earthSphereCollider.enabled = true;
+                earth.handSphereCollider.enabled = false;
+                
                 GetEarthCam();
                 orbits.gameObject.SetActive(false);
                 earth.earthSys.gameObject.SetActive(true);
@@ -427,6 +429,8 @@ namespace Assets
             {
                 // zoom to Solar
                 sphereCollider.enabled = true;
+                earth.handSphereCollider.enabled = true;
+                
                 targetPos = new Vector3(0, FIXED_CAM_Y, 0);
                 targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
                 orbits.gameObject.SetActive(true);
