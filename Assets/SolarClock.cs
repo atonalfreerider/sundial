@@ -65,6 +65,8 @@ namespace Assets
         Vector3 orbitScale = new Vector3(1, .01f, 1);
         float orthoSize;
         Coroutine zooming;
+        const float ZOOM_DURATION = 1;
+        
         static float solOrthoSize => SYSTEM_DIAMETER * (Screen.width > Screen.height
                                                  ? 1
                                                  : (float) Screen.height / Screen.width);
@@ -444,7 +446,7 @@ namespace Assets
             if (zooming != null)
                 StopCoroutine(zooming);
 
-            zooming = StartCoroutine(Zoom(50));
+            zooming = StartCoroutine(Zoom(ZOOM_DURATION));
         }
 
         void FlipMonthLabels(bool passLabelUp)
@@ -465,14 +467,16 @@ namespace Assets
             }
         }
 
-        IEnumerator Zoom(int passCD)
+        IEnumerator Zoom(float animationDuration)
         {
-            for (int ii = passCD; ii > 0; ii--)
+            float animationProgress = 0;
+            while (animationProgress < animationDuration)
             {
-                Zoomer(1f / ii);
+                Zoomer(Time.deltaTime / (animationDuration - animationProgress));
                 yield return null;
+                animationProgress += Time.deltaTime;
             }
-
+            
             zooming = null;
             Zoomer(1);
         }
@@ -620,7 +624,7 @@ namespace Assets
                     StopCoroutine(zooming);
 
                 orthoSize = 150;
-                zooming = StartCoroutine(Zoom(50));
+                zooming = StartCoroutine(Zoom(ZOOM_DURATION));
             }
 
             if (Input.GetKeyDown(KeyCode.T))
