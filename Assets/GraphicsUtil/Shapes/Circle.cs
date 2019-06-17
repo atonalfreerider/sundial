@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.GraphicsUtil.Shapes
@@ -231,47 +232,50 @@ namespace Assets.GraphicsUtil.Shapes
             }
         }
 
-        public void DrawSprocket()
+        public void DrawSprocket(float R, int majorTickCount, int minorTickCount, int innie,
+            float sprockTh, float baseAl, float pointAl, float smallH, float bigH)
         {
-            const float earthR = .15f;
-
             // create point cloud for earth sprocket mesh;
             List<Vector3> pointList = new List<Vector3>();
             List<int> indList = new List<int>();
-            SprocketTick retArr;
+            SprocketTick sprocketTick;
             int pointCounter = 0;
             int counter = 0;
             float alpha;
-            const float sprockTh = .003f;
-            const float baseAl = .02f;
-            const float pointAl = .01f;
-            const float smallH = .007f;
-            const float bigH = .015f;
-            const float hR = earthR * .4f;
-            const int segments = 8;
-            const int subSegments = 4;
-            const float stepD = 360f / (segments * subSegments) * Mathf.PI / 180f;
+            float stepD = 360f / (majorTickCount * (minorTickCount + 1)) * Mathf.PI / 180f;
 
-            for (int tt = 0; tt < segments; tt++)
+            for (int majorTicks = 0; majorTicks < majorTickCount; majorTicks++)
             {
                 alpha = -counter * stepD;
-                // create hour tick;
-
-                retArr = SprockTick(hR, bigH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl, pointCounter,
-                    0f);
-                pointList.AddRange(retArr.pointList);
-                indList.AddRange(retArr.indexList);
-                pointCounter = retArr.pointCounter;
+                sprocketTick = SprockTick(R,
+                    innie * bigH, 
+                    alpha,
+                    -(counter + 1) * stepD,
+                    innie * sprockTh,
+                    baseAl, 
+                    pointAl,
+                    pointCounter,
+                    0);
+                pointList.AddRange(sprocketTick.pointList);
+                indList.AddRange(sprocketTick.indexList);
+                pointCounter = sprocketTick.pointCounter;
                 counter++;
-                for (int dd = 0; dd < subSegments - 1; dd++)
+
+                for (int minorTicks = 0; minorTicks < minorTickCount; minorTicks++)
                 {
                     alpha = -counter * stepD;
-                    // create 15min tick;
-                    retArr = SprockTick(hR, smallH, alpha, -(counter + 1) * stepD, sprockTh, baseAl, pointAl,
-                        pointCounter, 0f);
-                    pointList.AddRange(retArr.pointList);
-                    indList.AddRange(retArr.indexList);
-                    pointCounter = retArr.pointCounter;
+                    sprocketTick = SprockTick(R,
+                        innie * smallH, 
+                        alpha, 
+                        -(counter + 1) * stepD, 
+                        innie * sprockTh,
+                        baseAl,
+                        pointAl,
+                        pointCounter, 
+                        0);
+                    pointList.AddRange(sprocketTick.pointList);
+                    indList.AddRange(sprocketTick.indexList);
+                    pointCounter = sprocketTick.pointCounter;
                     counter++;
                 }
             }
@@ -281,7 +285,6 @@ namespace Assets.GraphicsUtil.Shapes
             Draw3DPoly(pointList.ToArray(), MirrorIndices(indList.ToArray(), 0));
             name = "Sprocket";
         }
-        
     }
 
     public static class NewCylinder
