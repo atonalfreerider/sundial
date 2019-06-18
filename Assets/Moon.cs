@@ -21,7 +21,7 @@ namespace Assets
         public GameObject moonSys;
         public GameObject moon;
         public GameObject moonSprockCont;
-        Polygon moonSprock;
+        Circle moonSprock;
         public GameObject moonLabels;
         TextBox month1L, month1L2, month2L;
         GameObject monthSplitCont;
@@ -76,39 +76,11 @@ namespace Assets
 
             //...........................(0) hWheel
             // point cloud for moon sprocket
-            List<Vector3> pointList = new List<Vector3>();
-            List<int> indList = new List<int>();
-            Circle.SprocketTick retArr;
-            int pointCounter = 0;
-            float alpha;
-            float sprockTh = SolarClock.SYSTEM_DIAMETER * .00466f;
-            float baseAl = .007f;
-            float pointAl = .001f;
-            float smallH = SolarClock.SYSTEM_DIAMETER * .02f;;
-            float step = 360 / lunarSynodic * Mathf.PI / 180f;
-
-            for (int tt = 0; tt < 29; tt++)
-            {
-                alpha = -tt * step;
-                retArr = Circle.SprockTick(
-                    moonR,
-                    smallH,
-                    alpha, 
-                    -(tt + 1) * step,
-                    sprockTh, 
-                    baseAl, 
-                    pointAl,
-                    pointCounter,
-                    0);
-                pointList.AddRange(retArr.pointList);
-                indList.AddRange(retArr.indexList);
-                pointCounter = retArr.pointCounter;
-            }
-
-            indList.RemoveRange(indList.Count - 42, 42);
-
-            moonSprock = PolygonFactory.NewPoly(SolarClock.Instance.mainMat, false);
-            moonSprock.Draw3DPoly(pointList.ToArray(), indList.ToArray());
+            moonSprock = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            moonSprock.DrawSprocket(moonR, 29, 0, 1, 
+                SolarClock.SYSTEM_DIAMETER * .00466f, .007f, .001f,
+                0, SolarClock.SYSTEM_DIAMETER * .02f, 
+                lunarSynodic, 42);
             moonSprock.SetColor(Color.white);
             moonSprock.name = "MoonSprock";
             moonSprock.transform.parent = newMoonSprockCont.transform;
@@ -124,7 +96,7 @@ namespace Assets
             return newMoonSprockCont;
         }
 
-        public void MoveMoonSprockCont(DateTime passDate)
+        void MoveMoonSprockCont(DateTime passDate)
         {
             moonSprockCont.transform.rotation = Quaternion.AngleAxis(
                 moonSys.transform.rotation.eulerAngles.y +

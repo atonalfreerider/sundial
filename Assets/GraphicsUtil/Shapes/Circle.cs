@@ -233,7 +233,8 @@ namespace Assets.GraphicsUtil.Shapes
         }
 
         public void DrawSprocket(float R, int majorTickCount, int minorTickCount, int innie,
-            float sprockTh, float baseAl, float pointAl, float smallH, float bigH)
+            float sprockTh, float baseAl, float pointAl, float smallH, float bigH, 
+            float specialInterval = 0, int endSnip = 6)
         {
             // create point cloud for earth sprocket mesh;
             List<Vector3> pointList = new List<Vector3>();
@@ -242,15 +243,18 @@ namespace Assets.GraphicsUtil.Shapes
             int pointCounter = 0;
             int counter = 0;
             float alpha;
-            float stepD = 360f / (majorTickCount * (minorTickCount + 1)) * Mathf.PI / 180f;
+            float stepDivisor = specialInterval > float.Epsilon 
+                ? specialInterval 
+                : majorTickCount * (minorTickCount + 1);
+            float stepDistance = 360f / stepDivisor * Mathf.PI / 180f;
 
             for (int majorTicks = 0; majorTicks < majorTickCount; majorTicks++)
             {
-                alpha = -counter * stepD;
+                alpha = -counter * stepDistance;
                 sprocketTick = SprockTick(R,
                     innie * bigH, 
                     alpha,
-                    -(counter + 1) * stepD,
+                    -(counter + 1) * stepDistance,
                     innie * sprockTh,
                     baseAl, 
                     pointAl,
@@ -263,11 +267,11 @@ namespace Assets.GraphicsUtil.Shapes
 
                 for (int minorTicks = 0; minorTicks < minorTickCount; minorTicks++)
                 {
-                    alpha = -counter * stepD;
+                    alpha = -counter * stepDistance;
                     sprocketTick = SprockTick(R,
                         innie * smallH, 
                         alpha, 
-                        -(counter + 1) * stepD, 
+                        -(counter + 1) * stepDistance, 
                         innie * sprockTh,
                         baseAl,
                         pointAl,
@@ -280,7 +284,7 @@ namespace Assets.GraphicsUtil.Shapes
                 }
             }
 
-            indList.RemoveRange(indList.Count - 6, 6);
+            indList.RemoveRange(indList.Count - endSnip, endSnip);
 
             Draw3DPoly(pointList.ToArray(), MirrorIndices(indList.ToArray(), 0));
             name = "Sprocket";
