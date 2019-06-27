@@ -98,8 +98,8 @@ namespace Assets.GraphicsUtil.Shapes
                 {
                     diminishingR = Mathf.Lerp(0, R1 - R2, (float) ii / side);
                 }
-                
-                skinList[ii] = VectArc(R1 - diminishingR, ii * alpha, prct, 0, 0,spirBit, 0);
+
+                skinList[ii] = VectArc(R1 - diminishingR, ii * alpha, prct, 0, 0, spirBit, 0);
                 skinList[side * 2 - ii - 1] = VectArc(R2, ii * alpha, prct, 0, 0, spirBit, 0);
 
                 insInd = new[] {ii, side * 2 - ii - 2, side * 2 - ii - 1};
@@ -153,7 +153,7 @@ namespace Assets.GraphicsUtil.Shapes
             );
         }
 
-        public static SprocketTick SprockTick(float R, float H, float alpha, float aDelt, float sprockTh, float baseAl,
+        static SprocketTick SprockTick(float R, float H, float alpha, float aDelt, float sprockTh, float baseAl,
             float pointAl, int counter, float spiralH)
         {
             List<Vector3> pointList = new List<Vector3>();
@@ -215,10 +215,10 @@ namespace Assets.GraphicsUtil.Shapes
             indList.Add(counter + 1);
             indList.Add(counter + 0);
 
-           return new SprocketTick(pointList, indList, counter);
+            return new SprocketTick(pointList, indList, counter);
         }
 
-        public struct SprocketTick
+        struct SprocketTick
         {
             public readonly List<Vector3> pointList;
             public readonly List<int> indexList;
@@ -233,7 +233,7 @@ namespace Assets.GraphicsUtil.Shapes
         }
 
         public void DrawSprocket(float R, int majorTickCount, int minorTickCount, int innie,
-            float sprockTh, float baseAl, float pointAl, float smallH, float bigH, 
+            float sprockTh, float baseAl, float pointAl, float smallH, float bigH,
             float specialInterval = 0, int endSnip = 6)
         {
             // create point cloud for earth sprocket mesh;
@@ -243,8 +243,8 @@ namespace Assets.GraphicsUtil.Shapes
             int pointCounter = 0;
             int counter = 0;
             float alpha;
-            float stepDivisor = specialInterval > float.Epsilon 
-                ? specialInterval 
+            float stepDivisor = specialInterval > float.Epsilon
+                ? specialInterval
                 : majorTickCount * (minorTickCount + 1);
             float stepDistance = 360f / stepDivisor * Mathf.PI / 180f;
 
@@ -252,11 +252,11 @@ namespace Assets.GraphicsUtil.Shapes
             {
                 alpha = -counter * stepDistance;
                 sprocketTick = SprockTick(R,
-                    innie * bigH, 
+                    innie * bigH,
                     alpha,
                     -(counter + 1) * stepDistance,
                     innie * sprockTh,
-                    baseAl, 
+                    baseAl,
                     pointAl,
                     pointCounter,
                     0);
@@ -269,13 +269,13 @@ namespace Assets.GraphicsUtil.Shapes
                 {
                     alpha = -counter * stepDistance;
                     sprocketTick = SprockTick(R,
-                        innie * smallH, 
-                        alpha, 
-                        -(counter + 1) * stepDistance, 
+                        innie * smallH,
+                        alpha,
+                        -(counter + 1) * stepDistance,
                         innie * sprockTh,
                         baseAl,
                         pointAl,
-                        pointCounter, 
+                        pointCounter,
                         0);
                     pointList.AddRange(sprocketTick.pointList);
                     indList.AddRange(sprocketTick.indexList);
@@ -289,6 +289,100 @@ namespace Assets.GraphicsUtil.Shapes
             Draw3DPoly(pointList.ToArray(), MirrorIndices(indList.ToArray(), 0));
             name = "Sprocket";
         }
+
+        public void DrawSunSprocket(float R, DateTime passDate,
+            float sprockTh, float baseAl, float pointAl, float smallH, float medH, float bigH,
+            float specialInterval, int endSnip = 6)
+        {
+            int[] daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+            if (DateTime.IsLeapYear(passDate.Year))
+            {
+                // add one day to February
+                daysInMonth[1]++;
+            }
+
+            // determine start point of first day of year
+            DateTime jan1OfDate = new DateTime(passDate.Year, 1, 1);
+            int dayCounter = Calendar.ConvertDaytoInt(jan1OfDate.DayOfWeek.ToString());
+
+            // create point cloud for sprocket mesh
+            List<Vector3> pointList = new List<Vector3>();
+            List<int> indList = new List<int>();
+            SprocketTick retArr;
+            int counter = 0;
+            int pointCounter = 0;
+            float alpha;
+            float step = 360f / specialInterval * Mathf.PI / 180f;
+
+            foreach (int diM in daysInMonth)
+            {
+                alpha = -counter * step;
+                if (dayCounter > 6)
+                {
+                    // set back to Monday
+                    dayCounter = 0;
+                }
+
+                // add first-of-month tick
+                retArr = SprockTick(
+                    R,
+                    bigH,
+                    alpha,
+                    -(counter + 1) * step,
+                    sprockTh,
+                    baseAl,
+                    pointAl,
+                    pointCounter,
+                    0);
+                pointList.AddRange(retArr.pointList);
+                indList.AddRange(retArr.indexList);
+                pointCounter = retArr.pointCounter;
+                counter++;
+                dayCounter++;
+                for (int dd = 0; dd < diM - 1; dd++)
+                {
+                    alpha = -counter * step;
+                    if (dayCounter == 7)
+                    {
+                        // add Sunday tick
+                        retArr = SprockTick(
+                            R,
+                            medH,
+                            alpha,
+                            -(counter + 1) * step,
+                            sprockTh,
+                            baseAl,
+                            pointAl,
+                            pointCounter,
+                            0);
+                        dayCounter = 0;
+                    }
+                    else
+                    {
+                        // add day tick
+                        retArr = SprockTick(
+                            R,
+                            smallH,
+                            alpha,
+                            -(counter + 1) * step,
+                            sprockTh,
+                            baseAl,
+                            pointAl,
+                            pointCounter,
+                            0);
+                    }
+
+                    pointList.AddRange(retArr.pointList);
+                    indList.AddRange(retArr.indexList);
+                    pointCounter = retArr.pointCounter;
+                    counter++;
+                    dayCounter++;
+                }
+            }
+
+            indList.RemoveRange(indList.Count - endSnip, endSnip);
+            Draw3DPoly(pointList.ToArray(), indList.ToArray());
+        }
     }
 
     public static class NewCylinder
@@ -299,14 +393,14 @@ namespace Assets.GraphicsUtil.Shapes
         public static void Init(PolygonFactory polygonFactory, Material mainMat)
         {
             Color shapeColor = Color.white;
-            
+
             cylinder = PolygonFactory.NewCirclePoly(mainMat, false);
             cylinder.sidePer1M = 8;
             cylinder.DrawRing(1, .85f, 1, .3f);
             cylinder.name = "cylinder";
             cylinder.SetColor(shapeColor);
             cylinder.transform.SetParent(polygonFactory.transform, false);
-  
+
             rootDot = PolygonFactory.NewCirclePoly(mainMat, false);
             rootDot.name = "RootDot";
             rootDot.DrawCirc(.035f * .5f, 1, 0);

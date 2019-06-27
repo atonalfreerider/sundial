@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
@@ -50,7 +49,7 @@ namespace Assets
         GameObject sunSprockCont, sunLine, mLabelWheel;
         SphereCollider sphereCollider;
         Raycast raycast;
-        Polygon sunSprock;
+        Circle sunSprock;
         TextBox summerText, springText;
         [HideInInspector] public CalendarMenu calendarMenu;
         public Button nowButton;
@@ -177,7 +176,7 @@ namespace Assets
             GameObject sunDial = new GameObject();
             //.........(1) Sun;
             GameObject sunStar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            float sunR = SYSTEM_DIAMETER * .08f;
+            const float sunR = SYSTEM_DIAMETER * .08f;
             sunStar.transform.localScale = Vector3.one * sunR;
             sunStar.name = "Sun";
             sunStar.transform.SetParent(sunDial.transform, false);
@@ -257,7 +256,6 @@ namespace Assets
             GameObject newSunSprockCont = new GameObject("SunSprocketContainer");
 
             sunSprock = DrawSunSprock(passDate);
-            sunSprock.name = "SunSprock";
             sunSprock.transform.SetParent(newSunSprockCont.transform, false);
 
             // ........(3) MONTH LABEL;
@@ -284,105 +282,17 @@ namespace Assets
             return newSunSprockCont;
         }
 
-        static Polygon DrawSunSprock(DateTime passDate)
+        static Circle DrawSunSprock(DateTime passDate)
         {
+            Circle newSunSprocket = PolygonFactory.NewCirclePoly(Instance.mainMat);
+            newSunSprocket.name = "SunSprocket";
+
             // ........(2) DAYS;
-            int[] daysinMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-            if (DateTime.IsLeapYear(passDate.Year))
-            {
-                // add one day to February
-                daysinMonth[1]++;
-            }
+            newSunSprocket.DrawSunSprocket(SYSTEM_DIAMETER, passDate,
+                SYSTEM_DIAMETER / 150f, .002f, .001f,
+                SYSTEM_DIAMETER * .02f, SYSTEM_DIAMETER * .0333f, SYSTEM_DIAMETER * .0666f, 
+                YEAR);
 
-            // determine start point of first day of year
-            DateTime jan1OfDate = new DateTime(passDate.Year, 1, 1);
-            int dayCounter = Calendar.ConvertDaytoInt(jan1OfDate.DayOfWeek.ToString());
-
-            // create point cloud for sprocket mesh
-            List<Vector3> pointList = new List<Vector3>();
-            List<int> indList = new List<int>();
-            Circle.SprocketTick retArr;
-            int counter = 0;
-            int pointCounter = 0;
-            float alpha;
-            const float sprockTh = SYSTEM_DIAMETER / 150f;
-            const float baseAl = .002f;
-            const float pointAl = .001f;
-            const float bigH = SYSTEM_DIAMETER * .0666f;
-            const float medH = SYSTEM_DIAMETER * .0333f;
-            const float smallH = SYSTEM_DIAMETER * .02f;
-            const float step = 360f / YEAR * Mathf.PI / 180f;
-
-            foreach (int diM in daysinMonth)
-            {
-                alpha = -counter * step;
-                if (dayCounter > 6)
-                {
-                    // set back to Monday
-                    dayCounter = 0;
-                }
-
-                // add first-of-month tick
-                retArr = Circle.SprockTick(
-                    SYSTEM_DIAMETER,
-                    bigH,
-                    alpha,
-                    -(counter + 1) * step,
-                    sprockTh,
-                    baseAl,
-                    pointAl,
-                    pointCounter,
-                    0);
-                pointList.AddRange(retArr.pointList);
-                indList.AddRange(retArr.indexList);
-                pointCounter = retArr.pointCounter;
-                counter++;
-                dayCounter++;
-                for (int dd = 0; dd < diM - 1; dd++)
-                {
-                    alpha = -counter * step;
-                    if (dayCounter == 7)
-                    {
-                        // add Sunday tick
-                        retArr = Circle.SprockTick(
-                            SYSTEM_DIAMETER,
-                            medH,
-                            alpha,
-                            -(counter + 1) * step,
-                            sprockTh,
-                            baseAl,
-                            pointAl,
-                            pointCounter,
-                            0);
-                        dayCounter = 0;
-                    }
-                    else
-                    {
-                        // add day tick
-                        retArr = Circle.SprockTick(
-                            SYSTEM_DIAMETER,
-                            smallH,
-                            alpha,
-                            -(counter + 1) * step,
-                            sprockTh,
-                            baseAl,
-                            pointAl,
-                            pointCounter,
-                            0);
-                    }
-
-                    pointList.AddRange(retArr.pointList);
-                    indList.AddRange(retArr.indexList);
-                    pointCounter = retArr.pointCounter;
-                    counter++;
-                    dayCounter++;
-                }
-            }
-
-            indList.RemoveRange(indList.Count - 6, 6);
-
-            Polygon newSunSprocket = PolygonFactory.NewPoly(Instance.mainMat, false);
-            newSunSprocket.Draw3DPoly(pointList.ToArray(), indList.ToArray());
             newSunSprocket.SetColor(Color.white);
             return newSunSprocket;
         }
@@ -539,7 +449,6 @@ namespace Assets
 
                 Destroy(sunSprock.gameObject);
                 sunSprock = DrawSunSprock(newDateLocal);
-                sunSprock.name = "SunSprock";
                 sunSprock.transform.SetParent(sunSprockCont.transform, false);
 
                 // update yearcal
