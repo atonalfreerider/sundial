@@ -39,7 +39,6 @@ namespace Assets.UI.Text
 
         // Components - Attached in Unity Editor
         public TextMeshPro TextField;
-        public ContentSizeFitter ContentSizeFitter;
         public RectTransform RectTransform;
 
         // State

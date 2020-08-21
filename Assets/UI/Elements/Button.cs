@@ -211,12 +211,6 @@ namespace Assets.UI.Elements
             buttonOutline.SetColor(outlineColor);
         }
 
-        public void SetWrap(float width)
-        {
-            textBox.ContentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            textBox.RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-        }
-        
         #region ISelectable
 
         public Transform SelectionTarget => transform;
