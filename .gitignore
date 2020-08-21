@@ -41,3 +41,5 @@ Assets/StreamingAssets/crashlytics-build.properties
 *.exe
 SUNDIAL revisions/
 SUNDIAL_Web/
+
+.idea
