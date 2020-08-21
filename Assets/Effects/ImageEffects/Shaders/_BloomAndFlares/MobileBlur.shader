@@ -32,9 +32,9 @@ Shader "Hidden/FastBlur" {
 
 			o.pos = UnityObjectToClipPos (v.vertex);
         	o.uv20 = v.texcoord + _MainTex_TexelSize.xy;				
-			o.uv21 = v.texcoord + _MainTex_TexelSize.xy * half2(-0.5h,-0.5h);	
-			o.uv22 = v.texcoord + _MainTex_TexelSize.xy * half2(0.5h,-0.5h);		
-			o.uv23 = v.texcoord + _MainTex_TexelSize.xy * half2(-0.5h,0.5h);		
+			o.uv21 = v.texcoord + _MainTex_TexelSize.xy * half2(-0.5,-0.5);	
+			o.uv22 = v.texcoord + _MainTex_TexelSize.xy * half2(0.5,-0.5);		
+			o.uv23 = v.texcoord + _MainTex_TexelSize.xy * half2(-0.5,0.5);		
 
 			return o; 
 		}					
@@ -117,11 +117,11 @@ Shader "Hidden/FastBlur" {
 			half2 netFilterWidth = _MainTex_TexelSize.xy * half2(1.0, 0.0) * _Parameter.x; 
 			half4 coords = -netFilterWidth.xyxy * 3.0;
 			
-			o.offs[0] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[0] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 			coords += netFilterWidth.xyxy;
-			o.offs[1] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[1] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 			coords += netFilterWidth.xyxy;
-			o.offs[2] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[2] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 
 			return o; 
 		}		
@@ -135,11 +135,11 @@ Shader "Hidden/FastBlur" {
 			half2 netFilterWidth = _MainTex_TexelSize.xy * half2(0.0, 1.0) * _Parameter.x;
 			half4 coords = -netFilterWidth.xyxy * 3.0;
 			
-			o.offs[0] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[0] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 			coords += netFilterWidth.xyxy;
-			o.offs[1] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[1] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 			coords += netFilterWidth.xyxy;
-			o.offs[2] = v.texcoord.xyxy + coords * half4(1.0h,1.0h,-1.0h,-1.0h);
+			o.offs[2] = v.texcoord.xyxy + coords * half4(1.0,1.0,-1.0,-1.0);
 
 			return o; 
 		}	
