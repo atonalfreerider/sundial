@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
-using Assets;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace Assets
 {
     public class SolarTime : MonoBehaviour
     {

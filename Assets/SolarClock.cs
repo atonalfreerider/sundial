@@ -7,7 +7,6 @@ using Assets.UI;
 using Assets.UI.Elements;
 using Assets.UI.Raycasting;
 using Assets.UI.Text;
-using DefaultNamespace;
 using TMPro;
 
 namespace Assets

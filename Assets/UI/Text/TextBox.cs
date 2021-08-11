@@ -17,13 +17,13 @@ namespace Assets.UI.Text
         {
             Typeface = typeface;
             Size = size;
-            
+
             // Bug: for TextMesh Pro, colors must be linearized before they are displayed on Windows.
             // See: http://digitalnativestudios.com/forum/index.php?topic=1773.0
             // While Android builds use Gamma color space, no modification is needed.
 #if UNITY_ANDROID && !UNITY_EDITOR
             Color = QualitySettings.activeColorSpace == ColorSpace.Linear ? color.linear : color;
-            #else
+#else
             Color = color.linear;
 #endif
         }
@@ -151,7 +151,7 @@ namespace Assets.UI.Text
                     return new Font(
                         SolarClock.Instance.mainFont,
                         fontSize,
-                        new Color(1,1,1,.5f));
+                        new Color(1, 1, 1, .5f));
                 default:
                     Debug.LogError(
                         $"Could not find a font for font type {fontType}");
