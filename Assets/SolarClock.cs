@@ -9,6 +9,7 @@ using Assets.UI;
 using Assets.UI.Raycasting;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -507,7 +508,7 @@ namespace Assets
 
         void Update()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (WasPressed())
             {
                 if (!EventSystem.current.IsPointerOverGameObject()) // check if mouse is over UI
                 {
@@ -515,6 +516,13 @@ namespace Assets
                     target?.AsSelectable.RequestSelection();
                 }
             }
+        }
+        
+        static bool WasPressed()
+        {
+            return Application.platform == RuntimePlatform.Android 
+                ? Touchscreen.current.primaryTouch.press.wasPressedThisFrame 
+                : Mouse.current.leftButton.wasPressedThisFrame;
         }
 
         public void ToggleClock(bool isToggled)

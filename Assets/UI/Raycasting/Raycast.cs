@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Assets.UI.Raycasting
 {
@@ -18,9 +19,10 @@ namespace Assets.UI.Raycasting
             return null;
         }
 
-        static Ray RayFromMouseCursor() =>
-            Camera.main.ScreenPointToRay(Input.mousePosition);
-
+        static Ray RayFromMouseCursor() => Camera.main.ScreenPointToRay(
+            Application.platform == RuntimePlatform.Android
+                ? Touchscreen.current.primaryTouch.position.ReadValue()
+                : Mouse.current.position.ReadValue());
 
         static RaycastHit? CastRay(Ray ray)
         {

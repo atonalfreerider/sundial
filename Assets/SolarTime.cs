@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Assets
 {
@@ -77,19 +78,31 @@ namespace Assets
         // UPDATE Functions
         void Update()
         {
-            if (Input.GetMouseButtonUp(0))
+            if (WasReleased())
             {
                 isEarthTracking = false;
                 isMoonTracking = false;
             }
 
-            if (Input.GetMouseButton(0) && (isEarthTracking || isMoonTracking))
+            if (IsPressed()
+                && (isEarthTracking || isMoonTracking))
             {
                 showNow = false;
                 SolarClock.Instance.nowButton.gameObject.SetActive(true);
-                Vector2 mouseAroundCenter = new(
-                    Input.mousePosition.x - Screen.width * .5f,
-                    Input.mousePosition.y - Screen.height * .5f);
+                Vector2 mouseAroundCenter;
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    mouseAroundCenter = new Vector2(
+                        Touchscreen.current.primaryTouch.position.x.ReadValue() - Screen.width * .5f,
+                        Touchscreen.current.primaryTouch.position.y.ReadValue() - Screen.height * .5f);
+                }
+                else
+                {
+                    mouseAroundCenter = new Vector2(
+                        Mouse.current.position.x.ReadValue() - Screen.width * .5f,
+                        Mouse.current.position.y.ReadValue() - Screen.height * .5f);
+                }
+
                 float angularPosition = -Mathf.Atan2(mouseAroundCenter.y, mouseAroundCenter.x) + Mathf.PI * .5f;
                 if (angularPosition < -Mathf.PI)
                 {
@@ -131,6 +144,20 @@ namespace Assets
             //    Debug.Log("FOUND");
             secondFound = true;
             secondUpdate = StartCoroutine(SecondUpdate());
+        }
+
+        static bool IsPressed()
+        {
+            return Application.platform == RuntimePlatform.Android 
+                ? Touchscreen.current.primaryTouch.press.isPressed 
+                : Mouse.current.leftButton.isPressed;
+        }
+        
+        static bool WasReleased()
+        {
+            return Application.platform == RuntimePlatform.Android 
+                ? Touchscreen.current.primaryTouch.press.wasReleasedThisFrame 
+                : Mouse.current.leftButton.wasReleasedThisFrame;
         }
 
         IEnumerator MinuteUpdate()
