@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
 using Assets.GraphicsUtil.Shapes;
 using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Assets.UI.Elements
 {
@@ -21,26 +20,24 @@ namespace Assets.UI.Elements
         public bool ToggleButton = false;
         public bool isToggled = false;
         bool isLoadingBar = false;
+        public string toggleString = "";
 
         public float Pad = 0;
         Color normalColor = new Color(0, 0, 0, 0.02f);
         public Vector2 Size = Vector2.zero;
-
-        public TMP_SpriteAsset SpriteAsset
-        {
-            set { textBox.SpriteAsset = value; }
-        }
+        readonly Vector2 loadBarDim = new Vector2(.5f, .035f);
 
         #region Actions
 
         public delegate void TakeAction();
 
-        public delegate Task TakeAsyncAction();
-
+        public delegate void TakeActionWithBool(bool toggle);
+        
         public TakeAction SelectionAction { private get; set; }
-        public TakeAsyncAction AsyncSelectionAction { private get; set; }
-        public TakeAction HighlightAction { private get; set; }
-        public TakeAction UnhighlightAction { private get; set; }
+        public TakeActionWithBool SelectionActionWithBool { private get; set; }
+        
+        TakeAction HighlightAction { get; set; }
+        TakeAction UnhighlightAction { get; set; }
 
         #endregion
 
@@ -52,12 +49,12 @@ namespace Assets.UI.Elements
         {
             TextBox textBox =
                 TextBox.Create(buttonText, fontType, fontSize, align);
+
             GameObject gameObject = textBox.gameObject;
             gameObject.name = $"Button: {buttonText}";
             Button button = gameObject.AddComponent<Button>();
             button.textBox = textBox;
-            textBox.RectTransformDimensionsChange +=
-                button.OnRectTransformDimensionsChange;
+            textBox.TextField.OnPreRenderText += button.DoDelayBounds;
 
             button.buttonBack = Instantiate(NewCube.transRectPoly, button.transform, false);
             button.buttonBack.transform.localRotation =
@@ -73,29 +70,47 @@ namespace Assets.UI.Elements
                 {
                     Vector3.zero, new Vector3(0.001f, 0, 0)
                 },
-                1,
+                0.001f,
                 false,
                 2);
             button.buttonOutline.transform.SetParent(button.transform, false);
             button.buttonOutline.transform.localRotation =
                 Quaternion.AngleAxis(90, Vector3.right);
             button.buttonOutline.SetColor(Color.white);
-
-            button.RedrawButtonShape();
+            button.DoDelayBounds(textBox.TextField);
 
             return button;
         }
 
-        void OnRectTransformDimensionsChange()
+        void DoDelayBounds(TMP_Text textComponent)
         {
-            RedrawButtonShape();
+            StartCoroutine(DelayBounds(textComponent));
         }
 
-        void RedrawButtonShape()
+        void DoDelayBounds(TMP_TextInfo textInfo)
         {
-            Size = textBox.RectTransform.rect.size;
+            StartCoroutine(DelayBounds(textInfo.textComponent));
+        }
+
+        IEnumerator DelayBounds(TMP_Text textComponent)
+        {
+            yield return null;
+
+            Vector2 size = textComponent.rectTransform.rect.size;
+            if (size.magnitude < float.Epsilon)
+            {
+                size = new Vector2(textComponent.bounds.size.x, textComponent.bounds.size.y);
+            }
+
+            RedrawButtonShape(textComponent, size);
+        }
+
+        void RedrawButtonShape(TMP_Text textComponent, Vector2 size)
+        {
+            Size = size;
             Vector3 center = Vector3.zero;
-            switch (textBox.Alignment) {
+            switch (textComponent.alignment)
+            {
                 case TextAlignmentOptions.Left:
                     center = new Vector3((Size.x + Pad) * 0.5f - Pad * 0.5f, 0, 0);
                     break;
@@ -108,10 +123,10 @@ namespace Assets.UI.Elements
             {
                 buttonBack.transform.localScale =
                     new Vector3(Size.x + Pad, 1, Size.y + Pad * 0.5f);
-                buttonBack.transform.localPosition = center;
+                buttonBack.transform.localPosition = center + transform.forward * .001f;
             }
 
-            boxCollider.size = new Vector3(Size.x + Pad, Size.y + Pad, 10);
+            boxCollider.size = new Vector3(Size.x, Size.y, 0.05f);
             boxCollider.center = center;
 
             Vector3[] frame =
@@ -122,7 +137,7 @@ namespace Assets.UI.Elements
                 new Vector3(-Size.x * 0.5f - Pad, 0, -Size.y * 0.5f - Pad * 0.5f)
             };
 
-            buttonOutline.DrawLine(frame, .5f, true, 2);
+            buttonOutline.DrawLine(frame, 0.002f, true, 2);
             buttonOutline.transform.localPosition = center;
         }
 
@@ -134,56 +149,66 @@ namespace Assets.UI.Elements
 
         void PushButton()
         {
-            if (isLoadingBar) { return; }
-            
+            if (isLoadingBar) return;
+
             SelectionAction?.Invoke();
-            AsyncSelectionAction?.Invoke();
-            if (!ToggleButton)
-            {
-                buttonBack.SetColor(ColorForState(ButtonState.Pushed));
-                buttonBack.SetColor(
-                    ColorForState(ButtonState.Normal),
-                    0);
-            }
-            else
-            {
-                SetToggleState(!isToggled);
-            }
+            SelectionActionWithBool?.Invoke(!isToggled);
         }
 
         public void SetLoadStatus(float prct)
         {
-            Vector2 dim = textBox.RectTransform.rect.size;
+            DrawBar(prct, loadBarDim);
+            buttonBack.transform.localScale = new Vector3(
+                (loadBarDim.x + Pad) * prct,
+                1,
+                loadBarDim.y + Pad * 0.5f);
+        }
+
+        public void SetIndeterminate(float prct)
+        {
+            DrawBar(prct * 2, loadBarDim);
+            buttonBack.transform.localScale = new Vector3(
+                (loadBarDim.x + Pad) * .1f,
+                1,
+                loadBarDim.y + Pad * 0.5f);
+        }
+
+        void DrawBar(float prct, Vector2 dim)
+        {
             Vector3 center = Vector3.zero;
             switch (textBox.Alignment)
             {
                 case TextAlignmentOptions.Left:
-                    center = new Vector3((dim.x + Pad) * 0.5f * prct - Pad * 0.5f, 0, 0);
+                    center = new Vector3(
+                        (dim.x + Pad) * 0.5f * prct - Pad * 0.5f,
+                        0,
+                        0);
                     break;
                 case TextAlignmentOptions.Center:
-                    center = new Vector3((dim.x + Pad) * 0.5f * prct - (dim.x + Pad) * 0.5f, 0, 0);
+                    center = new Vector3(
+                        (dim.x + Pad) * 0.5f * prct - (dim.x + Pad) * 0.5f,
+                        0,
+                        0);
                     break;
             }
 
-            buttonBack.transform.localScale =
-                new Vector3((dim.x + Pad) * prct, 1, dim.y + Pad * 0.5f);
             buttonBack.transform.localPosition = center;
-        }
-
-        public void SetToggleState(bool isToggled)
-        {
-            buttonBack.SetColor(isToggled ? 
-                ColorForState(ButtonState.Pushed) : 
-                ColorForState(ButtonState.Normal));
-
-            this.isToggled = isToggled;
         }
 
         public void MakeLoadingBar()
         {
             isLoadingBar = true;
+            SetFixedSize(new Vector2(.5f, .035f));
             buttonBack.transform.localScale = new Vector3(.01f, 1, .01f);
             buttonBack.transform.localPosition = Vector3.zero;
+        }
+
+        public void SetFixedSize(Vector2 size)
+        {
+            textBox.TextField.overflowMode = TextOverflowModes.Ellipsis;
+            textBox.TextField.enableWordWrapping = false;
+            textBox.TextField.autoSizeTextContainer = false;
+            textBox.TextField.rectTransform.sizeDelta = size;
         }
 
         public void SetCollider(bool isEnabled)
@@ -191,15 +216,10 @@ namespace Assets.UI.Elements
             boxCollider.enabled = isEnabled;
         }
 
-        public Bounds Bounds => textBox.Bounds;
-
-        public void SetBoxCollider(bool isEnabled)
-        {
-            boxCollider.enabled = isEnabled;
-        }
-
         public void RemoveFromParentMenu()
         {
+            if (parentMenu == null) return;
+            
             parentMenu.RemoveButton(this, 0.3f);
         }
 
@@ -209,6 +229,13 @@ namespace Assets.UI.Elements
             buttonBack.SetColor(normalColor);
             textBox.Color = textColor;
             buttonOutline.SetColor(outlineColor);
+        }
+
+        public void SetWrap(float width)
+        {
+            textBox.TextField.enableWordWrapping = true;
+            textBox.TextField.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            textBox.TextField.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, textBox.TextField.preferredHeight);
         }
 
         #region ISelectable
@@ -229,9 +256,9 @@ namespace Assets.UI.Elements
 
         void HighlightButton(ButtonState newState)
         {
-            if (ToggleButton && isToggled) { return; }
+            if (ToggleButton || isToggled) return;
 
-            if (!isLoadingBar)
+            if (!isLoadingBar && buttonBack != null)
             {
                 buttonBack.SetColor(ColorForState(newState));
             }
@@ -242,7 +269,10 @@ namespace Assets.UI.Elements
             PushButton();
         }
 
-        public void RequestDeselection() { }
+        public bool RequestDeselection()
+        {
+            return false;
+        }
 
         #endregion
 
