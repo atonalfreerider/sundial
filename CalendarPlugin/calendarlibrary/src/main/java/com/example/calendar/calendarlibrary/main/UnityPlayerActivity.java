@@ -3,18 +3,29 @@ package com.example.calendar.calendarlibrary.main;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
+
+import com.unity3d.player.IUnityPlayerLifecycleEvents;
 import com.unity3d.player.UnityPlayer;
 
-public class UnityPlayerActivity extends Activity
+public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecycleEvents
 {
     protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+
+    // Override this in your custom UnityPlayerActivity to tweak the command line arguments passed to the Unity Android Player
+    // The command line arguments are passed as a string, separated by spaces
+    // UnityPlayerActivity calls this from 'onCreate'
+    // Supported: -force-gles20, -force-gles30, -force-gles31, -force-gles31aep, -force-gles32, -force-gles, -force-vulkan
+    // See https://docs.unity3d.com/Manual/CommandLineArguments.html
+    // @param cmdLine the current command line arguments, may be null
+    // @return the modified command line string or null
+    protected String updateUnityCommandLineArguments(String cmdLine)
+    {
+        return cmdLine;
+    }
 
     // Setup activity layout
     @Override protected void onCreate(Bundle savedInstanceState)
@@ -22,9 +33,21 @@ public class UnityPlayerActivity extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
-        mUnityPlayer = new UnityPlayer(this);
+        String cmdLine = updateUnityCommandLineArguments(getIntent().getStringExtra("unity"));
+        getIntent().putExtra("unity", cmdLine);
+
+        mUnityPlayer = new UnityPlayer(this, this);
         setContentView(mUnityPlayer);
         mUnityPlayer.requestFocus();
+    }
+
+    // When Unity player unloaded move task to background
+    @Override public void onUnityPlayerUnloaded() {
+        moveTaskToBack(true);
+    }
+
+    // Callback before Unity player process is killed
+    @Override public void onUnityPlayerQuitted() {
     }
 
     @Override protected void onNewIntent(Intent intent)
@@ -34,6 +57,7 @@ public class UnityPlayerActivity extends Activity
         // to get the intent set on launch. To update that after launch we have to manually
         // replace the intent with the one caught here.
         setIntent(intent);
+        mUnityPlayer.newIntent(intent);
     }
 
     // Quit Unity
@@ -55,18 +79,6 @@ public class UnityPlayerActivity extends Activity
     {
         super.onResume();
         mUnityPlayer.resume();
-    }
-
-    @Override protected void onStart()
-    {
-        super.onStart();
-        mUnityPlayer.start();
-    }
-
-    @Override protected void onStop()
-    {
-        super.onStop();
-        mUnityPlayer.stop();
     }
 
     // Low Memory Unity
