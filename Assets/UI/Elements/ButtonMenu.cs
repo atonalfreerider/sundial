@@ -37,7 +37,7 @@ namespace Assets.UI.Elements
             }
         }
 
-        public void AddButton(Button button, float animSec = 0)
+        public void AddButton(Button button)
         {
             button.transform.SetParent(transform, false);
             while (menuButtons.ContainsKey(button.name))
@@ -47,14 +47,14 @@ namespace Assets.UI.Elements
             }
             menuButtons.Add(button.name, button);
             button.parentMenu = this;
-            DoLayout(animSec);
+            DoLayout();
         }
 
-        public void RemoveButton(Button button, float animSec = 0)
+        public void RemoveButton(Button button)
         {
             Destroy(button.gameObject);
             menuButtons.Remove(button.name);
-            DoLayout(animSec);
+            DoLayout();
         }
 
         public void Clear()
@@ -80,7 +80,7 @@ namespace Assets.UI.Elements
             }
         }
         
-        void SetRadial(float animSec = 0)
+        void SetRadial()
         {
             int longest = menuButtons.Keys.Select(buttonName => buttonName.Length).Concat(new[] {0}).Max();
 
@@ -98,16 +98,9 @@ namespace Assets.UI.Elements
                 count++;
             }
 
-            if (animSec > float.Epsilon)
+            foreach (Button button in menuButtons.Values)
             {
-                StartCoroutine(MoveToHomePositions(animSec));
-            }
-            else
-            {
-                foreach (Button button in menuButtons.Values)
-                {
-                    button.transform.localPosition = button.HomePosition;
-                }
+                button.transform.localPosition = button.HomePosition;
             }
         }
 
@@ -115,63 +108,38 @@ namespace Assets.UI.Elements
         {
             // 1 frame delay required to allow button size to get set
             yield return null;
+            yield return null;
             int count = 0;
             Button previous = null;
             foreach (Button button in menuButtons.Values)
             {
                 button.HomePosition = new Vector3(
-                    0, 
-                    -count * (button.Size.y * .5f + (previous != null ? previous.Size.y * .5f : 0) + .07f),
+                    0,
+                    -count * (button.Size.y * .5f + (previous != null ? previous.Size.y * .5f : 0) + 7f),
                     0);
                 previous = button;
                 count++;
             }
 
-            if (animSec > float.Epsilon)
-            {
-                StartCoroutine(MoveToHomePositions(animSec));
-            }
-            else
-            {
-                foreach (Button button in menuButtons.Values)
-                {
-                    button.transform.localPosition = button.HomePosition;
-                }
-            }
-        }
-
-        void DoLayout(float animSec = 0)
-        {
-            switch (menuLayout) {
-                case Layout.Radial:
-                    SetRadial(animSec);
-                    break;
-                case Layout.List:
-                    if (!gameObject.activeInHierarchy) return;
-                    StartCoroutine(SetList(animSec));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-        
-        IEnumerator MoveToHomePositions(float animSec)
-        {
-            // animate;
-            float prog = 0;
-            while (prog < animSec)
-            {
-                foreach (Button button in menuButtons.Values)
-                    button.transform.localPosition = Vector3.Lerp(button.transform.localPosition, button.HomePosition, Time.deltaTime / (animSec - prog));
-
-                yield return null;
-                prog += Time.deltaTime;
-            }
-
-            // on complete;
             foreach (Button button in menuButtons.Values)
             {
                 button.transform.localPosition = button.HomePosition;
+            }
+        }
+
+        void DoLayout()
+        {
+            switch (menuLayout)
+            {
+                case Layout.Radial:
+                    SetRadial();
+                    break;
+                case Layout.List:
+                    if (!gameObject.activeInHierarchy) return;
+                    StartCoroutine(SetList());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

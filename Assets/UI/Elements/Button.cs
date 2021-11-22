@@ -68,9 +68,9 @@ namespace Assets.UI.Elements
             button.buttonOutline.DrawLine(
                 new[]
                 {
-                    Vector3.zero, new Vector3(0.001f, 0, 0)
+                    Vector3.zero, new Vector3(0.1f, 0, 0)
                 },
-                0.001f,
+                0.1f,
                 false,
                 2);
             button.buttonOutline.transform.SetParent(button.transform, false);
@@ -220,7 +220,7 @@ namespace Assets.UI.Elements
         {
             if (parentMenu == null) return;
             
-            parentMenu.RemoveButton(this, 0.3f);
+            parentMenu.RemoveButton(this);
         }
 
         public void SetColor(Color textColor, Color backColor, Color outlineColor)

@@ -101,7 +101,7 @@ namespace Assets
 
             raycast = gameObject.AddComponent<Raycast>();
 
-            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 100,
+            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 200,
                 TextAlignmentOptions.Center);
             nowButton.Pad = 20;
             nowButton.transform.SetParent(Camera.main.transform, false);

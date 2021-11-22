@@ -12,7 +12,7 @@ namespace UnityEngine
 
         void Start()
         {
-            showHideButton = Button.Create("Calendars", TextBox.FontType.MainFont, 100, TextAlignmentOptions.Center);
+            showHideButton = Button.Create("Calendars", TextBox.FontType.MainFont, 200, TextAlignmentOptions.Center);
             showHideButton.Pad = 20;
             showHideButton.transform.SetParent(transform, false);
             showHideButton.transform.localPosition = new Vector3(
@@ -40,7 +40,7 @@ namespace UnityEngine
         {
             foreach (string calName in calendarNames)
             {
-                Button calSelectButton = Button.Create(calName, TextBox.FontType.MainFont, 100, TextAlignmentOptions.Left);
+                Button calSelectButton = Button.Create(calName, TextBox.FontType.MainFont, 200, TextAlignmentOptions.Left);
                 calSelectButton.ToggleButton = true;
                 calSelectButton.SelectionAction = () => { AddOrRemove(!calSelectButton.isToggled, calName); };
                 calendars.AddButton(calSelectButton);
