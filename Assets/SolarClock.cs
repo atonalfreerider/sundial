@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
+using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI;
 using Assets.UI.Elements;
 using Assets.UI.Raycasting;
@@ -96,6 +97,7 @@ namespace Assets
 
             NewCylinder.Init(polygonFactory, mainMat);
             NewCube.InitCube(polygonFactory, mainMat);
+            StaticLink.InitStaticLink(polygonFactory, mainMat);
 
             raycast = gameObject.AddComponent<Raycast>();
 
