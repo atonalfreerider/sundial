@@ -40,9 +40,9 @@ namespace Assets.GraphicsUtil.Shapes
             AddMesh(newTri.gameObject, newTri, SolarClock.Instance.mainMat, false);
             newTri.rend = newTri.GetComponent<Renderer>();
             Vector3[] skinList = {
-                new Vector3(0, 0, h), 
-                new Vector3(b * .5f, 0, 0),
-                new Vector3(-b * .5f, 0, 0)
+                new(0, 0, h), 
+                new(b * .5f, 0, 0),
+                new(-b * .5f, 0, 0)
             };
 
             int[] indList = {0, 1, 2};

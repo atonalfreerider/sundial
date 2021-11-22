@@ -1,3 +1,4 @@
+using System;
 using Assets;
 using Assets.UI.Elements;
 using Assets.UI.Text;
@@ -23,7 +24,7 @@ namespace UnityEngine
             showHideButton.SelectionAction = () => { calendars.Show(!showHideButton.isToggled); };
             
             calendars = ButtonMenu.NewMenu(
-                new string[0], 
+                Array.Empty<string>(), 
                 "calendars", 
                 ButtonMenu.Layout.List, 
                 30);

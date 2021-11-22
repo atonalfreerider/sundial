@@ -67,7 +67,7 @@ namespace Assets.GraphicsUtil.Shapes.Lines
 
         public static void InitStaticLink(PolygonFactory polygonFactory, Material mainMat)
         {
-            GameObject newLinkGO = new GameObject("StaticLink");
+            GameObject newLinkGO = new("StaticLink");
             newLinkGO.transform.SetParent(polygonFactory.transform, false);
 
             prototypeStaticLink = newLinkGO.AddComponent<StaticLink>();

@@ -23,9 +23,9 @@ namespace Assets.UI.Elements
         public string toggleString = "";
 
         public float Pad = 0;
-        Color normalColor = new Color(0, 0, 0, 0.02f);
+        Color normalColor = new(0, 0, 0, 0.02f);
         public Vector2 Size = Vector2.zero;
-        readonly Vector2 loadBarDim = new Vector2(.5f, .035f);
+        readonly Vector2 loadBarDim = new(.5f, .035f);
 
         #region Actions
 
@@ -131,10 +131,10 @@ namespace Assets.UI.Elements
 
             Vector3[] frame =
             {
-                new Vector3(-Size.x * 0.5f - Pad, 0, Size.y * 0.5f + Pad * 0.5f),
-                new Vector3(Size.x * 0.5f + Pad, 0, Size.y * 0.5f + Pad * 0.5f),
-                new Vector3(Size.x * 0.5f + Pad, 0, -Size.y * 0.5f - Pad * 0.5f),
-                new Vector3(-Size.x * 0.5f - Pad, 0, -Size.y * 0.5f - Pad * 0.5f)
+                new(-Size.x * 0.5f - Pad, 0, Size.y * 0.5f + Pad * 0.5f),
+                new(Size.x * 0.5f + Pad, 0, Size.y * 0.5f + Pad * 0.5f),
+                new(Size.x * 0.5f + Pad, 0, -Size.y * 0.5f - Pad * 0.5f),
+                new(-Size.x * 0.5f - Pad, 0, -Size.y * 0.5f - Pad * 0.5f)
             };
 
             buttonOutline.DrawLine(frame, 0.002f, true, 2);

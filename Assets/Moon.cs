@@ -39,7 +39,7 @@ namespace Assets
             moonSys = new GameObject("MoonSys");
 
             //...........(0) Moon Hand
-            GameObject moonHandCont = new GameObject("MoonHandCont");
+            GameObject moonHandCont = new("MoonHandCont");
             float moonH = moonR * .95f;
             Polygon moonHand = PolygonFactory.DrawTri(moonH, moonR * .1f, Color.white);
             moonHand.transform.parent = moonHandCont.transform;
@@ -70,7 +70,7 @@ namespace Assets
         GameObject NewMoonSprockCont(float passMoonR, DateTime passDate)
         {
             moonR = passMoonR;
-            GameObject newMoonSprockCont = new GameObject("MoonSprockCont");
+            GameObject newMoonSprockCont = new("MoonSprockCont");
             //.........................................(0) circ
 
             //...........................(0) hWheel
@@ -147,7 +147,7 @@ namespace Assets
             //...........................(1) hLabelWheel
             // create days in month;        
             dayList = new TextBox[29];
-            GameObject newDLabelWheel = new GameObject("MoonLabels");
+            GameObject newDLabelWheel = new("MoonLabels");
             const float dayLabelPad = SolarClock.SYSTEM_DIAMETER * .0133f;;
             for (int ht = 0; ht < dayList.Length; ht++)
             {

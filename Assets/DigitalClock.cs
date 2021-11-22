@@ -2,7 +2,6 @@
 using Assets.UI.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Assets
 {

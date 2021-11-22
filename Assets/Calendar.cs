@@ -52,10 +52,10 @@ namespace Assets
         GameObject dayCal;
         GameObject yearCal;
 
-        readonly List<string> displayedCalendars = new List<string>();
-        private Dictionary<string, MyEvent[]> calendarEvents;
-        readonly List<MyEvent> yearQueue = new List<MyEvent>();
-        readonly List<MyEvent> dayQueue = new List<MyEvent>();
+        readonly List<string> displayedCalendars = new();
+        Dictionary<string, MyEvent[]> calendarEvents;
+        readonly List<MyEvent> yearQueue = new();
+        readonly List<MyEvent> dayQueue = new();
 
         public static readonly string[] daysofweekAbr =
         {
@@ -93,82 +93,77 @@ namespace Assets
         static Dictionary<string, MyEvent[]> RetrieveAndroidCalendarEvents()
         {
             Dictionary<string, MyEvent[]> calendarsAndEvents = new Dictionary<string, MyEvent[]>();
-            DateTime Jan1Of1970 = new DateTime(1970, 1, 1);
+            DateTime Jan1Of1970 = new(1970, 1, 1);
             int timeZoneOffset = Earth.GetTimeZone();
 
-            using (AndroidJavaClass javaClass =
-                new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            using AndroidJavaClass javaClass = new("com.unity3d.player.UnityPlayer");
+            using AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("currentActivity");
+            AndroidJavaObject calObj = activity.Call<AndroidJavaObject>("getAllCalendarNames");
+
+            if (calObj.GetRawObject().ToInt32() == 0)
             {
-                using (AndroidJavaObject activity = javaClass.GetStatic<AndroidJavaObject>("currentActivity"))
-                {
-                    AndroidJavaObject calObj = activity.Call<AndroidJavaObject>("getAllCalendarNames");
-
-                    if (calObj.GetRawObject().ToInt32() == 0)
-                    {
-                        // this returns empty if calendars are empty OR if this is the version without the calendar plugin
-                        calObj.Dispose();
-                        return calendarsAndEvents;
-                    }
+                // this returns empty if calendars are empty OR if this is the version without the calendar plugin
+                calObj.Dispose();
+                return calendarsAndEvents;
+            }
                     
-                    byte[] calendarNamesBytes = calObj.GetRawObject().ToInt32() != 0
-                        ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(calObj.GetRawObject())
-                        : new byte[0];
-                    calObj.Dispose();
+            byte[] calendarNamesBytes = calObj.GetRawObject().ToInt32() != 0
+                ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(calObj.GetRawObject())
+                : Array.Empty<byte>();
+            calObj.Dispose();
 
-                    string rectifyCalNames = System.Text.Encoding.Default.GetString(calendarNamesBytes);
-                    string[] calNames = rectifyCalNames.Split('|');
-                    int count = 0;
-                    foreach (string calName in calNames)
-                    {
-                        //Debug.Log(calName);
-                        string[] pair = calName.Split(':');
+            string rectifyCalNames = System.Text.Encoding.Default.GetString(calendarNamesBytes);
+            string[] calNames = rectifyCalNames.Split('|');
+            int count = 0;
+            foreach (string calName in calNames)
+            {
+                //Debug.Log(calName);
+                string[] pair = calName.Split(':');
 
-                        bool parsed = int.TryParse(pair[0], out int index);
-                        if (!parsed) continue;
+                bool parsed = int.TryParse(pair[0], out int index);
+                if (!parsed) continue;
 
-                        AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd", index);
-                        int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0
-                            ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject())
-                            : new int[0];
-                        obj.Dispose();
+                AndroidJavaObject obj = activity.Call<AndroidJavaObject>("getAllEventsStartEnd", index);
+                int[] eventsStartEnd = obj.GetRawObject().ToInt32() != 0
+                    ? AndroidJNIHelper.ConvertFromJNIArray<int[]>(obj.GetRawObject())
+                    : Array.Empty<int>();
+                obj.Dispose();
 
-                        AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles", index);
-                        byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0
-                            ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject())
-                            : new byte[0];
-                        obj2.Dispose();
+                AndroidJavaObject obj2 = activity.Call<AndroidJavaObject>("getAllEventsTitles", index);
+                byte[] eventsTitles = obj2.GetRawObject().ToInt32() != 0
+                    ? AndroidJNIHelper.ConvertFromJNIArray<byte[]>(obj2.GetRawObject())
+                    : Array.Empty<byte>();
+                obj2.Dispose();
 
-                        string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
-                        string[] split = rectify.Split('|');
+                string rectify = System.Text.Encoding.Default.GetString(eventsTitles);
+                string[] split = rectify.Split('|');
 
-                        MyEvent[] calendarEvents = new MyEvent[split.Length];
-                        for (int i = 0; i < calendarEvents.Length; i++)
-                        {
-                            string title = split[i];
-                            if (i * 2 > eventsStartEnd.Length - 2) break;
+                MyEvent[] calendarEvents = new MyEvent[split.Length];
+                for (int i = 0; i < calendarEvents.Length; i++)
+                {
+                    string title = split[i];
+                    if (i * 2 > eventsStartEnd.Length - 2) break;
 
-                            // note: I added a "d" for double below by accident and it worked - what are the chances?
-                            int start = eventsStartEnd[i * 2];
-                            DateTime startDate = Jan1Of1970.AddMilliseconds(start * 10000d);
-                            int end = eventsStartEnd[i * 2 + 1];
-                            DateTime endDate = Jan1Of1970.AddMilliseconds(end * 10000d);
+                    // note: I added a "d" for double below by accident and it worked - what are the chances?
+                    int start = eventsStartEnd[i * 2];
+                    DateTime startDate = Jan1Of1970.AddMilliseconds(start * 10000d);
+                    int end = eventsStartEnd[i * 2 + 1];
+                    DateTime endDate = Jan1Of1970.AddMilliseconds(end * 10000d);
 
-                            //int TimeZone = Earth.GetTimeZone();
-                            calendarEvents[i] = new MyEvent(
-                                calName,
-                                title,
-                                startDate,
-                                endDate,
-                                GetEventColor(title),
-                                timeZoneOffset
-                            );
-                        }
-
-                        calendarsAndEvents.Add(calName, calendarEvents);
-
-                        count++;
-                    }
+                    //int TimeZone = Earth.GetTimeZone();
+                    calendarEvents[i] = new MyEvent(
+                        calName,
+                        title,
+                        startDate,
+                        endDate,
+                        GetEventColor(title),
+                        timeZoneOffset
+                    );
                 }
+
+                calendarsAndEvents.Add(calName, calendarEvents);
+
+                count++;
             }
 
             return calendarsAndEvents;
@@ -181,11 +176,11 @@ namespace Assets
             yearQueue.Clear();
             dayQueue.Clear();
 
-            foreach (KeyValuePair<string, MyEvent[]> kvp in calendarEvents)
+            foreach (var (calendarName, eventList) in calendarEvents)
             {
-                if (!displayedCalendars.Contains(kvp.Key)) continue;
+                if (!displayedCalendars.Contains(calendarName)) continue;
 
-                foreach (MyEvent calendarEvent in kvp.Value)
+                foreach (MyEvent calendarEvent in eventList)
                 {
                     //Debug.Log($"{calendarEvent.title}:{prettyDate(calendarEvent.start)}-{prettyDate(calendarEvent.end)}");
 
@@ -297,18 +292,18 @@ namespace Assets
             float R = 0;
             float prct = 0;
             string displayTitle;
-            TimeSpan span = new TimeSpan(passEv.end.Ticks - passEv.start.Ticks);
+            TimeSpan span = new(passEv.end.Ticks - passEv.start.Ticks);
             if (isYearEvent)
             {
                 R = calR - earthR * .0166f - index * evH;
                 prct = (float) span.TotalDays / YEAR;
-                displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalDays, passEv.title.Length));
+                displayTitle = passEv.title[..Math.Min((int) span.TotalDays, passEv.title.Length)];
             }
             else
             {
                 R = earthR - earthR * .0166f - index * evH;
                 prct = (float) span.TotalHours / 24;
-                displayTitle = passEv.title.Substring(0, Math.Min((int) span.TotalHours * 4, passEv.title.Length));
+                displayTitle = passEv.title[..Math.Min((int) span.TotalHours * 4, passEv.title.Length)];
             }
 
             Circle newRing = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
@@ -362,86 +357,57 @@ namespace Assets
 
         public static int ConvertDaytoInt(string passDay)
         {
-            switch (passDay)
+            return passDay switch
             {
-                case "Sunday":
-                    return 0;
-                case "Monday":
-                    return 1;
-                case "Tuesday":
-                    return 2;
-                case "Wednesday":
-                    return 3;
-                case "Thursday":
-                    return 4;
-                case "Friday":
-                    return 5;
-                case "Saturday":
-                    return 6;
-                default:
-                    return 0;
-            }
+                "Sunday" => 0,
+                "Monday" => 1,
+                "Tuesday" => 2,
+                "Wednesday" => 3,
+                "Thursday" => 4,
+                "Friday" => 5,
+                "Saturday" => 6,
+                _ => 0
+            };
         }
 
         public static int ConvertAbrDaytoInt(string passDay)
         {
-            switch (passDay)
+            return passDay switch
             {
-                case "SUN":
-                    return 0;
-                case "MON":
-                    return 1;
-                case "TUE":
-                    return 2;
-                case "WED":
-                    return 3;
-                case "THU":
-                    return 4;
-                case "FRI":
-                    return 5;
-                case "SAT":
-                    return 6;
-                default:
-                    return 0;
-            }
+                "SUN" => 0,
+                "MON" => 1,
+                "TUE" => 2,
+                "WED" => 3,
+                "THU" => 4,
+                "FRI" => 5,
+                "SAT" => 6,
+                _ => 0
+            };
         }
 
         public static int ConverMonthtoInt(string passDay)
         {
-            switch (passDay)
+            return passDay switch
             {
-                case "JAN":
-                    return 0;
-                case "FEB":
-                    return 1;
-                case "MAR":
-                    return 2;
-                case "APR":
-                    return 3;
-                case "MAY":
-                    return 4;
-                case "JUN":
-                    return 5;
-                case "JUL":
-                    return 6;
-                case "AUG":
-                    return 7;
-                case "SEP":
-                    return 8;
-                case "OCT":
-                    return 9;
-                case "NOV":
-                    return 10;
-                case "DEC":
-                    return 11;
-                default:
-                    return 0;
-            }
+                "JAN" => 0,
+                "FEB" => 1,
+                "MAR" => 2,
+                "APR" => 3,
+                "MAY" => 4,
+                "JUN" => 5,
+                "JUL" => 6,
+                "AUG" => 7,
+                "SEP" => 8,
+                "OCT" => 9,
+                "NOV" => 10,
+                "DEC" => 11,
+                _ => 0
+            };
         }
 
         static DateTime CreateDate(int yr, int month, int day, int hour, int min)
         {
-            DateTime newDate = new DateTime();
+            DateTime newDate = new();
             newDate = newDate.AddYears(yr - 1);
             newDate = newDate.AddMonths(month - 1);
             newDate = newDate.AddDays(day - 1);
@@ -462,7 +428,7 @@ namespace Assets
             calendarEvents = new Dictionary<string, MyEvent[]>();
             DateTime now = DateTime.Now;
             string testCal = "1:testCal";
-            MyEvent testYearEvent = new MyEvent(
+            MyEvent testYearEvent = new(
                 testCal,
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
@@ -471,7 +437,7 @@ namespace Assets
                 0);
 
             MyEvent testDayEvent =
-                new MyEvent(
+                new(
                     testCal,
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),
@@ -482,7 +448,7 @@ namespace Assets
             calendarEvents.Add(testCal, new[] {testYearEvent, testDayEvent});
 
             string testCal2 = "2:testCal";
-            MyEvent testYearEvent2 = new MyEvent(
+            MyEvent testYearEvent2 = new(
                 testCal2,
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
@@ -491,7 +457,7 @@ namespace Assets
                 0);
 
             MyEvent testDayEvent2 =
-                new MyEvent(
+                new(
                     testCal2,
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),

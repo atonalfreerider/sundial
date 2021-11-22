@@ -41,7 +41,7 @@ namespace Assets.Editor
         {
             PlayerSettings.Android.minSdkVersion = version;
 
-            BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions()
+            BuildPlayerOptions buildPlayerOptions = new()
             {
                 scenes = new[]
                 {
@@ -106,7 +106,7 @@ namespace Assets.Editor
 
         static void ExcludeDirectory(string path)
         {
-            DirectoryInfo root = new DirectoryInfo(path);
+            DirectoryInfo root = new(path);
 
             DirectoryInfo[] subDirs = root.GetDirectories();
 
@@ -128,7 +128,7 @@ namespace Assets.Editor
 
         static void RestoreDirectory(string path)
         {
-            DirectoryInfo root = new DirectoryInfo(path);
+            DirectoryInfo root = new(path);
             IEnumerable<DirectoryInfo> allExcludeDirectories = AllExcludedSubDirectories(root);
             foreach (DirectoryInfo excludeDirectory in allExcludeDirectories)
             {

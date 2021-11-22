@@ -16,7 +16,7 @@ namespace Assets.UI.Elements
         }
 
         // persistent vars
-        public readonly Dictionary<string, Button> menuButtons = new Dictionary<string, Button>();
+        public readonly Dictionary<string, Button> menuButtons = new();
 
         // state vars
         Layout menuLayout;

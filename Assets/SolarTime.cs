@@ -87,7 +87,7 @@ namespace Assets
             {
                 showNow = false;
                 SolarClock.Instance.nowButton.gameObject.SetActive(true);
-                Vector2 mouseAroundCenter = new Vector2(
+                Vector2 mouseAroundCenter = new(
                     Input.mousePosition.x - Screen.width * .5f,
                     Input.mousePosition.y - Screen.height * .5f);
                 float angularPosition = -Mathf.Atan2(mouseAroundCenter.y, mouseAroundCenter.x) + Mathf.PI * .5f;

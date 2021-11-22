@@ -12,7 +12,7 @@ namespace Assets.UI.Raycasting
         }
     
         public static RaycastTarget SelectableTarget(Vector3 collisionPoint, Transform target) =>
-            new RaycastTarget(collisionPoint, TargetAsSelectable(target));
+            new(collisionPoint, TargetAsSelectable(target));
 
         static ISelectable TargetAsSelectable(Transform target)
         {

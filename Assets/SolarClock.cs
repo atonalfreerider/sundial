@@ -59,9 +59,9 @@ namespace Assets
         // camera vars
         public ViewState viewState = ViewState.HelioCentric;
         const float FIXED_CAM_Y = 200;
-        Vector3 targetPos = new Vector3(0, FIXED_CAM_Y, 0);
+        Vector3 targetPos = new(0, FIXED_CAM_Y, 0);
         Quaternion targetRot = Quaternion.AngleAxis(90, Vector3.right);
-        Vector3 orbitScale = new Vector3(1, .01f, 1);
+        Vector3 orbitScale = new(1, .01f, 1);
         float orthoSize;
         Coroutine zooming;
         const float ZOOM_DURATION = 1;
@@ -157,14 +157,14 @@ namespace Assets
             sunDial.transform.SetParent(transform, false);
 
             // (1) EARTHDIAL
-            GameObject earthGO = new GameObject("EarthDial");
+            GameObject earthGO = new("EarthDial");
             earth = earthGO.AddComponent<Earth>();
             earth.NewEarthSystem(passDate);
             earthGO.transform.SetParent(transform, false);
 
             // (2) SUN and Planets
             //.........(0) Planets
-            GameObject orbitsGO = new GameObject("PlanetOrbits");
+            GameObject orbitsGO = new("PlanetOrbits");
             orbits = orbitsGO.AddComponent<Orbits>();
             orbits.NewOrbits();
             orbitsGO.transform.SetParent(transform, false);
@@ -174,7 +174,7 @@ namespace Assets
 
         GameObject NewSunDial(DateTime passDate)
         {
-            GameObject sunDial = new GameObject();
+            GameObject sunDial = new();
             //.........(1) Sun;
             GameObject sunStar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             const float sunR = SYSTEM_DIAMETER * .08f;
@@ -184,8 +184,8 @@ namespace Assets
             sunStar.GetComponent<SphereCollider>().enabled = false;
 
             // .......(0) SEASONS;
-            GameObject seasonCross = new GameObject("SeasonCross");
-            Color axisColor = new Color(1, 1, 1, .5f);
+            GameObject seasonCross = new("SeasonCross");
+            Color axisColor = new(1, 1, 1, .5f);
             GameObject solsticeLine = PolygonFactory.DrawDottedLine(
                 new Vector3(0, 0, SYSTEM_DIAMETER),
                 new Vector3(0, 0, -SYSTEM_DIAMETER),
@@ -254,7 +254,7 @@ namespace Assets
 
         GameObject DrawSunSprockCont(DateTime passDate)
         {
-            GameObject newSunSprockCont = new GameObject("SunSprocketContainer");
+            GameObject newSunSprockCont = new("SunSprocketContainer");
 
             sunSprock = DrawSunSprock(passDate);
             sunSprock.transform.SetParent(newSunSprockCont.transform, false);
@@ -469,7 +469,7 @@ namespace Assets
 
             // move the sun line horizontally as a percentage of how far the solar system is through the year
 
-            TimeSpan yearProgress = new TimeSpan(newDateLocal.Ticks - new DateTime(newDateLocal.Year, 1, 1).Ticks);
+            TimeSpan yearProgress = new(newDateLocal.Ticks - new DateTime(newDateLocal.Year, 1, 1).Ticks);
             sunLine.transform.position = new Vector3(
                 0,
                 earthLineL * (.5f - yearProgress.Days / YEAR),

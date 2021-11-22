@@ -17,28 +17,28 @@ namespace Assets
         public float flatScale = .01f;
         readonly PlanetData[] planetDatas =
         {
-            new PlanetData(
+            new(
                 "Mercury",
                 new Color(.4f, .5f, .6f),
                 new Color(.4f, .5f, .6f, .3f),
                 .387f,
                 .238f * earthR
             ),
-            new PlanetData(
+            new(
                 "Venus",
                 new Color(.97f, .97f, .85f),
                 new Color(.97f, .97f, .85f, .3f),
                 .723f,
                 .95f * earthR
             ),
-            new PlanetData(
+            new(
                 "Earth",
                 new Color(.8f, .92f, .97f),
                 new Color(.3f, .3f, 1f, 1f),
                 1,
                 earthR
             ),
-            new PlanetData(
+            new(
                 "Mars",
                 new Color(.9f, .2f, .3f),
                 new Color(.9f, .2f, .3f, .3f),
@@ -55,7 +55,7 @@ namespace Assets
             GameObject planet;
             Circle path;
             Polygon planetTri;
-            Color minorColor = new Color(1, 1, 1, .5f);
+            Color minorColor = new(1, 1, 1, .5f);
             float minorThick = SolarClock.SYSTEM_DIAMETER * .002f;
             foreach (PlanetData planetData in planetDatas)
             {
@@ -144,7 +144,7 @@ namespace Assets
                                         DateTime.MinValue.AddYears(
                                             DateTime.Now.Year - 1).Ticks;
             
-            TimeSpan timeSpan = new TimeSpan(ticksIntoCurrentYear);
+            TimeSpan timeSpan = new(ticksIntoCurrentYear);
 
             // convert to degrees
             float woundAngle = -((float) timeSpan.TotalDays / SolarClock.YEAR) * 360 + SolarClock.SunSprockOffset();
@@ -159,10 +159,10 @@ namespace Assets
             // anything that is not the earth follows an orbit defined by a period
             // since the planets and the moon don't have a naturally occuring ordinal position, define an arbitrary
             // one and offset the orbits by an arbitrary amount
-            DateTime Date_2019_01_01 = new DateTime(2019,1,1);
+            DateTime Date_2019_01_01 = new(2019,1,1);
             long ticksFrom_2019_01_01 = passDate.Ticks - Date_2019_01_01.Ticks;
             
-            TimeSpan timeSpan = new TimeSpan(ticksFrom_2019_01_01);
+            TimeSpan timeSpan = new(ticksFrom_2019_01_01);
             float periodInSeconds = passPeriodInDays * 24 * 60 * 60;
             // convert to degrees
             float woundAngle = -((float) timeSpan.TotalSeconds / periodInSeconds) * 360 + passOffset;
@@ -183,7 +183,7 @@ namespace Assets
             return angle;
         }
 
-        struct PlanetData
+        readonly struct PlanetData
         {
             public readonly string planetName;
             public readonly Color planetColor;

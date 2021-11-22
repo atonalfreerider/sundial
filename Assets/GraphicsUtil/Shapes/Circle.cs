@@ -302,7 +302,7 @@ namespace Assets.GraphicsUtil.Shapes
             }
 
             // determine start point of first day of year
-            DateTime jan1OfDate = new DateTime(passDate.Year, 1, 1);
+            DateTime jan1OfDate = new(passDate.Year, 1, 1);
             int dayCounter = Calendar.ConvertDaytoInt(jan1OfDate.DayOfWeek.ToString());
 
             // create point cloud for sprocket mesh

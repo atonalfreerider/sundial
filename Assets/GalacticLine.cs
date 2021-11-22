@@ -9,7 +9,7 @@ namespace Assets
     {
         public static GameObject YearLine(string year, float earthLineL)
         {
-            GameObject yearLine = new GameObject("yearLine");
+            GameObject yearLine = new("yearLine");
 
             StaticLink axisLine = Object.Instantiate(StaticLink.prototypeStaticLink);
             axisLine.DrawFromTo(new Vector3(0, -earthLineL * .5f, 0), new Vector3(0, earthLineL * .5f, 0));

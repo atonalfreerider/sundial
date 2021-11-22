@@ -38,7 +38,7 @@ namespace Assets
         public void NewEarthSystem(DateTime passDate)
         {
             //...(0) Earth Line
-            GameObject earthLineCont = new GameObject("EarthLineCont");
+            GameObject earthLineCont = new("EarthLineCont");
             earthLineCont.transform.SetParent(transform, false);
 
             handSphereCollider = gameObject.AddComponent<SphereCollider>();
@@ -59,7 +59,7 @@ namespace Assets
             earthSys.transform.Translate(Vector3.forward * SolarClock.SYSTEM_DIAMETER * .5f);
             
             // .........(1) Earth Sprocket;
-            GameObject earthSprockCont = new GameObject("EarthSprockCont");
+            GameObject earthSprockCont = new("EarthSprockCont");
             earthSprockCont.transform.SetParent(earthSys.transform, false);
 
             // create point cloud for earth sprocket mesh
@@ -74,7 +74,7 @@ namespace Assets
 
             //...........................(1) hLabelWheel
             // create 24 hour marks
-            GameObject hLabelWheel = new GameObject("HourLabelWheel");
+            GameObject hLabelWheel = new("HourLabelWheel");
             hLabelWheel.transform.SetParent(earthSprockCont.transform, false);
             TextBox hLabel;
             for (int ht = 0; ht < 24; ht++)
@@ -162,7 +162,7 @@ namespace Assets
             earthSph.transform.SetParent(earthSys.transform, false);
 
             ////........(6) Moon;    
-            GameObject moonDialGO = new GameObject("MoonDial");
+            GameObject moonDialGO = new("MoonDial");
             moonDialGO.transform.SetParent(earthSys.transform, false);
             moonDial = moonDialGO.AddComponent<Moon>();
             moonDial.NewMoon(SolarClock.SYSTEM_DIAMETER * .45f, passDate);
