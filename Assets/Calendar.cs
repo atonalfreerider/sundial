@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,6 +66,8 @@ namespace Assets
         {
             "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
         };
+
+        static readonly Color EventColor = new(.7f, .7f, 0, .5f);
 
         // INIT Functions
         public Calendar(float YEAR, float calR, float earthR)
@@ -156,7 +158,7 @@ namespace Assets
                         title,
                         startDate,
                         endDate,
-                        GetEventColor(title),
+                        EventColor,
                         timeZoneOffset
                     );
                 }
@@ -215,29 +217,6 @@ namespace Assets
             }
 
             FilterIntoYearAndDayCalendars();
-        }
-
-        static Color GetEventColor(string title)
-        {
-            switch (title)
-            {
-                case "ABQ":
-                    return new Color(1f, 1f, 0f, .5f);
-                case "LA":
-                case "NYC":
-                case "NC":
-                    return new Color(1f, 0f, 0f, .5f);
-                case "London":
-                case "LONDON":
-                case "Zurich":
-                    return new Color(.3f, 0, 1f, .5f);
-                case "India":
-                case "Singapore":
-                case "Taiwan":
-                    return new Color(0f, 1f, 0f, .5f);
-                default:
-                    return new Color(0f, 0f, 1f, .5f);
-            }
         }
         
         public void DrawYearCalendar(DateTime passDate, Transform solarClock)
@@ -433,7 +412,7 @@ namespace Assets
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
                 CreateDate(now.Year, 2, 1, 0, 0),
-                Color.red,
+                EventColor,
                 0);
 
             MyEvent testDayEvent =
@@ -442,7 +421,7 @@ namespace Assets
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),
                     CreateDate(now.Year, now.Month, now.Day, 5, 0),
-                    Color.red,
+                    EventColor,
                     0);
 
             calendarEvents.Add(testCal, new[] {testYearEvent, testDayEvent});
@@ -453,7 +432,7 @@ namespace Assets
                 "TEST",
                 CreateDate(now.Year, 1, 1, 0, 0),
                 CreateDate(now.Year, 2, 1, 0, 0),
-                Color.green,
+                EventColor,
                 0);
 
             MyEvent testDayEvent2 =
@@ -462,7 +441,7 @@ namespace Assets
                     "TEST",
                     CreateDate(now.Year, now.Month, now.Day, 1, 0),
                     CreateDate(now.Year, now.Month, now.Day, 5, 0),
-                    Color.green,
+                    EventColor,
                     0);
 
             calendarEvents.Add(testCal2, new[] {testYearEvent2, testDayEvent2});
