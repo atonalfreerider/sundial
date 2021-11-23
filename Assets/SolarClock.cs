@@ -105,10 +105,21 @@ namespace Assets
                 TextAlignmentOptions.Center);
             nowButton.Pad = 20;
             nowButton.transform.SetParent(Camera.main.transform, false);
-            nowButton.transform.localPosition = new Vector3(
-                0,
-                -280,
-                100);
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                nowButton.transform.localPosition = new Vector3(
+                    0,
+                    -280,
+                    100);
+            }
+            else
+            {
+                nowButton.transform.localPosition = new Vector3(
+                    -200,
+                    -140,
+                    100);
+            }
+
             nowButton.SelectionAction = solarTime.NowTime;
             nowButton.gameObject.SetActive(false);
 

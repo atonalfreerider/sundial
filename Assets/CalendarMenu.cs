@@ -16,12 +16,26 @@ namespace UnityEngine
             showHideButton = Button.Create("Calendars", TextBox.FontType.MainFont, 200, TextAlignmentOptions.Center);
             showHideButton.Pad = 20;
             showHideButton.transform.SetParent(transform, false);
-            showHideButton.transform.localPosition = new Vector3(
-                0,
-                -240,
-                100);
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                showHideButton.transform.localPosition = new Vector3(
+                    0,
+                    -240,
+                    100);
+            }
+            else
+            {
+                showHideButton.transform.localPosition = new Vector3(
+                    -200,
+                    -100,
+                    100);
+            }
+
             showHideButton.ToggleButton = true;
-            showHideButton.SelectionAction = () => { calendars.Show(!showHideButton.isToggled); };
+            showHideButton.SelectionAction = () =>
+            {
+                calendars.Show(!showHideButton.isToggled);
+            };
             
             calendars = ButtonMenu.NewMenu(
                 Array.Empty<string>(), 
@@ -30,10 +44,21 @@ namespace UnityEngine
                 30);
             
             calendars.transform.SetParent(transform, false);
-            calendars.transform.localPosition = new Vector3(
-                -40,
-                270,
-                100);
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                calendars.transform.localPosition = new Vector3(
+                    -40,
+                    270,
+                    100);
+            }
+            else
+            {
+                calendars.transform.localPosition = new Vector3(
+                    -240,
+                    100,
+                    100);
+            }
+
             calendars.Show(false);
         }
 
@@ -43,7 +68,10 @@ namespace UnityEngine
             {
                 Button calSelectButton = Button.Create(calName, TextBox.FontType.MainFont, 200, TextAlignmentOptions.Left);
                 calSelectButton.ToggleButton = true;
-                calSelectButton.SelectionAction = () => { AddOrRemove(!calSelectButton.isToggled, calName); };
+                calSelectButton.SelectionAction = () =>
+                {
+                    AddOrRemove(!calSelectButton.isToggled, calName);
+                };
                 calendars.AddButton(calSelectButton);
             }
         }

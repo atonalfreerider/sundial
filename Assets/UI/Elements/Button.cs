@@ -26,6 +26,7 @@ namespace Assets.UI.Elements
         Color normalColor = new(0, 0, 0, 0.02f);
         public Vector2 Size = Vector2.zero;
         readonly Vector2 loadBarDim = new(.5f, .035f);
+        const float ButtonOutlineLW = .8f;
 
         #region Actions
 
@@ -70,7 +71,7 @@ namespace Assets.UI.Elements
                 {
                     Vector3.zero, new Vector3(0.1f, 0, 0)
                 },
-                0.1f,
+                ButtonOutlineLW,
                 false,
                 2);
             button.buttonOutline.transform.SetParent(button.transform, false);
@@ -137,7 +138,7 @@ namespace Assets.UI.Elements
                 new(-Size.x * 0.5f - Pad, 0, -Size.y * 0.5f - Pad * 0.5f)
             };
 
-            buttonOutline.DrawLine(frame, 0.002f, true, 2);
+            buttonOutline.DrawLine(frame, ButtonOutlineLW, true, 2);
             buttonOutline.transform.localPosition = center;
         }
 
@@ -153,6 +154,13 @@ namespace Assets.UI.Elements
 
             SelectionAction?.Invoke();
             SelectionActionWithBool?.Invoke(!isToggled);
+
+            if (!ToggleButton) return;
+            
+            isToggled = !isToggled;
+            buttonBack.SetColor(isToggled 
+                ? ColorForState(ButtonState.Pushed) 
+                : ColorForState(ButtonState.Normal));
         }
 
         public void SetLoadStatus(float prct)
@@ -297,7 +305,7 @@ namespace Assets.UI.Elements
                 case ButtonState.Selected:
                     return new Color(0.1f, 0,0.7f, 0.2f);
                 case ButtonState.Pushed:
-                    return new Color(1, 1, 0, 0.2f);
+                    return new Color(1, 1, 1, .3f);
                 default:
                     Debug.LogErrorFormat(
                         "Unknown `ButtonState` {0} {1}",
