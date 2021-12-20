@@ -43,3 +43,25 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     compileOnly files('classes.jar')
 }
+
+task getDeps(type: Copy) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    if( !sourceSets.collect {it.name}.contains("main")) return 
+    from (sourceSets.main.compileClasspath){
+        include ("**/*.jar")
+        include ("**/*.class")
+    }
+    from (sourceSets.main.runtimeClasspath){
+    	include ("**/*.jar")
+        include ("**/*.class")
+    }
+    from (sourceSets.test.compileClasspath){
+        include ("**/*.jar")
+        include ("**/*.class")
+    }
+    from (sourceSets.test.runtimeClasspath){
+        include ("**/*.jar")
+        include ("**/*.class")
+    }
+	into ("build/runtimeLibs/")
+}
