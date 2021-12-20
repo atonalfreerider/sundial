@@ -72,3 +72,11 @@ The following packages were updated:
   com.unity.ide.visualstudio from version 2.0.5 to 2.0.9
   com.unity.test-framework from version 1.1.20 to 1.1.27
   com.unity.textmeshpro from version 3.0.1 to 3.0.6
+
+=== Sun Dec 19 17:12:45 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.visualstudio from version 2.0.11 to 2.0.12
