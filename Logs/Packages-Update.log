@@ -91,3 +91,11 @@ The following packages were updated:
   com.unity.ide.visualstudio from version 2.0.12 to 2.0.16
   com.unity.ide.vscode from version 1.2.4 to 1.2.5
   com.unity.test-framework from version 1.1.30 to 1.1.33
+
+=== Tue Dec 13 08:48:58 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were added:
+  com.unity.ai.navigation@1.1.1
