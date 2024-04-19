@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.UI.Text;
 using UnityEngine;
 
 namespace Assets.UI.Elements
@@ -30,7 +29,6 @@ namespace Assets.UI.Elements
             {
                 Button button = Button.Create(
                     buttonName,
-                    TextBox.FontType.MainFont,
                     buttonFontSize,
                     alignment);
                 AddButton(button);

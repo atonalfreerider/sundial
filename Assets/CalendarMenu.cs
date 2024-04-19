@@ -1,10 +1,9 @@
 using System;
-using Assets;
 using Assets.UI.Elements;
-using Assets.UI.Text;
 using TMPro;
+using UnityEngine;
 
-namespace UnityEngine
+namespace Assets
 {
     public class CalendarMenu : MonoBehaviour
     {
@@ -13,7 +12,7 @@ namespace UnityEngine
 
         void Start()
         {
-            showHideButton = Button.Create("Calendars", TextBox.FontType.MainFont, 200, TextAlignmentOptions.Center);
+            showHideButton = Button.Create("Calendars", 200, TextAlignmentOptions.Center);
             showHideButton.Pad = 20;
             showHideButton.transform.SetParent(transform, false);
             if (Application.platform == RuntimePlatform.Android)
@@ -66,7 +65,7 @@ namespace UnityEngine
         {
             foreach (string calName in calendarNames)
             {
-                Button calSelectButton = Button.Create(calName, TextBox.FontType.MainFont, 200, TextAlignmentOptions.Left);
+                Button calSelectButton = Button.Create(calName, 200, TextAlignmentOptions.Left);
                 calSelectButton.ToggleButton = true;
                 calSelectButton.SelectionAction = () =>
                 {

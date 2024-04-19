@@ -1,167 +1,78 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-namespace Assets.UI.Text
+/// <summary>
+/// This is a wrapper for a <see cref="TextMeshPro"/> TextMeshPro that is attached to the prefab that is
+/// instantiated every time a new TextBox is created.
+/// </summary>
+public class TextBox : MonoBehaviour
 {
-    public class Font
+    static TextBox TextBoxPrefab;
+        
+    // Components - Attached in Unity Editor
+    public TextMeshPro TextField;
+     
+    public TextAlignmentOptions Alignment
     {
-        public readonly TMP_FontAsset Typeface;
-        public readonly float Size;
-        public readonly Color Color;
-
-        public Font(TMP_FontAsset typeface, float size, Color color)
+        get => TextField.alignment;
+        set
         {
-            Typeface = typeface;
-            Size = size;
+            TextField.alignment = value;
 
-            // Bug: for TextMesh Pro, colors must be linearized before they are displayed on Windows.
-            // See: http://digitalnativestudios.com/forum/index.php?topic=1773.0
-            // While Android builds use Gamma color space, no modification is needed.
-#if UNITY_ANDROID && !UNITY_EDITOR
-            Color = QualitySettings.activeColorSpace == ColorSpace.Linear ? color.linear : color;
-#else
-            Color = color.linear;
-#endif
+            TextField.rectTransform.pivot = value switch
+            {
+                TextAlignmentOptions.Right => new Vector2(1, 0.5f),
+                TextAlignmentOptions.Center => new Vector2(0.5f, 0.5f),
+                TextAlignmentOptions.TopLeft => new Vector2(0, 1),
+                TextAlignmentOptions.Top => new Vector2(0.5f, 1),
+                TextAlignmentOptions.Left => new Vector2(0, 0.5f),
+                _ => new Vector2(0, 0.5f) // default left
+            };
         }
     }
 
-    public class TextBox : UIBehaviour
+    public string Text
     {
-        public enum FontType
+        set => TextField.SetText(value);
+    }
+
+    #region Font Setters
+
+    public float Size
+    {
+        set => TextField.fontSize = value;
+    }
+
+    public Color Color
+    {
+        set => TextField.color = value;
+    }
+
+    #endregion
+
+    public void SetFixedWithWrap(float width)
+    {
+        TextField.autoSizeTextContainer = false;
+        TextField.textWrappingMode = TextWrappingModes.Normal;
+        TextField.rectTransform.sizeDelta = new Vector2(width, 0f);
+    }
+
+    public static TextBox Create(
+        string text,
+        TextAlignmentOptions align = TextAlignmentOptions.Left)
+    {
+        if (TextBoxPrefab == null)
         {
-            MainFont,
-            SecFont
+            TextBoxPrefab = Resources.Load<TextBox>("TextBox");
         }
 
-        // Components - Attached in Unity Editor
-        public TextMeshPro TextField;
-        public RectTransform RectTransform;
+        TextBox textBox = Instantiate(TextBoxPrefab);
+        textBox.name = $"TextBox: {text.Split('\n').First()}";
 
-        // State
-        public Vector3 HomePosition;
+        textBox.Alignment = align;
+        textBox.Text = text;
 
-        public event Action RectTransformDimensionsChange;
-
-        public Bounds Bounds => TextField.bounds;
-
-        public TextAlignmentOptions Alignment
-        {
-            get => TextField.alignment;
-            set
-            {
-                TextField.alignment = value;
-
-                switch (value)
-                {
-                    case TextAlignmentOptions.Right:
-                        RectTransform.pivot = new Vector2(1f, 0.5f);
-                        break;
-                    case TextAlignmentOptions.Center:
-                        RectTransform.pivot = new Vector2(0.5f, 0.5f);
-                        break;
-                    case TextAlignmentOptions.TopLeft:
-                        RectTransform.pivot = new Vector2(0f, 1f);
-                        break;
-                    case TextAlignmentOptions.Top:
-                        RectTransform.pivot = new Vector2(0.5f, 1f);
-                        break;
-                    default:
-                        RectTransform.pivot = new Vector2(0f, 0.5f);
-                        break;
-                }
-            }
-        }
-
-        public TMP_SpriteAsset SpriteAsset
-        {
-            set => TextField.spriteAsset = value;
-        }
-
-        public string Text
-        {
-            set
-            {
-                TextField.SetText(value);
-                LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
-            }
-            get => TextField.text;
-        }
-
-        #region Font Setters
-
-        public Font Font
-        {
-            set
-            {
-                TextField.font = value.Typeface;
-                TextField.fontSize = value.Size;
-                TextField.color = value.Color;
-
-                LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
-            }
-        }
-
-        public float Size
-        {
-            set
-            {
-                TextField.fontSize = value;
-
-                LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
-            }
-        }
-
-        public Color Color
-        {
-            set { TextField.color = value; }
-        }
-
-        #endregion
-
-        public static TextBox Create(
-            string text,
-            FontType fontType,
-            float fontSize,
-            TextAlignmentOptions align)
-        {
-            TextBox textBox = Instantiate(SolarClock.Instance.TextBoxPrefab);
-            textBox.name = $"TextBox: {text.Split('\n').First()}";
-
-            textBox.Font = FontFromType(fontType, fontSize * SolarClock.SYSTEM_DIAMETER / 150f);
-            textBox.Alignment = align;
-            textBox.Text = text;
-
-            return textBox;
-        }
-
-        public static Font FontFromType(FontType fontType, float fontSize)
-        {
-            switch (fontType)
-            {
-                case FontType.MainFont:
-                    return new Font(
-                        SolarClock.Instance.mainFont,
-                        fontSize,
-                        Color.white);
-                case FontType.SecFont:
-                    return new Font(
-                        SolarClock.Instance.mainFont,
-                        fontSize,
-                        new Color(1, 1, 1, .5f));
-                default:
-                    Debug.LogError(
-                        $"Could not find a font for font type {fontType}");
-                    return null;
-            }
-        }
-
-        protected override void OnRectTransformDimensionsChange()
-        {
-            RectTransformDimensionsChange?.Invoke();
-        }
+        return textBox;
     }
 }

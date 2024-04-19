@@ -1,5 +1,4 @@
 ﻿using Assets.GraphicsUtil.Shapes.Lines;
-using Assets.UI.Text;
 using TMPro;
 using UnityEngine;
 
@@ -18,7 +17,8 @@ namespace Assets
             axisLine.name = "axisLine";
             axisLine.transform.SetParent(yearLine.transform, false);
 
-            TextBox yearText = TextBox.Create(year, TextBox.FontType.MainFont, 200, TextAlignmentOptions.Right);
+            TextBox yearText = TextBox.Create(year,  TextAlignmentOptions.Right);
+            yearText.Size = 200;
             yearText.transform.SetParent(yearLine.transform);
             yearText.transform.localPosition = new Vector3(-10f, -earthLineL * .5f + 10f, 0f);
             yearText.transform.Rotate(Vector3.forward * -90f);

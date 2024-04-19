@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
-using Assets.UI.Text;
 using TMPro;
 
 namespace Assets
@@ -75,7 +74,7 @@ namespace Assets
 
             //...........................(0) hWheel
             // point cloud for moon sprocket
-            moonSprock = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            moonSprock = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
             moonSprock.DrawSprocket(moonR, 29, 0, 1, 
                 SolarClock.SYSTEM_DIAMETER * .00466f, .007f, .001f,
                 0, SolarClock.SYSTEM_DIAMETER * .02f, 
@@ -151,7 +150,8 @@ namespace Assets
             const float dayLabelPad = SolarClock.SYSTEM_DIAMETER * .0133f;;
             for (int ht = 0; ht < dayList.Length; ht++)
             {
-                TextBox dLabel = TextBox.Create("", TextBox.FontType.MainFont, 28, TextAlignmentOptions.Right);
+                TextBox dLabel = TextBox.Create("",  TextAlignmentOptions.Right);
+                dLabel.Size = 28;
                 dLabel.transform.SetParent(newDLabelWheel.transform, false);
                 dayList[ht] = dLabel;
                 dLabel.transform.Rotate(Vector3.forward, (ht) * (360 / lunarSynodic) + 2);
@@ -159,8 +159,8 @@ namespace Assets
                 dLabel.transform.Rotate(Vector3.forward, 90);
             }
 
-            month1L = TextBox.Create("", TextBox.FontType.MainFont, 28,
-                TextAlignmentOptions.Left);
+            month1L = TextBox.Create("");
+            month1L.Size = 28;
             month1L.transform.SetParent(newDLabelWheel.transform, false);
             month1L.transform.Translate(Vector3.up * (moonR + dayLabelPad));
             month1L.transform.Translate(Vector3.left * SolarClock.SYSTEM_DIAMETER * .0133f);
@@ -174,8 +174,8 @@ namespace Assets
             monthTick.transform.SetParent(monthSplitCont.transform, false);
             monthTick.transform.Translate(Vector3.forward * moonR);
 
-            month1L2 = TextBox.Create("", TextBox.FontType.MainFont, 28,
-                TextAlignmentOptions.Left);
+            month1L2 = TextBox.Create("");
+            month1L2.Size = 28;
             month1L2.transform.SetParent(monthSplitCont.transform, false);
             month1L2.transform.Rotate(Vector3.right * 90);
             month1L2.transform.Translate(Vector3.up * (moonR + 1));
@@ -183,8 +183,8 @@ namespace Assets
             month1L2.transform.Rotate(Vector3.forward * 90);
             month1L2.transform.Rotate(Vector3.up, -1);
 
-            month2L = TextBox.Create("",
-                TextBox.FontType.MainFont, 28, TextAlignmentOptions.Left);
+            month2L = TextBox.Create("");
+            month2L.Size = 28;
             month2L.transform.SetParent(monthSplitCont.transform, false);
             month2L.transform.Rotate(Vector3.right * 90);
             month2L.transform.Translate(Vector3.up * (moonR + 1));

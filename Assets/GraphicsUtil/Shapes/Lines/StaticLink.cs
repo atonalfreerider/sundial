@@ -9,7 +9,7 @@ namespace Assets.GraphicsUtil.Shapes.Lines
         public Transform to;
 
         // Calibration Vars
-        public float LW = 1f;
+        public float LW = .1f;
         float length;
         public bool needsGlobalScale = false;
 
@@ -65,19 +65,18 @@ namespace Assets.GraphicsUtil.Shapes.Lines
 
         public static StaticLink prototypeStaticLink;
 
-        public static void InitStaticLink(PolygonFactory polygonFactory, Material mainMat)
+        public static void InitStaticLink(PolygonFactory polygonFactory)
         {
             GameObject newLinkGO = new("StaticLink");
             newLinkGO.transform.SetParent(polygonFactory.transform, false);
 
             prototypeStaticLink = newLinkGO.AddComponent<StaticLink>();
-            PolygonFactory.AddMesh(newLinkGO, prototypeStaticLink, mainMat, false);
+            PolygonFactory.AddMesh(newLinkGO, prototypeStaticLink, polygonFactory.mainMat);
             prototypeStaticLink.rend = newLinkGO.GetComponent<Renderer>();
             prototypeStaticLink.SetColor(Color.white);
 
             prototypeStaticLink.DrawRegPoly(1, 6, Mathf.PI / 6f, 1, 0);
             prototypeStaticLink.transform.SetParent(polygonFactory.transform, false);
-            prototypeStaticLink.transform.localScale = Vector3.one * .01f;
             
             prototypeStaticLink.gameObject.SetActive(false);
         }

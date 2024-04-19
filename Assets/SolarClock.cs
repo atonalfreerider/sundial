@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Linq;
@@ -7,7 +7,6 @@ using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI;
 using Assets.UI.Elements;
 using Assets.UI.Raycasting;
-using Assets.UI.Text;
 using TMPro;
 
 namespace Assets
@@ -33,11 +32,7 @@ namespace Assets
         const float SiderealDayInSeconds = 86164.0905f;
 
         // font, shader material vars
-        public TMP_FontAsset mainFont;
-        public Shader mainShader;
         public Material EarthMM, MoonMat;
-        [HideInInspector] public Material mainMat;
-        public TextBox TextBoxPrefab;
 
         // persistent objects
         [HideInInspector] public Earth earth;
@@ -65,13 +60,14 @@ namespace Assets
         float orthoSize;
         Coroutine zooming;
         const float ZOOM_DURATION = 1;
-        
+
         static float solOrthoSize => SYSTEM_DIAMETER * (Screen.width > Screen.height
-                                                 ? 1
-                                                 : (float) Screen.height / Screen.width);
+            ? 1
+            : (float)Screen.height / Screen.width);
+
         static float earthOrthoSize => solOrthoSize * (Screen.width > Screen.height
-                                           ? .55f
-                                           : .45f); // get a little closer on phones
+            ? .55f
+            : .45f); // get a little closer on phones
 
         // light vars
         public Light ptLight, dirLight;
@@ -83,9 +79,11 @@ namespace Assets
         bool labelUp = false;
 
         // INIT Functions
+
         void Awake()
         {
             Instance = this;
+            polygonFactory.Init();
             solarTime = GetComponent<SolarTime>();
 
             QualitySettings.antiAliasing = 4;
@@ -93,16 +91,13 @@ namespace Assets
             sphereCollider = gameObject.AddComponent<SphereCollider>();
             sphereCollider.radius = SYSTEM_DIAMETER * .7f;
 
-            mainMat = new Material(mainShader);
-
-            NewCylinder.Init(polygonFactory, mainMat);
-            NewCube.InitCube(polygonFactory, mainMat);
-            StaticLink.InitStaticLink(polygonFactory, mainMat);
+            Circle.NewCylinder.Init(polygonFactory);
+            NewCube.InitCube(polygonFactory);
+            StaticLink.InitStaticLink(polygonFactory);
 
             raycast = gameObject.AddComponent<Raycast>();
 
-            nowButton = Button.Create("Reset Current Time", TextBox.FontType.MainFont, 200,
-                TextAlignmentOptions.Center);
+            nowButton = Button.Create("Reset Current Time", 200, TextAlignmentOptions.Center);
             nowButton.Pad = 20;
             nowButton.transform.SetParent(Camera.main.transform, false);
             if (Application.platform == RuntimePlatform.Android)
@@ -215,21 +210,29 @@ namespace Assets
             equinoxLine.transform.Rotate(Vector3.up, 90);
 
             // Season labels;
-            string[] seasonList = {"SUMMER", "SPRING", "WINTER", "FALL"};
+            string[] seasonList = { "SUMMER", "SPRING", "WINTER", "FALL" };
 
             int count = 0;
             foreach (string season in seasonList)
             {
-                TextBox seasonText = TextBox.Create(season, TextBox.FontType.SecFont, 60, TextAlignmentOptions.Center);
+                TextBox seasonText = TextBox.Create(season, TextAlignmentOptions.Center);
+                seasonText.Size = 60;
                 seasonText.transform.SetParent(seasonCross.transform, false);
+                seasonText.Color = new Color(1, 1, 1, .5f);
                 seasonText.transform.Rotate(Vector3.up, count * 90 - 45);
                 seasonText.transform.Translate(Vector3.forward * SYSTEM_DIAMETER * .82f);
                 seasonText.transform.Rotate(Vector3.right * 90);
                 seasonText.transform.Rotate(Vector3.forward * 180);
-                if (count == 0)
-                    summerText = seasonText;
-                else if (count == 1)
-                    springText = seasonText;
+                switch (count)
+                {
+                    case 0:
+                        summerText = seasonText;
+                        break;
+                    case 1:
+                        springText = seasonText;
+                        break;
+                }
+
                 seasonLabels[count] = seasonText.gameObject;
                 count++;
             }
@@ -277,8 +280,8 @@ namespace Assets
             TextBox monthText;
             for (int mt = 1; mt <= 12; mt++)
             {
-                monthText = TextBox.Create(monthArray[mt - 1], TextBox.FontType.MainFont, 60,
-                    TextAlignmentOptions.Center);
+                monthText = TextBox.Create(monthArray[mt - 1], TextAlignmentOptions.Center);
+                monthText.Size = 60;
                 monthText.transform.Rotate(Vector3.forward, 30 * mt);
                 monthText.transform.Translate(Vector3.up * (-.96f * SYSTEM_DIAMETER));
 
@@ -296,13 +299,13 @@ namespace Assets
 
         static Circle DrawSunSprock(DateTime passDate)
         {
-            Circle newSunSprocket = PolygonFactory.NewCirclePoly(Instance.mainMat);
+            Circle newSunSprocket = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
             newSunSprocket.name = "SunSprocket";
 
             // ........(2) DAYS;
             newSunSprocket.DrawSunSprocket(SYSTEM_DIAMETER, passDate,
                 SYSTEM_DIAMETER / 150f, .002f, .001f,
-                SYSTEM_DIAMETER * .02f, SYSTEM_DIAMETER * .0333f, SYSTEM_DIAMETER * .0666f, 
+                SYSTEM_DIAMETER * .02f, SYSTEM_DIAMETER * .0333f, SYSTEM_DIAMETER * .0666f,
                 YEAR);
 
             newSunSprocket.SetColor(Color.white);
@@ -339,7 +342,7 @@ namespace Assets
                 sphereCollider.enabled = false;
                 earth.earthSphereCollider.enabled = true;
                 earth.handSphereCollider.enabled = false;
-                
+
                 GetEarthCam();
                 orbits.gameObject.SetActive(false);
                 earth.earthSys.gameObject.SetActive(true);
@@ -354,7 +357,7 @@ namespace Assets
                 // zoom to Solar
                 sphereCollider.enabled = true;
                 earth.handSphereCollider.enabled = true;
-                
+
                 targetPos = new Vector3(0, FIXED_CAM_Y, 0);
                 targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
                 orbits.gameObject.SetActive(true);
@@ -398,7 +401,7 @@ namespace Assets
                 yield return null;
                 animationProgress += Time.deltaTime;
             }
-            
+
             zooming = null;
             Zoomer(1);
         }
@@ -419,7 +422,7 @@ namespace Assets
                 lerp);
             earth.earthSys.transform.localScale = Vector3.Lerp(
                 earth.earthSys.transform.localScale,
-                Vector3.one * earthScale,  
+                Vector3.one * earthScale,
                 lerp);
 
             ptLight.intensity = Mathf.Lerp(ptLight.intensity, ptInt, lerp);
@@ -558,7 +561,7 @@ namespace Assets
                 calendarMenu.calendars.menuButtons.First().Value.RequestSelection();
             }
         }
-        
+
         #region ISelectable
 
         public Transform SelectionTarget => transform;

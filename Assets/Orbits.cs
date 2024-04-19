@@ -69,7 +69,7 @@ namespace Assets
                 planet.transform.Translate(Vector3.forward * planetData.orbitMultiplier * earthOR);
                 planet.transform.localScale = Vector3.one * planetData.radius;
 
-                path = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+                path = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
                 if (count != 2)
                 {
                     path.DrawRing(
@@ -133,7 +133,7 @@ namespace Assets
 
             // Mars Orbit:  686.971
             planets[3].transform.localRotation = Quaternion.AngleAxis(
-                Orbits.GetNonEarthOrbitAngle(newDateUTC, 686.971f, -130),
+                GetNonEarthOrbitAngle(newDateUTC, 686.971f, -130),
                 Vector3.up);
         }
         

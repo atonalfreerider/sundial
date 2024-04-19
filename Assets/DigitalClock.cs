@@ -1,5 +1,4 @@
 ﻿using System;
-using Assets.UI.Text;
 using TMPro;
 using UnityEngine;
 
@@ -13,16 +12,19 @@ namespace Assets
 
         void Awake()
         {
-            sundialText = TextBox.Create("SUNDIAL", TextBox.FontType.MainFont, 80, TextAlignmentOptions.Center);
+            sundialText = TextBox.Create("SUNDIAL", TextAlignmentOptions.Center);
+            sundialText.Size = 80;
             sundialText.transform.SetParent(transform, false);
 
-            date = TextBox.Create("", TextBox.FontType.MainFont, 140, TextAlignmentOptions.Center);
+            date = TextBox.Create("",TextAlignmentOptions.Center);
+            date.Size = 140;
             date.transform.SetParent(transform, false);
             date.transform.Translate(Vector3.down * 10);
-            time = TextBox.Create("", TextBox.FontType.MainFont, 140, TextAlignmentOptions.Center);
+            time = TextBox.Create("", TextAlignmentOptions.Center);
+            time.Size = 140;
             time.transform.SetParent(transform, false);
             time.transform.Translate(Vector3.up * 10);
-            
+
             SetTime(DateTime.Now);
         }
 

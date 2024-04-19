@@ -192,6 +192,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8afa66abc0094342818753c96adfd75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainMat: {fileID: 2100000, guid: 5d62da57434231a4ba2e7c7021aff742, type: 2}
+  transMat: {fileID: 0}
+  textMat: {fileID: 0}
+  tetra: {fileID: 0}
+  icosahedron0: {fileID: 0}
+  tri: {fileID: 0}
+  hex: {fileID: 0}
 --- !u!4 &362815715
 Transform:
   m_ObjectHideFlags: 0
@@ -620,13 +627,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   solarTime: {fileID: 0}
-  mainFont: {fileID: 11400000, guid: d2712319ab4667a4f94730f70e3dac20, type: 2}
-  mainShader: {fileID: 4800000, guid: 6d824186910e2f3408f89afba6c5c416, type: 3}
   EarthMM: {fileID: 2100000, guid: c68433ba07f10fa4eb886be15dd204fc, type: 2}
   MoonMat: {fileID: 2100000, guid: 531d1b9b09fad3b498cacc60f58daee6, type: 2}
-  mainMat: {fileID: 0}
-  TextBoxPrefab: {fileID: 9082128490148338507, guid: 4ace1f4e55bd0dc43ad2df8d28d23434,
-    type: 3}
   earth: {fileID: 0}
   polygonFactory: {fileID: 362815714}
   digiClock: {fileID: 85370279}

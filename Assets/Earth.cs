@@ -2,7 +2,6 @@
 using UnityEngine;
 using Assets.GraphicsUtil.Shapes;
 using Assets.UI;
-using Assets.UI.Text;
 using TMPro;
 
 namespace Assets
@@ -63,7 +62,7 @@ namespace Assets
             earthSprockCont.transform.SetParent(earthSys.transform, false);
 
             // create point cloud for earth sprocket mesh
-            earthSprock = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            earthSprock = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
             earthSprock.DrawSprocket(SolarClock.SYSTEM_DIAMETER * .4f, 24, 3, 1,
                 SolarClock.SYSTEM_DIAMETER / 150f,  .007f, .003f,
                 SolarClock.SYSTEM_DIAMETER * .02f, SolarClock.SYSTEM_DIAMETER * .0466f);
@@ -79,7 +78,8 @@ namespace Assets
             TextBox hLabel;
             for (int ht = 0; ht < 24; ht++)
             {
-                hLabel = TextBox.Create(ht.ToString(), TextBox.FontType.MainFont, 40, TextAlignmentOptions.Center);
+                hLabel = TextBox.Create(ht.ToString(),TextAlignmentOptions.Center);
+                hLabel.Size = 40;
                 hLabel.transform.SetParent(hLabelWheel.transform, false);
                 hLabel.transform.Rotate(Vector3.forward, ht * (360f / 24f));
                 hLabel.transform.Translate(Vector3.up * (SolarClock.SYSTEM_DIAMETER * .4f - SolarClock.SYSTEM_DIAMETER * .066f));
@@ -104,13 +104,15 @@ namespace Assets
 
             const float angOffset = 4.2f;
             const float padDay = SolarClock.SYSTEM_DIAMETER * .015f;
-            day11 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
+            day11 = TextBox.Create(Calendar.daysofweekAbr[yesterday],TextAlignmentOptions.Center);
+            day11.Size = 30;
             day11.transform.SetParent(earthSprockCont.transform, false);
             day11.transform.Rotate(Vector3.up * (180 + angOffset));
             day11.transform.Translate(Vector3.forward * -(localR - padDay));
             day11.transform.Rotate(Vector3.right * 90);
 
-            day21 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
+            day21 = TextBox.Create(Calendar.daysofweekAbr[datelineDay],TextAlignmentOptions.Center);
+            day21.Size = 30;
             day21.transform.SetParent(earthSprockCont.transform, false);
             day21.transform.Rotate(Vector3.up * (180 - angOffset));
             day21.transform.Translate(Vector3.forward * -(localR - padDay));
@@ -119,13 +121,15 @@ namespace Assets
             intDatelineSplit = new GameObject("IntDatelineSplit");
             intDatelineSplit.transform.SetParent(earthSprockCont.transform, false);
 
-            day12 = TextBox.Create(Calendar.daysofweekAbr[yesterday], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
+            day12 = TextBox.Create(Calendar.daysofweekAbr[yesterday],TextAlignmentOptions.Center);
+            day12.Size = 30;
             day12.transform.SetParent(intDatelineSplit.transform, false);
             day12.transform.Rotate(Vector3.up * (180 - angOffset));
             day12.transform.Translate(Vector3.forward * -(localR - padDay));
             day12.transform.Rotate(Vector3.right * 90);
 
-            day22 = TextBox.Create(Calendar.daysofweekAbr[datelineDay], TextBox.FontType.MainFont, 30, TextAlignmentOptions.Center);
+            day22 = TextBox.Create(Calendar.daysofweekAbr[datelineDay],  TextAlignmentOptions.Center);
+            day22.Size = 30;
             day22.transform.SetParent(intDatelineSplit.transform, false);
             day22.transform.Rotate(Vector3.up * (180 + angOffset));
             day22.transform.Translate(Vector3.forward * -(localR - padDay));
@@ -135,7 +139,7 @@ namespace Assets
             localWheelCont = new GameObject("LocalWheelCont");
             const float bigH = SolarClock.SYSTEM_DIAMETER * .1f;
             
-            Circle hSprock = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            Circle hSprock = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
             hSprock.DrawSprocket(localR, 1, 23, -1,
                 SolarClock.SYSTEM_DIAMETER * .0046f, .04f, .001f,
                 SolarClock.SYSTEM_DIAMETER * .02f,  bigH);
@@ -180,13 +184,13 @@ namespace Assets
             // the polar axis of the earth is tilted
             earthSph.transform.Rotate(Vector3.right, -23.4f);
             // the Earth is rotated by the hours into the day
-            earthSph.transform.Rotate(Vector3.up, getDiurnalPos(newDateUTC));
+            earthSph.transform.Rotate(Vector3.up, GetDiurnalPos(newDateUTC));
 
             // Clock Sprocket - reverse rotated from the diurnal position of the Earth
             localWheelCont.transform.localRotation =
                 Quaternion.Euler(new Vector3(
                     180,
-                    -getLocalClockAlpha(newDateLocal) + 180,
+                    -GetLocalClockAlpha(newDateLocal) + 180,
                     0));
             
             intDatelineSplit.transform.rotation =
@@ -228,20 +232,18 @@ namespace Assets
         
         void RedrawStrip(DateTime passDate)
         {
-            float prct = (360 - getLocalClockAlpha(passDate)) / 360f;
+            float prct = (360 - GetLocalClockAlpha(passDate)) / 360f;
             if (strip != null)
             {
                 Destroy(strip.gameObject);
             }
 
-            strip = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
+            strip = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
             strip.DrawRing(
                 localR - SolarClock.SYSTEM_DIAMETER / 150f,
                 localR - SolarClock.SYSTEM_DIAMETER * .0233f,
                 prct,
-                0,
-                0,
-                false);
+                0);
             strip.SetColor(new Color(1, 1, 1, .3f));
             strip.transform.SetParent(earthSprock.transform, false);
         }
@@ -262,7 +264,7 @@ namespace Assets
             return Convert.ToInt32(dateline.DayOfWeek);
         }
 
-        static float getDiurnalPos(DateTime passDate)
+        static float GetDiurnalPos(DateTime passDate)
         {
             //Debug.Log(-((Convert.ToSingle(passDate.Ticks - DateTime.MinValue.AddYears(DateTime.Now.Year - 1).Ticks)) / 10000f / 1000f / 60f / 60f / earthSidereal) * 360f );
             float woundAngle = -(Convert.ToSingle(passDate.Ticks -
@@ -271,13 +273,13 @@ namespace Assets
             return Orbits.UnwindAngle(woundAngle);
         }
 
-        static float getLocalClockAlpha(DateTime passDate)
+        static float GetLocalClockAlpha(DateTime passDate)
         {
             return (passDate.Hour * 60 * 60 + passDate.Minute * 60 + passDate.Second) /
                    (earthSynodic * 60 * 60) * 360;
         }
 
-        static float getSynodicPos(DateTime passDate)
+        static float GetSynodicPos(DateTime passDate)
         {
             float time = (float) DateTime.Now.Subtract(DateTime.MinValue.AddYears(1969))
                 .TotalMilliseconds;

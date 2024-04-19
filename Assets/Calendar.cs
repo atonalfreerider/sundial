@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
-using Assets.UI.Text;
 using TMPro;
 using Object = UnityEngine.Object;
 
@@ -285,11 +284,12 @@ namespace Assets
                 displayTitle = passEv.title[..Math.Min((int) span.TotalHours * 4, passEv.title.Length)];
             }
 
-            Circle newRing = PolygonFactory.NewCirclePoly(SolarClock.Instance.mainMat);
-            newRing.DrawRing(R, R - evH, prct, 0, 0, false);
+            Circle newRing = PolygonFactory.NewCirclePoly(PolygonFactory.Instance.mainMat);
+            newRing.DrawRing(R, R - evH, prct, 0);
             newRing.SetColor(passEv.color);
 
-            TextBox titleT = TextBox.Create(displayTitle, TextBox.FontType.MainFont, 50, TextAlignmentOptions.Center);
+            TextBox titleT = TextBox.Create(displayTitle, TextAlignmentOptions.Center);
+            titleT.Size = 50;
             titleT.transform.SetParent(newRing.transform, false);
 
             float halfAng = (prct * .5f);

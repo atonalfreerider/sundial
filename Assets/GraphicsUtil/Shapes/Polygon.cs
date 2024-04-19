@@ -8,48 +8,48 @@ namespace Assets.GraphicsUtil.Shapes
         // Persistent References
         public MeshFilter meshFilter;
         public Renderer rend;
-        public bool wireFrame = false;
 
         // Link Vars
         Coroutine colorAnimator;
+        static readonly int Color = Shader.PropertyToID("_Color");
 
-        #region SHAPE Functions
+        #region DRAW Functions
 
         public void DrawRegPoly(float radius, int sides, float offSet, float h, float taper)
         {
             Vector3[] verts = new Vector3[sides];
             int numTriangles = sides - 2;
-            int[] ind = new int[numTriangles * 3];
+            int[] indices = new int[numTriangles * 3];
 
             float alpha = 2 * Mathf.PI / sides;
             for (int ii = 0; ii < sides; ii++)
-                verts[ii] = new Vector3(radius * Mathf.Sin(alpha * ii + offSet), 0,
+            {
+                verts[ii] = new Vector3(
+                    radius * Mathf.Sin(alpha * ii + offSet),
+                    0,
                     radius * Mathf.Cos(alpha * ii + offSet));
+            }
 
             for (int ii = 0; ii < numTriangles; ii++)
             {
-                ind[ii * 3 + 0] = 0;
-                ind[ii * 3 + 1] = ii + 1;
-                ind[ii * 3 + 2] = ii + 2;
+                indices[ii * 3 + 0] = 0;
+                indices[ii * 3 + 1] = ii + 1;
+                indices[ii * 3 + 2] = ii + 2;
             }
 
-            if (h < float.Epsilon)
+            if (h <= float.Epsilon)
             {
-                Draw3DPoly(verts, MirrorIndices(ind, 0));
+                Draw3DPoly(verts, MirrorIndices(indices, 0));
             }
             else
             {
-                Extrude(verts, ind, h, false, true, taper);
+                Extrude(verts, indices, h, false, true, taper);
             }
         }
 
-        #endregion
-
-        #region DRAW Functions
-
         public static int[] MirrorIndices(int[] indices, int vertLength)
         {
-            // copy the indices twice (mirror the second set of indices);
+            // copy the indices twice (mirror the second set of indices)
             int[] retIndices = new int[indices.Length * 2];
             int subCount = 0;
             for (int ii = 0; ii < indices.Length; ii++)
@@ -57,18 +57,12 @@ namespace Assets.GraphicsUtil.Shapes
                 retIndices[ii] = indices[ii];
                 retIndices[ii + indices.Length] = indices[ii + subCount] + vertLength;
 
-                switch (subCount)
+                subCount = subCount switch
                 {
-                    case 0:
-                        subCount = 1;
-                        break;
-                    case 1:
-                        subCount = -1;
-                        break;
-                    default:
-                        subCount = 0;
-                        break;
-                }
+                    0 => 1,
+                    1 => -1,
+                    _ => 0
+                };
             }
 
             return retIndices;
@@ -78,7 +72,7 @@ namespace Assets.GraphicsUtil.Shapes
             bool centerPoint, bool fillTopAndBottom, float taper)
         {
             Vector3[] extVertices = new Vector3[vertices.Length * 2];
-            // create mirror of main contour at the depth of the extrusion and copy both contours into a new vertices[];
+            // create mirror of main contour at the depth of the extrusion and copy both contours into a new vertices[]
             for (int ii = 0; ii < vertices.Length; ii++)
             {
                 extVertices[ii] = new Vector3(vertices[ii].x * (1 - taper), h * .5f, vertices[ii].z * (1 - taper));
@@ -86,7 +80,7 @@ namespace Assets.GraphicsUtil.Shapes
                     vertices[ii].z * (1 + taper));
             }
 
-            // create indices;
+            // create indices
             int[] extIndices = new int[vertices.Length * 6];
             int fillIndOffset = 0;
 
@@ -100,10 +94,9 @@ namespace Assets.GraphicsUtil.Shapes
                     extIndices[ii] = mirInd[ii];
             }
 
-            // link up the two contours;
-            int mod = 0;
-            if (centerPoint)
-                mod = 1;
+            // link up the two contours
+            int mod = centerPoint ? 1 : 0;
+
             for (int ii = mod; ii < vertices.Length - 1; ii++)
             {
                 extIndices[(ii - mod) * 6 + 0 + fillIndOffset] = ii + 0;
@@ -116,12 +109,12 @@ namespace Assets.GraphicsUtil.Shapes
             }
 
             // close external surface end to start;
-            extIndices[extIndices.Length - 1] = vertices.Length + mod;
-            extIndices[extIndices.Length - 3] = 0 + mod;
-            extIndices[extIndices.Length - 2] = vertices.Length - 1;
-            extIndices[extIndices.Length - 4] = extVertices.Length - 1;
-            extIndices[extIndices.Length - 6] = vertices.Length + mod;
-            extIndices[extIndices.Length - 5] = vertices.Length - 1;
+            extIndices[^1] = vertices.Length + mod;
+            extIndices[^3] = 0 + mod;
+            extIndices[^2] = vertices.Length - 1;
+            extIndices[^4] = extVertices.Length - 1;
+            extIndices[^6] = vertices.Length + mod;
+            extIndices[^5] = vertices.Length - 1;
 
             Draw3DPoly(extVertices, extIndices);
         }
@@ -139,7 +132,7 @@ namespace Assets.GraphicsUtil.Shapes
             sharedMesh.RecalculateNormals();
             sharedMesh.RecalculateBounds();
 
-            // Set up game object with mesh;
+            // Set up game object with mesh
             meshFilter.sharedMesh = sharedMesh;
         }
 
@@ -167,12 +160,7 @@ namespace Assets.GraphicsUtil.Shapes
 
         void ChangeColorProperties(Color color)
         {
-            rend.material.SetColor("_Color", color);
-
-            if (wireFrame)
-            {
-                rend.material.SetColor("_V_WIRE_Color", BrightenedColor(color));
-            }
+            rend.material.SetColor(Color, color);
         }
 
         public void SetColor(Color color)
@@ -198,8 +186,11 @@ namespace Assets.GraphicsUtil.Shapes
             }
             else
             {
-                colorAnimator = StartCoroutine(
-                    BlendColorsAnimator(color, animationDuration));
+                if (isActiveAndEnabled)
+                {
+                    colorAnimator = StartCoroutine(
+                        BlendColorsAnimator(color, animationDuration));
+                }
             }
         }
 
@@ -209,7 +200,7 @@ namespace Assets.GraphicsUtil.Shapes
             while (elapsedTime < animationDuration)
             {
                 ChangeColorProperties(
-                    Color.Lerp(
+                    UnityEngine.Color.Lerp(
                         rend.material.color,
                         color,
                         Time.deltaTime / (animationDuration - elapsedTime)));

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,10 +6,10 @@ namespace Assets.GraphicsUtil.Shapes
 {
     public class Circle : Polygon
     {
-        // the amount of straight lines per 1 meter of an arc; 
+        // the amount of straight lines per 1 meter of an arc
         public int sidePer1M = 16;
 
-        // the current radius and percent completion of a circle or ring;
+        // the current radius and percent completion of a circle or ring
         public float curPrct;
 
         public float curR;
@@ -25,43 +25,42 @@ namespace Assets.GraphicsUtil.Shapes
             curPrct = prct;
             curR = R;
 
-            // calculate the number of sides to this circle;
-            // there is one less side because a full circle fills the last side;
+            // calculate the number of sides to this circle
+            // there is one less side because a full circle fills the last side
             int side = Mathf.RoundToInt(Mathf.Pow(R + 1f, .8f) * sidePer1M * prct);
-            if (side <= 0)
-                return;
 
-            // if an incomplete circle, draw one more side;
+            if (side <= 0) return;
+
+            // if an incomplete circle, draw one more side
             if (prct < 1f)
                 side += 1;
 
-            // generate vertices and indices;
+            // generate vertices and indices
             Vector3[] skinList = new Vector3[side + 1];
             int[] indList = new int[side * 3];
 
             skinList[0] = Vector3.zero;
-            float alpha = 360f / (side - (prct < 1f ? 1 : 0)); // a positive alpha is drawn clockwise;
+            float alpha = 360f / (side - (prct < 1 ? 1 : 0)); // a positive alpha is drawn clockwise
 
             int count = 1;
-            int[] insInd;
             for (int ii = side - 1; ii >= 0; ii--)
             {
                 skinList[count] = VectArc(R, ii * alpha, prct, offset, 0, 0, 0);
-                insInd = new[] {0, count, count + 1};
+                int[] insInd = { 0, count, count + 1 };
                 insInd.CopyTo(indList, (count - 1) * 3);
                 count++;
             }
 
-            indList[indList.Length - 1] = 1;
+            indList[^1] = 1;
 
-            if (h < float.Epsilon)
+            if (h <= float.Epsilon)
             {
-                // a circle with 0 depth - only draw two sides;
+                // a circle with 0 depth - only draw two sides
                 Draw3DPoly(skinList, MirrorIndices(indList, 0));
             }
             else
             {
-                Extrude(skinList, indList, h, true, true, 0f);
+                Extrude(skinList, indList, h, true, true, 0);
             }
         }
 
@@ -93,29 +92,29 @@ namespace Assets.GraphicsUtil.Shapes
 
             for (int ii = 0; ii < side; ii++)
             {
-                spirBit = -(ii) * spiralH / side;
+                spirBit = -ii * spiralH / side;
                 if (diminishTail)
                 {
-                    diminishingR = Mathf.Lerp(0, R1 - R2, (float) ii / side);
+                    diminishingR = Mathf.Lerp(0, R1 - R2, (float)ii / side);
                 }
 
                 skinList[ii] = VectArc(R1 - diminishingR, ii * alpha, prct, 0, 0, spirBit, 0);
                 skinList[side * 2 - ii - 1] = VectArc(R2, ii * alpha, prct, 0, 0, spirBit, 0);
 
-                insInd = new[] {ii, side * 2 - ii - 2, side * 2 - ii - 1};
+                insInd = new[] { ii, side * 2 - ii - 2, side * 2 - ii - 1 };
                 insInd.CopyTo(indList, ii * 6);
 
-                insInd = new[] {ii, ii + 1, side * 2 - ii - 2};
+                insInd = new[] { ii, ii + 1, side * 2 - ii - 2 };
                 insInd.CopyTo(indList, ii * 6 + 3);
             }
 
             if (prct >= 1f - float.Epsilon)
             {
                 // if a complete ring - connect the last segment of the ring to the beginning segment;
-                indList[indList.Length - 1] = side * 2 - 1;
-                indList[indList.Length - 2] = 0;
+                indList[^1] = side * 2 - 1;
+                indList[^2] = 0;
 
-                indList[indList.Length - 5] = side * 2 - 1;
+                indList[^5] = side * 2 - 1;
             }
             else if (indList.Length > 6)
             {
@@ -294,7 +293,7 @@ namespace Assets.GraphicsUtil.Shapes
             float sprockTh, float baseAl, float pointAl, float smallH, float medH, float bigH,
             float specialInterval, int endSnip = 6)
         {
-            int[] daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+            int[] daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
             if (DateTime.IsLeapYear(passDate.Year))
             {
                 // add one day to February
@@ -383,29 +382,31 @@ namespace Assets.GraphicsUtil.Shapes
             indList.RemoveRange(indList.Count - endSnip, endSnip);
             Draw3DPoly(pointList.ToArray(), indList.ToArray());
         }
-    }
-
-    public static class NewCylinder
-    {
-        public static Circle cylinder;
-        public static Circle rootDot;
-
-        public static void Init(PolygonFactory polygonFactory, Material mainMat)
+        
+        public static class NewCylinder
         {
-            Color shapeColor = Color.white;
+            public static Circle cylinder;
+            public static Circle circle;
 
-            cylinder = PolygonFactory.NewCirclePoly(mainMat, false);
-            cylinder.sidePer1M = 8;
-            cylinder.DrawRing(1, .85f, 1, .3f);
-            cylinder.name = "cylinder";
-            cylinder.SetColor(shapeColor);
-            cylinder.transform.SetParent(polygonFactory.transform, false);
+            public static void Init(PolygonFactory polygonFactory)
+            {
+                Color shapeColor = Color.white;
 
-            rootDot = PolygonFactory.NewCirclePoly(mainMat, false);
-            rootDot.name = "RootDot";
-            rootDot.DrawCirc(.035f * .5f, 1, 0);
-            rootDot.SetColor(shapeColor);
-            rootDot.transform.SetParent(polygonFactory.transform, false);
+                cylinder = PolygonFactory.NewCirclePoly(polygonFactory.mainMat);
+                cylinder.sidePer1M = 8;
+                cylinder.DrawRing(1, .85f, 1, .3f);
+                cylinder.name = "cylinder";
+                cylinder.SetColor(shapeColor);
+                cylinder.transform.SetParent(polygonFactory.transform, false);
+                cylinder.gameObject.SetActive(false);
+
+                circle = PolygonFactory.NewCirclePoly(polygonFactory.mainMat);
+                circle.name = "RootDot";
+                circle.DrawCirc(.035f * .5f, 1, 0);
+                circle.SetColor(shapeColor);
+                circle.transform.SetParent(polygonFactory.transform, false);
+                circle.gameObject.SetActive(false);
+            }
         }
     }
 }
