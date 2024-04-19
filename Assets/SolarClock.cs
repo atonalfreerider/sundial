@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
 using System.Collections;
-using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI;
-using Assets.UI.Elements;
 using Assets.UI.Raycasting;
 using TMPro;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Assets
 {
@@ -46,7 +46,6 @@ namespace Assets
         Raycast raycast;
         Circle sunSprock;
         TextBox summerText, springText;
-        [HideInInspector] public CalendarMenu calendarMenu;
         public Button nowButton;
         readonly GameObject[] seasonLabels = new GameObject[4];
         readonly TextBox[] yearQueue = new TextBox[3];
@@ -97,25 +96,7 @@ namespace Assets
 
             raycast = gameObject.AddComponent<Raycast>();
 
-            nowButton = Button.Create("Reset Current Time", 200, TextAlignmentOptions.Center);
-            nowButton.Pad = 20;
-            nowButton.transform.SetParent(Camera.main.transform, false);
-            if (Application.platform == RuntimePlatform.Android)
-            {
-                nowButton.transform.localPosition = new Vector3(
-                    0,
-                    -280,
-                    100);
-            }
-            else
-            {
-                nowButton.transform.localPosition = new Vector3(
-                    -200,
-                    -140,
-                    100);
-            }
-
-            nowButton.SelectionAction = solarTime.NowTime;
+            nowButton = GameObject.Find("Reset").GetComponent<Button>();
             nowButton.gameObject.SetActive(false);
 
             DateTime utcNow = DateTime.UtcNow;
@@ -151,7 +132,6 @@ namespace Assets
             dirLight.enabled = false;
             ptLight.intensity = ptInt;
 
-            calendarMenu = Camera.main.GetComponent<CalendarMenu>();
             CreateCalendar();
         }
 
@@ -523,43 +503,46 @@ namespace Assets
         {
             if (Input.GetMouseButtonDown(0))
             {
-                RaycastTarget target = raycast.TargetAfterCasting();
-                target?.AsSelectable.RequestSelection();
+                if (!EventSystem.current.IsPointerOverGameObject()) // check if mouse is over UI
+                {
+                    RaycastTarget target = raycast.TargetAfterCasting();
+                    target?.AsSelectable.RequestSelection();
+                }
             }
+        }
 
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                viewState = ViewState.Galactic;
-                sunSprockCont.SetActive(false);
-                earth.gameObject.SetActive(false);
-                targetPos = new Vector3(375, 330, 150);
-                targetRot = Quaternion.Euler(new Vector3(40, 250, 257));
-                orbits.gameObject.SetActive(true);
-                foreach (GameObject seaLab in seasonLabels)
-                    seaLab.SetActive(false);
+        public void ToggleClock(bool isToggled)
+        {
+            digiClock.gameObject.SetActive(isToggled);
+        }
+        
+        public void ShowGalactic()
+        {
+            viewState = ViewState.Galactic;
+            sunSprockCont.SetActive(false);
+            earth.gameObject.SetActive(false);
+            targetPos = new Vector3(375, 330, 150);
+            targetRot = Quaternion.Euler(new Vector3(40, 250, 257));
+            orbits.gameObject.SetActive(true);
+            foreach (GameObject seaLab in seasonLabels)
+                seaLab.SetActive(false);
 
-                sunLine.SetActive(true);
-                earthScale = .001f;
-                orbitScale = Vector3.one;
+            sunLine.SetActive(true);
+            earthScale = .001f;
+            orbitScale = Vector3.one;
 
-                ptInt = .35f;
+            ptInt = .35f;
 
-                if (zooming != null)
-                    StopCoroutine(zooming);
+            if (zooming != null)
+                StopCoroutine(zooming);
 
-                orthoSize = 150;
-                zooming = StartCoroutine(Zoom(ZOOM_DURATION));
-            }
+            orthoSize = 150;
+            zooming = StartCoroutine(Zoom(ZOOM_DURATION));
+        }
 
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                digiClock.gameObject.SetActive(!digiClock.gameObject.activeInHierarchy);
-            }
-
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                calendarMenu.calendars.menuButtons.First().Value.RequestSelection();
-            }
+        public void Quit()
+        {
+            Application.Quit(0);
         }
 
         #region ISelectable

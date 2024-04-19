@@ -27,7 +27,7 @@ namespace Assets.UI.Raycasting
             bool didHit = Physics.Raycast(
                 ray,
                 out RaycastHit hitInfo);
-            return didHit ? (RaycastHit?) hitInfo : null;
+            return didHit ? hitInfo : null;
         }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
+using Assets.UI;
 using TMPro;
 using Object = UnityEngine.Object;
 
@@ -75,20 +76,13 @@ namespace Assets
             this.calR = calR;
             this.earthR = earthR;
   
-            //TestCalendar();
-            if (calendarEvents == null || !calendarEvents.Keys.Any())
-            {
-                SolarClock.Instance.calendarMenu.showHideButton.gameObject.SetActive(false);
-            }
+            TestCalendar();
 
             if (Application.platform != RuntimePlatform.Android) return;
 
             calendarEvents = RetrieveAndroidCalendarEvents();
-            SolarClock.Instance.calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
-            if (calendarEvents != null && calendarEvents.Keys.Any())
-            {
-                SolarClock.Instance.calendarMenu.showHideButton.gameObject.SetActive(true);
-            }
+            CalendarMenu calendarMenu = GameObject.Find("Menu").GetComponent<CalendarMenu>();
+            calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
         }
 
         static Dictionary<string, MyEvent[]> RetrieveAndroidCalendarEvents()
@@ -395,7 +389,7 @@ namespace Assets
             return newDate;
         }
         
-        string prettyDate(DateTime dateTime)
+        string PrettyDate(DateTime dateTime)
         {
             return $"{dateTime.Year}/{dateTime.Month}/{dateTime.Day}";
         }
@@ -446,7 +440,8 @@ namespace Assets
 
             calendarEvents.Add(testCal2, new[] {testYearEvent2, testDayEvent2});
 
-            SolarClock.Instance.calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
+            CalendarMenu calendarMenu = GameObject.Find("Menu").GetComponent<CalendarMenu>();
+            calendarMenu.PassCalendars(calendarEvents.Keys.ToArray());
         }
     }
 }
