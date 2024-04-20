@@ -22,7 +22,7 @@ namespace Assets.Editor
             Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
             PlayerSettings.productName = "Sundial";
 
-            BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel23, false);
+            BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel30, false);
         }
         
         [MenuItem("Build/Build Pro Release")]
@@ -31,7 +31,7 @@ namespace Assets.Editor
             Beebyte.Obfuscator.OptionsManager.LoadOptions().enabled = true;
             PlayerSettings.productName = "SundialPro";
 
-            BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel23, true);
+            BuildAndroid(BuildOptions.None, AndroidSdkVersions.AndroidApiLevel30, true);
         }
 
         static void BuildAndroid(
