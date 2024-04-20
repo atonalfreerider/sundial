@@ -15,12 +15,12 @@ namespace Assets
             {
                 GameObject calSelectButtonGO = new GameObject(calName);
                 RectTransform rectTransform = calSelectButtonGO.AddComponent<RectTransform>();
-                rectTransform.sizeDelta = new Vector2(85, 20);
+                rectTransform.sizeDelta = new Vector2(250, 80);
                 calSelectButtonGO.AddComponent<CanvasRenderer>();
                 Image image = calSelectButtonGO.AddComponent<Image>();
                 image.color = Color.black;
                 Outline outline = calSelectButtonGO.AddComponent<Outline>();
-                outline.effectColor = Color.white;
+                outline.effectColor = new Color(1, 1, 1, 0.5f);
                 Toggle calSelectButton = calSelectButtonGO.AddComponent<Toggle>();
                 calSelectButton.onValueChanged.AddListener((x) => AddOrRemove(x, calName));
                 HorizontalLayoutGroup horizontalLayoutGroup = calSelectButtonGO.AddComponent<HorizontalLayoutGroup>();
@@ -32,6 +32,7 @@ namespace Assets
                 text.horizontalOverflow = HorizontalWrapMode.Wrap;
                 text.font = Resources.Load<Font>("FRAMDCN");
                 text.text = calName;
+                text.fontSize = 40;
                 text.transform.SetParent(calSelectButtonGO.transform);
                 
                 menu.GetComponent<Menu>().AddCalendarButton(calSelectButtonGO);
