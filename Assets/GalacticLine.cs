@@ -18,6 +18,7 @@ namespace Assets
             axisLine.transform.SetParent(yearLine.transform, false);
 
             TextBox yearText = TextBox.Create(year,  TextAlignmentOptions.Right);
+            yearText.DeleteBack();
             yearText.Size = 200;
             yearText.transform.SetParent(yearLine.transform);
             yearText.transform.localPosition = new Vector3(-10f, -earthLineL * .5f + 10f, 0f);

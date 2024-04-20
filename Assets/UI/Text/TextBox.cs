@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#nullable enable
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -9,10 +10,10 @@ using UnityEngine;
 public class TextBox : MonoBehaviour
 {
     static TextBox TextBoxPrefab;
-        
+
     // Components - Attached in Unity Editor
     public TextMeshPro TextField;
-     
+
     public TextAlignmentOptions Alignment
     {
         get => TextField.alignment;
@@ -34,19 +35,31 @@ public class TextBox : MonoBehaviour
 
     public string Text
     {
-        set => TextField.SetText(value);
+        set
+        {
+            TextField.SetText(value);
+            if (backSide != null) backSide.TextField.SetText(value);
+        }
     }
 
     #region Font Setters
 
     public float Size
     {
-        set => TextField.fontSize = value;
+        set
+        {
+            TextField.fontSize = value; 
+            if (backSide != null) backSide.TextField.fontSize = value;
+        }
     }
 
     public Color Color
     {
-        set => TextField.color = value;
+        set
+        {
+            TextField.color = value;
+            if (backSide != null) backSide.TextField.color = value;
+        }
     }
 
     #endregion
@@ -56,6 +69,29 @@ public class TextBox : MonoBehaviour
         TextField.autoSizeTextContainer = false;
         TextField.textWrappingMode = TextWrappingModes.Normal;
         TextField.rectTransform.sizeDelta = new Vector2(width, 0f);
+    }
+    
+    public void SetBackText(string text)
+    {
+        if (backSide == null) return;
+        backSide.Text = text;
+    }
+
+    TextBox? backSide;
+    
+    public void Flip(bool front)
+    {
+        if (backSide == null) return;
+        
+        TextField.enabled = front;
+        backSide.TextField.enabled = !front;
+    }
+
+    public void DeleteBack()
+    {
+        if(backSide == null) return;
+        Destroy(backSide.gameObject);
+        backSide = null;
     }
 
     public static TextBox Create(
@@ -72,6 +108,25 @@ public class TextBox : MonoBehaviour
 
         textBox.Alignment = align;
         textBox.Text = text;
+
+        // render a backside
+        TextBox backBox = Instantiate(TextBoxPrefab);
+        backBox.name = $"TextBox Back: {text.Split('\n').First()}";
+
+        backBox.Alignment = align switch
+        {
+            TextAlignmentOptions.Center => TextAlignmentOptions.Center,
+            TextAlignmentOptions.Left => TextAlignmentOptions.Right,
+            TextAlignmentOptions.Right => TextAlignmentOptions.Left,
+            _ => backBox.Alignment
+        };
+
+        backBox.Text = text;
+        textBox.backSide = backBox;
+        backBox.transform.SetParent(textBox.transform, false);
+        backBox.transform.Rotate(Vector3.up, 180);
+        backBox.transform.Rotate(Vector3.forward, 180);
+        backBox.TextField.enabled = false;
 
         return textBox;
     }

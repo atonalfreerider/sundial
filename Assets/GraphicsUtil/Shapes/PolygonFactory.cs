@@ -91,7 +91,7 @@ namespace Assets.GraphicsUtil.Shapes
 
             int[] indList = {0, 1, 2};
 
-            newTri.Draw3DPoly(skinList, indList);
+            newTri.Draw3DPoly(skinList, Polygon.MirrorIndices(indList, 0));
             newTri.SetColor(passColor);
             return newTri;
         }

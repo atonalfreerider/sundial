@@ -76,7 +76,7 @@ namespace Assets
             this.calR = calR;
             this.earthR = earthR;
   
-            TestCalendar();
+            //TestCalendar();
 
             if (Application.platform != RuntimePlatform.Android) return;
 

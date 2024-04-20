@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.GraphicsUtil.Shapes
@@ -380,7 +381,7 @@ namespace Assets.GraphicsUtil.Shapes
             }
 
             indList.RemoveRange(indList.Count - endSnip, endSnip);
-            Draw3DPoly(pointList.ToArray(), indList.ToArray());
+            Draw3DPoly(pointList.ToArray(),  MirrorIndices(indList.ToArray(), 0).ToArray());
         }
         
         public static class NewCylinder

@@ -101,14 +101,16 @@ namespace Assets
                     angularPosition -= 2 * Mathf.PI;
                 }
 
-                DateTime utcDateThatMatchesAngle = UTCDateThatMatchesAngle(angularPosition * 180 / Mathf.PI, lastDate);
+                float angleDeg = angularPosition * 180 / Mathf.PI;
+                if (!SolarClock.Instance.IsNorth)
+                {
+                    angleDeg *= -1;
+                    angleDeg += 180;
+                }
+
+                DateTime utcDateThatMatchesAngle = UTCDateThatMatchesAngle(angleDeg, lastDate);
                 DateTime localTimeThatMatchesAngle = utcDateThatMatchesAngle.AddHours(Earth.GetTimeZone());
                 SolarClock.Instance.SetOrbit(utcDateThatMatchesAngle, localTimeThatMatchesAngle);
-            }
-
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                NowTime();
             }
 
             if (!minuteFound)

@@ -295,7 +295,7 @@ namespace Assets
         {
             if (SolarClock.Instance.viewState == SolarClock.ViewState.GeoCentric)
             {
-                SolarClock.Instance.Toggle(SolarClock.ViewState.HelioCentric);
+                SolarClock.Instance.SetViewState(SolarClock.ViewState.HelioCentric);
                 earthSphereCollider.enabled = false;
             }
             else

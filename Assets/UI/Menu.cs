@@ -10,7 +10,8 @@ namespace Assets.UI
         Button quitButton;
         Toggle showClockButton;
         Button galacticButton;
-        readonly List<GameObject> calendarButtons = new List<GameObject>();
+        readonly List<GameObject> calendarButtons = new();
+        Toggle northSouthToggle;
         
         void Awake()
         {
@@ -22,6 +23,9 @@ namespace Assets.UI
             
             galacticButton = transform.GetChild(0).Find("Galactic").GetComponent<Button>();
             galacticButton.gameObject.SetActive(false);
+            
+            northSouthToggle = transform.GetChild(0).Find("NorthSouth").GetComponent<Toggle>();
+            northSouthToggle.gameObject.SetActive(false);
         }
 
         public void AddCalendarButton(GameObject button)
@@ -35,6 +39,7 @@ namespace Assets.UI
             quitButton.gameObject.SetActive(isToggled);
             showClockButton.gameObject.SetActive(isToggled);
             galacticButton.gameObject.SetActive(isToggled);
+            northSouthToggle.gameObject.SetActive(isToggled);
             foreach (GameObject calendarButton in calendarButtons)
             {
                 calendarButton.SetActive(isToggled);

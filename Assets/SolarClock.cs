@@ -1,12 +1,15 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Assets.GraphicsUtil.Shapes;
 using Assets.GraphicsUtil.Shapes.Lines;
 using Assets.UI;
 using Assets.UI.Raycasting;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Assets
@@ -52,6 +55,7 @@ namespace Assets
 
         // camera vars
         public ViewState viewState = ViewState.HelioCentric;
+        public bool IsNorth = true;
         const float FIXED_CAM_Y = 200;
         Vector3 targetPos = new(0, FIXED_CAM_Y, 0);
         Quaternion targetRot = Quaternion.AngleAxis(90, Vector3.right);
@@ -126,6 +130,7 @@ namespace Assets
         void Start()
         {
             // move camera to Solar View - initialize lights
+            SetViewState(ViewState.HelioCentric);
             Zoomer(1);
             dirLight.transform.LookAt(earth.earthSys.transform);
             earth.earthSys.gameObject.SetActive(false);
@@ -196,6 +201,7 @@ namespace Assets
             foreach (string season in seasonList)
             {
                 TextBox seasonText = TextBox.Create(season, TextAlignmentOptions.Center);
+                seasonText.SetBackText(seasonList[(count + 2) % 4]);
                 seasonText.Size = 60;
                 seasonText.transform.SetParent(seasonCross.transform, false);
                 seasonText.Color = new Color(1, 1, 1, .5f);
@@ -305,7 +311,7 @@ namespace Assets
 
         #region TOGGLE Functions
 
-        public void Toggle(ViewState newState)
+        public void SetViewState(ViewState newState)
         {
             viewState = newState;
             orbitScale = new Vector3(1, orbits.flatScale, 1);
@@ -338,8 +344,8 @@ namespace Assets
                 sphereCollider.enabled = true;
                 earth.handSphereCollider.enabled = true;
 
-                targetPos = new Vector3(0, FIXED_CAM_Y, 0);
-                targetRot = Quaternion.Euler(new Vector3(90, 0, 0));
+                targetPos = new Vector3(0, IsNorth ? FIXED_CAM_Y : -FIXED_CAM_Y, 0);
+                targetRot = Quaternion.Euler(new Vector3(IsNorth ? 90 : -90, 0, 0));
                 orbits.gameObject.SetActive(true);
                 earthScale = .001f;
                 orthoSize = solOrthoSize;
@@ -474,10 +480,10 @@ namespace Assets
         {
             targetPos = new Vector3(
                 earth.earthSys.transform.position.x,
-                FIXED_CAM_Y,
+                IsNorth ? FIXED_CAM_Y : -FIXED_CAM_Y,
                 earth.earthSys.transform.position.z);
             targetRot = Quaternion.Euler(new Vector3(
-                90,
+                 IsNorth ? 90 : -90,
                 earth.transform.rotation.eulerAngles.y - 180,
                 0));
         }
@@ -545,13 +551,24 @@ namespace Assets
             Application.Quit(0);
         }
 
+        public void NorthSouth(bool isToggled)
+        {
+            IsNorth = !isToggled;
+            SetViewState(viewState);
+            List<TextBox> allText = GameObject.FindObjectsByType<TextBox>(FindObjectsInactive.Include, FindObjectsSortMode.None).ToList();
+            foreach (TextBox text in allText)
+            {
+                text.Flip(IsNorth);
+            }
+        }
+
         #region ISelectable
 
         public Transform SelectionTarget => transform;
 
         public void RequestSelection()
         {
-            Toggle(ViewState.GeoCentric);
+            SetViewState(ViewState.GeoCentric);
         }
 
         #endregion
