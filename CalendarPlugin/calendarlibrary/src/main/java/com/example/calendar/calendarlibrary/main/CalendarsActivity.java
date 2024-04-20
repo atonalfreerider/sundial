@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarsActivity
-        extends Activity
+        extends UnityPlayerActivity
         implements CalendarsProxy.Listener {
 
     private CalendarsProxy mCalendarsQueryHandler;
