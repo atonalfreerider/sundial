@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: ff2dce0e10fe14e4db5cb44f88208d4c
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48919
+  packageName: Obfuscator
+  packageVersion: 3.12.0
+  assetPath: Assets/Editor/Beebyte/Obfuscator/Obfuscator_README.txt
+  uploadId: 638837

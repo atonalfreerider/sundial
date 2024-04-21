@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 555e23ec41b0cea4599481f593be7b4a
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48919
+  packageName: Obfuscator
+  packageVersion: 3.12.0
+  assetPath: Assets/Editor/Beebyte/Obfuscator/Third-Party Notices.txt
+  uploadId: 638837

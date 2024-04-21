@@ -28,9 +28,9 @@ MonoBehaviour:
   addFakeCode: 1
   minFalseMethodsPerClass: 10
   maxFalseMethodsPerClass: 150
-  unicodeStartInDecimal: 320
+  unicodeStartInDecimal: 65
   numberOfCharacters: 2
-  createNameTranslationFile: 1
+  createNameTranslationFile: 0
   nameTranslationFile: nameTranslation.txt
   usePreviousObfuscation: 0
   previousNameTranslationFile: nameTranslation.txt
@@ -42,13 +42,26 @@ MonoBehaviour:
   - Net.Json
   - HutongGames.PlayMaker
   - ChartboostSDK
-  - Assets.GameEvents.Events
   - BestHTTP
   - InControl
   - PlayFab
   - GoogleMobileAds
   - ExitGames
-  - Assets.OVR
+  - Com.Google
+  - Zenject
+  - UniRx
+  - DG.Tweening
+  - LeanplumSDK
+  - Org.BouncyCastle
+  - Bolt
+  - BoltInternal
+  - UdpKit
+  - LapinerTools
+  - VRInteraction
+  - Photon
+  - TMPro
+  - QFSW
+  - Sirenix
   unityMethods:
   - Awake
   - FixedUpdate
@@ -140,6 +153,10 @@ MonoBehaviour:
   - OnWebRpcResponse
   - OnOwnershipRequest
   - OnLobbyStatisticsUpdate
+  - OnJointBreak2D
+  - OnParticleSystemStopped
+  - OnParticleTrigger
+  - OnParticleUpdateJobScheduled
   skipClasses:
   - MonoPInvokeCallbackAttribute
   - CloudRegionCode
@@ -170,8 +187,16 @@ MonoBehaviour:
   - OwnershipOption
   - JoinType
   - OpJoinRandomRoomParams
+  - BoltAOI
+  - BoltPOI
+  - BoltDebugStart
+  - BoltDebugStartSettings
+  - BoltExecutionOrderAttribute
+  - BoltNetworkUtils
+  - BoltRuntimeConfigs
   alternateRPCAnnotations:
   - PunRPC
+  - Photon.Pun.PunRPC
   includePublicClasses: 1
   includePublicMethods: 1
   includePublicFields: 1
@@ -182,23 +207,22 @@ MonoBehaviour:
   includeProtectedFields: 1
   includeProtectedProperties: 1
   includeProtectedEvents: 1
-  enabled: 0
-  onlyObfuscatedSpecifiedNamespaces: 1
+  enabled: 1
+  onlyObfuscatedSpecifiedNamespaces: 0
   skipNamespacesRecursively: 1
   obfuscateSpecifiedNamespacesRecursively: 1
-  obfuscateNamespaces:
-  - Assets
+  obfuscateNamespaces: []
   replaceLiteralsOnSkippedClasses: 1
   obfuscateUnityReflectionMethods: 1
   inheritBeebyteAttributes: 0
   treatScriptableObjectsAsSerializable: 1
   deriveNamesFromCryptoHash: 1
-  sha1seed: cUeqt1HDFiHr
+  sha1seed: Y6bHTZ41NzPUBeWVPmG4g474
   numberOfDifferentCharactersAsPowerOfTwo: 4
   numberOfHashBitsToUse: 6
   allowCopyingOfAllAttributesInFakeCode: 0
   allowCopyingOfBeebyteAttributesInFakeCode: 1
-  simplifiedNameTranslationForCryptoHash: 1
+  simplifiedNameTranslationForCryptoHash: 0
   reverseNameTranslationOrderPerLine: 1
   namePaddingDelimiter: 0
   preservePrefixes:
@@ -243,21 +267,42 @@ MonoBehaviour:
   equivalentAttributesForDoNotFake: []
   equivalentAttributesForObfuscateLiterals: []
   equivalentAttributesForReplaceLiteralsWithName: []
-  equivalentAttributesForSkip: []
+  equivalentAttributesForSkip:
+  - Unity.Burst.BurstCompileAttribute
   equivalentAttributesForSkipRename:
   - Newtonsoft.Json.JsonPropertyAttribute
   includeCompilationPipelineAssemblies: 0
   assemblies:
   - Assembly-CSharp.dll
   compiledAssemblies: []
-  extraAssemblyDirectories:
-  - C:\Path\To\Assembly\Directory
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Runtime\4.0.20\lib\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Collections\4.0.0\ref\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Collections\4.0.10\lib\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Threading\4.0.0\ref\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Diagnostics.Debug\4.0.0\ref\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Runtime.Extensions\4.0.0\ref\netcore50
-  - C:\Program Files (x86)\Microsoft SDKs\NETCoreSDK\System.Runtime.Extensions\4.0.0\ref\dotnet
+  extraAssemblyDirectories: []
+  referencedAssemblies: []
   onlyObfuscateLiteralsInObfuscatedMethods: 0
   obfuscateLiteralsInAllMethods: 0
+  noPublicFakeMethods: 0
+  progressBar: 1
+  obfuscateReleaseOnly: 1
+  attributesToRemoveIfObfuscatedMember:
+  - UnityEngine.AddComponentMenu
+  - UnityEngine.ContextMenu
+  - UnityEngine.ContextMenuItem
+  - UnityEngine.CreateAssetMenu
+  - UnityEngine.Header
+  - UnityEngine.HelpURL
+  - UnityEngine.Tooltip
+  appendGenericTick: 0
+  equivalentAttributesForRename: []
+  doNotConvertConstantLiteralsToStatics: 0
+  useRandomisedNameGenerator: 0
+  forcedRandomSeed: 0
+  allowShortShaSalt: 0
+  printShaSaltInNameTranslationFile: 0
+  randomiseShaSaltOnBuild: 1
+  equivalentAttributesForSuppressLog: []
+  obfuscateAnonymousTypes: 0
+  obfuscateAnonymousYieldingEnumeratorTypes: 1
+  allowCompilerGeneratedFieldsOnSerializedTypesToBeObfuscated: 0
+  literalObfuscationBlockLength: 64
+  skipClassesByRegex:
+  - ^UnitySourceGeneratedAssemblyMonoScriptTypes_v.*$
+  retainIndices: 0

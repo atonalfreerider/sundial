@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: deaebd23fa7658a449def3d74a4cb94f
+guid: 0dd28f0e347550542af285906ff2b7b6
 MonoImporter:
   serializedVersion: 2
   defaultReferences: []
@@ -13,5 +13,5 @@ AssetOrigin:
   productId: 48919
   packageName: Obfuscator
   packageVersion: 3.12.0
-  assetPath: Assets/Plugins/Beebyte/Obfuscator/ReplaceLiteralsWithName.cs
+  assetPath: Assets/Plugins/Beebyte/Obfuscator/SuppressLog.cs
   uploadId: 638837

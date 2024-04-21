@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEditor;
 
 namespace Beebyte.Obfuscator
@@ -17,10 +18,26 @@ namespace Beebyte.Obfuscator
 
 			Options o = LoadAsset(OptionsAssetName);
 
-			if (o != null) return o;
+			if (o != null)
+			{
+                Obfuscator.FixHexBug(o);
+				return o;
+			}
 			
 			Debug.LogError("Failed to load " + OptionsAssetName + " asset at " + DefaultOptionsPath);
 			return null;
+		}
+		
+		/**
+		 * Can return null, i.e. on first package install.
+		 */
+		public static Options LoadOptionsIgnoringInstallFiles()
+		{
+			Options o = LoadAsset(OptionsAssetName);
+			if (o == null) return null;
+			
+			Obfuscator.FixHexBug(o);
+			return o;
 		}
 
 		private static bool HasInstallFiles()
@@ -86,25 +103,29 @@ namespace Beebyte.Obfuscator
 #else
 		private static string GetAssetPath(string name)
 		{
-			string guid = SearchForAssetGuid(name);
+			string[] optionGuids = AssetDatabase.FindAssets(name);
 
-			return guid != null ? AssetDatabase.GUIDToAssetPath(guid) : null;
+			IList<string> optionPaths = new List<string>();
+			
+			foreach (string guid in optionGuids)
+			{
+                string optionPath = AssetDatabase.GUIDToAssetPath(guid);
+				if (optionPath.EndsWith(name + ".asset"))
+				{
+                    optionPaths.Add(optionPath);
+				}
+			}
+
+			if (optionPaths.Count == 0) return null;
+			if (optionPaths.Count == 1) return optionPaths[0];
+			
+            Debug.LogError("Multiple " + name + " assets found! Aborting");
+            return null;
 		}
 
 		private static Options LoadAssetAtPath(string path)
 		{
 			return AssetDatabase.LoadAssetAtPath<Options>(path);
-		}
-
-		private static string SearchForAssetGuid(string assetName)
-		{
-			string[] optionPaths = AssetDatabase.FindAssets(assetName);
-
-			if (optionPaths.Length == 0) return null;
-			if (optionPaths.Length == 1) return optionPaths[0];
-			
-            Debug.LogError("Multiple " + assetName + " assets found! Aborting");
-            return null;
 		}
 #endif
 

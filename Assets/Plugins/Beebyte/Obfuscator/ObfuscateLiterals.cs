@@ -5,7 +5,7 @@ using System;
 
 namespace Beebyte.Obfuscator
 {
-	[AttributeUsage(AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class)]
 	public class ObfuscateLiteralsAttribute : System.Attribute
 	{
 		public ObfuscateLiteralsAttribute()

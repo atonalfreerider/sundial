@@ -1,9 +1,10 @@
 ﻿#if UNITY_2017_3_OR_NEWER
 /*
- * Copyright (c) 2018 Beebyte Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Beebyte Limited. All rights reserved.
  */
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEditor.Compilation;
 
 namespace Beebyte.Obfuscator.Assembly
@@ -18,7 +19,38 @@ namespace Beebyte.Obfuscator.Assembly
 			{
 				directories.UnionWith(GetAssemblyReferenceDirectories(assembly));
 			}
+			directories.Add("./Library/PlayerScriptAssemblies".Replace('/', Path.DirectorySeparatorChar));
+			directories.Add("./Library/Bee/PlayerScriptAssemblies".Replace('/', Path.DirectorySeparatorChar));
+			directories.UnionWith(GetUnityEditorLibDirectories());
 			return directories;
+		}
+
+		private static IEnumerable<string> GetUnityEditorLibDirectories()
+		{
+			HashSet<string> libDirectories = new HashSet<string>();
+			Stack<string> stack = new Stack<string>();
+			var monoPath = EditorApplication.applicationContentsPath +
+			               Path.DirectorySeparatorChar.ToString() +
+			               "MonoBleedingEdge" +
+			               Path.DirectorySeparatorChar.ToString() +
+			               "lib" +
+			               Path.DirectorySeparatorChar.ToString() +
+			               "mono";
+			stack.Push(monoPath);
+
+			while (stack.Count > 0)
+			{
+				string dir = stack.Pop();
+				if (Directory.GetFiles(dir, "*.dll").Length > 0)
+				{
+					libDirectories.Add(dir);
+				}
+				foreach (var childDirectory in Directory.GetDirectories(dir))
+				{
+					stack.Push(childDirectory);
+				}
+			}
+			return libDirectories;
 		}
 
 		private static IEnumerable<string> GetAssemblyReferenceDirectories(UnityEditor.Compilation.Assembly assembly)
