@@ -5,6 +5,9 @@ using UnityEngine.InputSystem;
 
 namespace Assets
 {
+    /// <summary>
+    /// Calculates the time and the angle of orbiting objects.
+    /// </summary>
     public class SolarTime : MonoBehaviour
     {
         // state vars

@@ -1,11 +1,12 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Assets.UI.Raycasting
 {
-    public class Raycast : MonoBehaviour
+    public static class Raycast
     {
-        public RaycastTarget TargetAfterCasting()
+        public static RaycastTarget? TargetAfterCasting()
         {
             RaycastHit? hit = CastRay(RayFromMouseCursor());
             if (hit.HasValue)
@@ -14,8 +15,7 @@ namespace Assets.UI.Raycasting
                     hit.Value.point,
                     hit.Value.transform);
             }
-
-            // We don't move the world using raycasting in desktop mode.
+            
             return null;
         }
 

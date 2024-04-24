@@ -43,7 +43,7 @@ namespace Assets
                 tick.gameObject.SetActive(true);
                 tick.name = "MedTick";
                 tick.transform.SetParent(yearLine.transform, false);
-                tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f + (ii * earthLineL) / 11f, 0f);
+                tick.transform.localPosition = new Vector3(0f, -earthLineL * .5f + ii * earthLineL / 11f, 0f);
                 tick.transform.Rotate(Vector3.forward, 90f);
             }
 

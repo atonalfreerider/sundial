@@ -149,7 +149,7 @@ namespace Assets
 
             Polygon redTri = PolygonFactory.DrawTri(bigH * .7f, SolarClock.SYSTEM_DIAMETER * .015f, Color.red);
             redTri.name = "RedTriangle";
-            redTri.transform.Translate(Vector3.forward * (localR));
+            redTri.transform.Translate(Vector3.forward * localR);
             redTri.transform.Rotate(Vector3.forward, 180f);
             redTri.transform.Translate(Vector3.up * .2f);
             redTri.transform.SetParent(localWheelCont.transform, false);

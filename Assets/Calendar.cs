@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.GraphicsUtil.Shapes;
-using Assets.UI;
 using TMPro;
 using Object = UnityEngine.Object;
 
@@ -171,7 +170,7 @@ namespace Assets
             yearQueue.Clear();
             dayQueue.Clear();
 
-            foreach (var (calendarName, eventList) in calendarEvents)
+            foreach ((string calendarName, MyEvent[] eventList) in calendarEvents)
             {
                 if (!displayedCalendars.Contains(calendarName)) continue;
 
@@ -286,12 +285,12 @@ namespace Assets
             titleT.Size = 50;
             titleT.transform.SetParent(newRing.transform, false);
 
-            float halfAng = (prct * .5f);
+            float halfAng = prct * .5f;
             titleT.transform.localPosition = new Vector3(
                 (R - earthR * .1666f) * Mathf.Sin(halfAng * 2 * Mathf.PI),
                 0,
                 (R - earthR * .1666f) * Mathf.Cos(halfAng * 2 * Mathf.PI));
-            titleT.transform.parent.Rotate(Vector3.up, (prct * .5f) * 360 + 180);
+            titleT.transform.parent.Rotate(Vector3.up, prct * .5f * 360 + 180);
             titleT.transform.Rotate(Vector3.right * 90);
             if (isYearEvent || (!isYearEvent && passEv.end.Hour < 6) || (!isYearEvent && passEv.end.Hour > 18))
             {

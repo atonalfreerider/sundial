@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 using System.Collections;
@@ -10,11 +11,15 @@ using Assets.UI.Raycasting;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Assets
 {
+    /// <summary>
+    /// The main Unity script that instantiates the Sundial, gameobjects, and handles events.
+    ///
+    /// Note that the functions that pertain to calculating the time are refactored into <see cref="solarTime"/>
+    /// </summary>
     [RequireComponent(typeof(SolarTime))]
     public class SolarClock : MonoBehaviour, ISelectable
     {
@@ -32,7 +37,7 @@ namespace Assets
         public const float YEAR = 365.256363004f;
         public const float SYSTEM_DIAMETER = 150;
         float earthScale = .001f;
-        const float earthLineL = 400;
+        const float EarthLineLength = 400;
         const float SiderealDayInSeconds = 86164.0905f;
 
         // font, shader material vars
@@ -47,7 +52,6 @@ namespace Assets
 
         GameObject sunSprockCont, sunLine, mLabelWheel;
         SphereCollider sphereCollider;
-        Raycast raycast;
         Circle sunSprock;
         TextBox summerText, springText;
         public Button nowButton;
@@ -62,7 +66,7 @@ namespace Assets
         Quaternion targetRot = Quaternion.AngleAxis(90, Vector3.right);
         Vector3 orbitScale = new(1, .01f, 1);
         float orthoSize;
-        Coroutine zooming;
+        Coroutine? zooming;
         const float ZOOM_DURATION = 1;
 
         static float solOrthoSize => SYSTEM_DIAMETER * (Screen.width > Screen.height
@@ -81,6 +85,8 @@ namespace Assets
         public bool calCreated = false;
         int currentYear, dst;
         bool labelUp = false;
+        
+        static readonly int DetailAlbedoMap = Shader.PropertyToID("_DetailAlbedoMap");
 
         // INIT Functions
 
@@ -99,8 +105,6 @@ namespace Assets
             NewCube.InitCube(polygonFactory);
             StaticLink.InitStaticLink(polygonFactory);
 
-            raycast = gameObject.AddComponent<Raycast>();
-
             nowButton = GameObject.Find("Reset").GetComponent<Button>();
             nowButton.gameObject.SetActive(false);
 
@@ -116,7 +120,7 @@ namespace Assets
                 dst = 1;
             }
 
-            EarthMM.SetTextureOffset("_DetailAlbedoMap",
+            EarthMM.SetTextureOffset(DetailAlbedoMap,
                 new Vector2((12 - Earth.GetTimeZone() + dst + .5f) / 24f, 0));
 
             // create new SolarClock and set celestial positions
@@ -234,18 +238,18 @@ namespace Assets
             sunLine.transform.SetParent(sunDial.transform, false);
             sunLine.transform.Rotate(Vector3.up * -90);
 
-            GameObject yearLine = GalacticLine.YearLine((passDate.Year - 1).ToString(), earthLineL);
+            GameObject yearLine = GalacticLine.YearLine((passDate.Year - 1).ToString(), EarthLineLength);
             yearLine.transform.SetParent(sunLine.transform, false);
-            yearLine.transform.localPosition = new Vector3(0, -earthLineL, 0);
+            yearLine.transform.localPosition = new Vector3(0, -EarthLineLength, 0);
             yearQueue[0] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
-            yearLine = GalacticLine.YearLine(passDate.Year.ToString(), earthLineL);
+            yearLine = GalacticLine.YearLine(passDate.Year.ToString(), EarthLineLength);
             yearLine.transform.SetParent(sunLine.transform, false);
             yearQueue[1] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
-            yearLine = GalacticLine.YearLine((passDate.Year + 1).ToString(), earthLineL);
+            yearLine = GalacticLine.YearLine((passDate.Year + 1).ToString(), EarthLineLength);
             yearLine.transform.SetParent(sunLine.transform, false);
-            yearLine.transform.localPosition = new Vector3(0, earthLineL, 0);
+            yearLine.transform.localPosition = new Vector3(0, EarthLineLength, 0);
             yearQueue[2] = yearLine.transform.GetChild(1).GetComponent<TextBox>();
 
             sunLine.SetActive(false);
@@ -446,7 +450,7 @@ namespace Assets
                 currentYear = newDateLocal.Year;
 
                 yearQueue[0].Text = (currentYear - 1).ToString();
-                yearQueue[1].Text = (currentYear).ToString();
+                yearQueue[1].Text = currentYear.ToString();
                 yearQueue[2].Text = (currentYear + 1).ToString();
 
                 Destroy(sunSprock.gameObject);
@@ -473,7 +477,7 @@ namespace Assets
             TimeSpan yearProgress = new(newDateLocal.Ticks - new DateTime(newDateLocal.Year, 1, 1).Ticks);
             sunLine.transform.position = new Vector3(
                 0,
-                earthLineL * (.5f - yearProgress.Days / YEAR),
+                EarthLineLength * (.5f - yearProgress.Days / YEAR),
                 0);
         }
 
@@ -512,7 +516,7 @@ namespace Assets
             {
                 if (!EventSystem.current.IsPointerOverGameObject()) // check if mouse is over UI
                 {
-                    RaycastTarget target = raycast.TargetAfterCasting();
+                    RaycastTarget? target = Raycast.TargetAfterCasting();
                     target?.AsSelectable.RequestSelection();
                 }
             }
@@ -525,6 +529,8 @@ namespace Assets
                 : Mouse.current.leftButton.wasPressedThisFrame;
         }
 
+        #region UI BUTTON ACTIONS
+        
         public void ToggleClock(bool isToggled)
         {
             digiClock.gameObject.SetActive(isToggled);
@@ -536,10 +542,12 @@ namespace Assets
             sunSprockCont.SetActive(false);
             earth.gameObject.SetActive(false);
             targetPos = new Vector3(375, 330, 150);
-            targetRot = Quaternion.Euler(new Vector3(40, 250, 257));
+            targetRot = Quaternion.LookRotation(-targetPos, Vector3.up);
             orbits.gameObject.SetActive(true);
             foreach (GameObject seaLab in seasonLabels)
+            {
                 seaLab.SetActive(false);
+            }
 
             sunLine.SetActive(true);
             earthScale = .001f;
@@ -548,9 +556,11 @@ namespace Assets
             ptInt = .35f;
 
             if (zooming != null)
+            {
                 StopCoroutine(zooming);
+            }
 
-            orthoSize = 150;
+            orthoSize = 350;
             zooming = StartCoroutine(Zoom(ZOOM_DURATION));
         }
 
@@ -569,6 +579,8 @@ namespace Assets
                 text.Flip(IsNorth);
             }
         }
+        
+        #endregion
 
         #region ISelectable
 
