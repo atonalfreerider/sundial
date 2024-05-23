@@ -1,4 +1,4 @@
-Obfuscator v3.12.0 Copyright (c) 2015-2023 Beebyte Limited. All Rights Reserved
+Obfuscator v3.13.0 Copyright (c) 2015-2024 Beebyte Limited. All Rights Reserved
 
 Please see the Obfuscator.pdf document for more detailed guidance.
 
@@ -144,7 +144,12 @@ See Obfuscator.pdf for more information.
 Update History
 ==============
 
-3.12.0 - 18th January 2023
+3.13.0 - 23rd April 2024
+
+    * Improved obfuscation when using [SerializeField]. If you use Addressables and also obfuscate public MonoBehaviour fields then you should check you are preserving those annotated with [SerializeField]. If you wish to preserve all [SerializeField] instances you could define it as an equivalent attribute for [SkipRename]
+    * Minor changes to the UI help texts to use the term "Addressables" alongside "Streaming Assets"
+
+3.12.0 - 18th January 2024
 
     * Parameters on public or protected methods can now be excluded from obfuscation via the IDE. Previously these could only be excluded by a manual edit of the ObfuscatorOptions.asset file
     * [ObfuscateLiterals] now correctly applies string obfuscation to yielding methods

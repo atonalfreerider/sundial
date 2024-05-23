@@ -12,6 +12,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 48919
   packageName: Obfuscator
-  packageVersion: 3.12.0
+  packageVersion: 3.13.0
   assetPath: Assets/Plugins/Beebyte/Obfuscator/SuppressLogAttribute.cs
-  uploadId: 638837
+  uploadId: 659341
