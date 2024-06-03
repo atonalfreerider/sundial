@@ -27,6 +27,9 @@ ExportedObj/
 *.opendb
 *.VC.db
 
+# TextMesh Pro files
+[Aa]ssets/TextMesh*Pro/
+
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
